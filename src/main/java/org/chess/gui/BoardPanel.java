@@ -1,9 +1,6 @@
 package org.chess.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +20,7 @@ import org.chess.enums.Type;
 public class BoardPanel extends JPanel implements Runnable {
 	private static final long serialVersionUID = -5189356863277669172L;
 	private static final int WIDTH = 512;
-	private static final int HEIGHT = WIDTH;
+	private static final int HEIGHT = 512;
 	private final int FPS = 60;
 	private Thread thread;
 
@@ -41,11 +38,14 @@ public class BoardPanel extends JPanel implements Runnable {
 	private Piece checkingPiece;
 	private int hoverCol = -1;
 	private int hoverRow = -1;
-	private Tint promotionColor;
+	private int dragOffsetX;
+	private int dragOffsetY;
+    private Tint promotionColor;
 
 	private boolean canMove;
 	private boolean validSquare;
 	private boolean isPromoted;
+	private boolean isDragging;
 	private boolean isGameOver;
 
 	public BoardPanel() {
@@ -207,103 +207,149 @@ public class BoardPanel extends JPanel implements Runnable {
 		hoverCol = mouse.getX() / Board.getSquare();
 		hoverRow = mouse.getY() / Board.getSquare();
 
-		if(isPromoted) {
+		if (isPromoted) {
 			promotion();
 			mouse.setClicked(false);
 			return;
 		}
 
-		if(mouse.isClicked()) {
-			if(currentPiece == null) {
-				for(Piece p : pieces) {
-					if(p.getColor() == currentTurn && p.getCol() == hoverCol && p.getRow() == hoverRow) {
-						currentPiece = p;
-						break;
-					}
+		if (mouse.isPressed() && !isDragging && currentPiece == null) {
+			for (Piece p : pieces) {
+				if (p.getColor() == currentTurn &&
+						p.getCol() == hoverCol &&
+						p.getRow() == hoverRow) {
+					currentPiece = p;
+					isDragging = true;
+					dragOffsetX = mouse.getX() - p.getX();
+					dragOffsetY = mouse.getY() - p.getY();
+					currentPiece.setPreCol(p.getCol());
+					currentPiece.setPreRow(p.getRow());
+					break;
 				}
-			} else {
+			}
+		}
+
+		if (isDragging && mouse.isPressed() && currentPiece != null) {
+			currentPiece.setX(mouse.getX() - dragOffsetX);
+			currentPiece.setY(mouse.getY() - dragOffsetY);
+		}
+
+		if (isDragging && mouse.isClicked() && currentPiece != null) {
+			isDragging = false;
+
+			int targetCol = mouse.getX() / Board.getSquare();
+			int targetRow = mouse.getY() / Board.getSquare();
+
+			boolean legal =
+					currentPiece.canMove(targetCol, targetRow, this) &&
+							!wouldLeaveKingInCheck(currentPiece, targetCol, targetRow);
+
+			if (legal) {
 				capturedPiece = null;
-				for(Piece p : pieces) {
-					if(p.getCol() == hoverCol && p.getRow() == hoverRow && p != currentPiece) {
+				for (Piece p : pieces) {
+					if (p != currentPiece &&
+							p.getCol() == targetCol &&
+							p.getRow() == targetRow) {
 						capturedPiece = p;
 						break;
 					}
 				}
-				if(currentPiece.canMove(hoverCol, hoverRow, this)
-						&& !wouldLeaveKingInCheck(currentPiece, hoverCol, hoverRow)) {
-					if(capturedPiece != null) {
-						pieces.remove(capturedPiece);
-					} else if(currentPiece instanceof Pawn) {
-						int dir = (currentPiece.getColor() == Tint.WHITE) ? -1 : 1;
-						for(Piece p : pieces) {
-							if(p.getCol() == hoverCol && p.getRow() == hoverRow - dir && p.isTwoStepsAhead()) {
-								pieces.remove(p);
+
+				if (capturedPiece != null) {
+					pieces.remove(capturedPiece);
+				}
+
+				if (currentPiece instanceof King) {
+					int colDiff = targetCol - currentPiece.getCol();
+
+					if (Math.abs(colDiff) == 2 && !currentPiece.hasMoved()) {
+						int step = (colDiff > 0) ? 1 : -1;
+						int rookStartCol = (colDiff > 0) ? 7 : 0;
+						int rookTargetCol = (colDiff > 0) ? 5 : 3;
+
+						if (isKingInCheck(currentPiece.getColor()) ||
+								wouldLeaveKingInCheck(currentPiece,
+										currentPiece.getCol() + step,
+										currentPiece.getRow())) {
+
+							currentPiece.updatePos();
+							currentPiece = null;
+							return;
+						}
+
+						boolean pathClear = true;
+						for (int c = currentPiece.getCol() + step; c != rookStartCol; c += step) {
+							if (boardHasPieceAt(c, currentPiece.getRow())) {
+								pathClear = false;
 								break;
 							}
 						}
-					}
-					if(currentPiece instanceof King) {
-						int colDiff = hoverCol - currentPiece.getCol();
-						if(Math.abs(colDiff) == 2 && !currentPiece.hasMoved()) {
 
-							int rookStartCol = (colDiff > 0) ? 7 : 0;
-							int rookTargetCol = (colDiff > 0) ? 5 : 3;
-							int step = (colDiff > 0) ? 1 : -1;
+						if (pathClear) {
+							for (Piece p : pieces) {
+								if (p instanceof Rook &&
+										p.getCol() == rookStartCol &&
+										p.getRow() == currentPiece.getRow() &&
+										!p.hasMoved()) {
 
-							if(isKingInCheck(currentPiece.getColor())) {
-								return;
-							}
-							
-							int midCol = currentPiece.getCol() + step;
-							if(wouldLeaveKingInCheck(currentPiece, midCol, currentPiece.getRow())) {
-								return;
-							}
-
-							boolean pathClear = true;
-							for(int c = currentPiece.getCol() + step; c != rookStartCol; c += step) {
-								if(boardHasPieceAt(c, currentPiece.getRow())) {
-									pathClear = false;
+									p.setCol(rookTargetCol);
+									p.updatePos();
+									p.setHasMoved(true);
 									break;
 								}
 							}
-
-							Rook rook = null;
-							for(Piece p : pieces) {
-								if(p instanceof Rook && p.getRow() == currentPiece.getRow()
-										&& p.getCol() == rookStartCol && !p.hasMoved()) {
-									rook = (Rook) p;
-									break;
-								}
-							}
-
-							if(pathClear && rook != null) {
-								rook.setCol(rookTargetCol);
-								rook.updatePos();
-								rook.setHasMoved(true);
-							}
 						}
-					}
-					currentPiece.setCol(hoverCol);
-					currentPiece.setRow(hoverRow);
-					currentPiece.updatePos();
-					currentPiece.setHasMoved(true);
-
-					for(Piece p : pieces) {
-						if(p.getColor() != currentPiece.getColor() && p instanceof Pawn) {
-							p.resetEnPassant();
-						}
-					}
-
-					if(canPromote()) {
-						isPromoted = true;
-						promotionColor = currentPiece.getColor();
-					} else {
-						currentTurn = (currentTurn == Tint.WHITE) ? Tint.BLACK : Tint.WHITE;
-						isKingInCheck(currentTurn);
 					}
 				}
-				currentPiece = null;
+
+				currentPiece.setCol(targetCol);
+				currentPiece.setRow(targetRow);
+				currentPiece.updatePos();
+				currentPiece.setHasMoved(true);
+
+				if (currentPiece instanceof Pawn) {
+					int oldRow = currentPiece.getPreRow();
+					int movedSquares = Math.abs(targetRow - oldRow);
+
+					if (capturedPiece == null && Math.abs(targetCol -
+							currentPiece.getPreCol()) == 1) {
+						int dir = (currentPiece.getColor() == Tint.WHITE) ? -1 : 1;
+						if (targetRow - oldRow == dir) {
+							for (Piece p : pieces) {
+								if (p instanceof Pawn &&
+										p.getColor() != currentPiece.getColor() &&
+										p.getCol() == targetCol &&
+										p.getRow() == oldRow &&
+										p.isTwoStepsAhead()) {
+									capturedPiece = p;
+									pieces.remove(p);
+									break;
+								}
+							}
+						}
+					}
+					currentPiece.setTwoStepsAhead(movedSquares == 2);
+				}
+
+				for (Piece p : pieces) {
+					if (p instanceof Pawn && p.getColor() != currentPiece.getColor()) {
+						p.resetEnPassant();
+					}
+				}
+
+				if (canPromote()) {
+					isPromoted = true;
+					promotionColor = currentPiece.getColor();
+				} else {
+					currentTurn = (currentTurn == Tint.WHITE)
+							? Tint.BLACK : Tint.WHITE;
+					isKingInCheck(currentTurn);
+				}
+
+			} else {
+				currentPiece.updatePos();
 			}
+			currentPiece = null;
 		}
 	}
 
@@ -466,22 +512,33 @@ public class BoardPanel extends JPanel implements Runnable {
 		Graphics2D g2 = (Graphics2D) g;
 		board.draw(g2);
 
-		for(Piece p : pieces) {
-			p.draw(g2);
+		for (Piece p : pieces) {
+			if (p != currentPiece) {
+				p.draw(g2);
+			}
 		}
 
 		if (currentPiece != null) {
-		    boolean canMoveHere = currentPiece.canMove(hoverCol, hoverRow, this) &&
-		                          !wouldLeaveKingInCheck(currentPiece, hoverCol, hoverRow);
-		    if (!canMoveHere) {
-		        g2.setColor(new Color(255, 0, 0, 150));
-		        g2.fillRect(hoverCol * Board.getSquare(), hoverRow * Board.getSquare(),
-		                    Board.getSquare(), Board.getSquare());
-		    } else {
-		        g2.setColor(new Color(0, 255, 0, 150));
-		        g2.fillRect(hoverCol * Board.getSquare(), hoverRow * Board.getSquare(),
-		                    Board.getSquare(), Board.getSquare());
-		    }
+			currentPiece.draw(g2);
+		}
+
+		if (currentPiece != null) {
+			boolean canMoveHere = currentPiece.canMove(hoverCol, hoverRow, this) &&
+					!wouldLeaveKingInCheck(currentPiece, hoverCol, hoverRow);
+
+			g2.setStroke(new BasicStroke(3));
+
+			if (!canMoveHere) {
+				g2.setColor(new Color(255, 0, 0, 150));
+				g2.drawRect(hoverCol * Board.getSquare(),
+						hoverRow * Board.getSquare(),
+						Board.getSquare(), Board.getSquare());
+			} else {
+				g2.setColor(new Color(0, 255, 0, 150));
+				g2.drawRect(hoverCol * Board.getSquare(),
+						hoverRow * Board.getSquare(),
+						Board.getSquare(), Board.getSquare());
+			}
 		}
 		drawPromotionOptions(g2);
 	}

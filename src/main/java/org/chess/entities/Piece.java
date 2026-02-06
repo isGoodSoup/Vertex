@@ -139,6 +139,10 @@ public abstract class Piece {
 	public boolean isTwoStepsAhead() {
 		return isTwoStepsAhead;
 	}
+
+	public void setTwoStepsAhead(boolean twoStepsAhead) {
+		this.isTwoStepsAhead = twoStepsAhead;
+	}
 	
 	public void resetEnPassant() {
 		isTwoStepsAhead = false;

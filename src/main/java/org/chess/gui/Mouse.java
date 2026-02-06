@@ -35,6 +35,8 @@ public class Mouse extends MouseAdapter {
 	@Override
 	public void mousePressed(MouseEvent e) {
 		isPressed = true;
+		x = e.getX();
+		y = e.getY();
 	}
 
 	@Override
