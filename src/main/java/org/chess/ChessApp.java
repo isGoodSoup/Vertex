@@ -3,6 +3,7 @@ package org.chess;
 import org.chess.gui.ChessFrame;
 
 public class ChessApp {
+	private static ChessApp app;
 	private final ChessFrame frame;
 
 	public ChessApp() {
@@ -11,15 +12,10 @@ public class ChessApp {
 	}
 	
 	public static void main(String[] args) {
-		ChessApp app = new ChessApp();
-		app.init();
+		app = new ChessApp();
 	}
 
 	public ChessFrame getFrame() {
 		return frame;
-	}
-	
-	public void init() {
-		
 	}
 }
