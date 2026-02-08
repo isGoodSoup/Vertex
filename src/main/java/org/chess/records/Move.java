@@ -1,4 +1,4 @@
-package org.chess;
+package org.chess.records;
 
 import org.chess.entities.Piece;
 

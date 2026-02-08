@@ -3,6 +3,7 @@ package org.chess.entities;
 import org.chess.gui.BoardPanel;
 
 import java.awt.*;
+import java.util.Objects;
 
 public class Board {
 	private final int COL = 8;
@@ -13,6 +14,7 @@ public class Board {
 	private static final Color ODD = new Color(175, 115, 70);
 	private static final int PADDING = 4;
 	private final String[][] squares = new String[ROW][COL];
+	private static Font font;
 
 	public int getCOL() {
 		return COL;
@@ -30,8 +32,31 @@ public class Board {
 		return HALF_SQUARE;
 	}
 
+	public static Color getEven() {
+		return EVEN;
+	}
+
+	public static Color getOdd() {
+		return ODD;
+	}
+
+	public static Font getFont(int size) {
+		return font.deriveFont(Font.PLAIN, (float) size);
+	}
+
 	public Board() {
 		precomputeSquares();
+		try {
+			font = Font.createFont(Font.TRUETYPE_FONT,
+                    Objects.requireNonNull(Board.class.getResourceAsStream(
+							"/ui/Monocraft.ttf")));
+			GraphicsEnvironment ge =
+					GraphicsEnvironment.getLocalGraphicsEnvironment();
+			ge.registerFont(font);
+		} catch(Exception e) {
+			System.err.println(e.getMessage());
+			font = new Font("Helvetica", Font.BOLD, 30);
+		}
 	}
 
 	private void precomputeSquares() {
@@ -49,7 +74,7 @@ public class Board {
 				boolean isEven = (row + col) % 2 == 0;
 				g2.setColor(isEven ? EVEN : ODD);
 				g2.fillRect(col * SQUARE, row * SQUARE, SQUARE, SQUARE);
-				g2.setFont(BoardPanel.getFont(12));
+				g2.setFont(getFont(14));
 				g2.setColor(isEven ? ODD : EVEN);
 				g2.drawString(getSquareName(col, row),
 						col * SQUARE + PADDING,

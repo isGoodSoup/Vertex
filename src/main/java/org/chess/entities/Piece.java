@@ -3,6 +3,7 @@ package org.chess.entities;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import javax.imageio.ImageIO;
@@ -184,6 +185,11 @@ public abstract class Piece {
 
 	public abstract boolean canMove(int targetCol, int targetRow, BoardPanel board);
 
+	public abstract boolean canMove(int targetCol, int targetRow,
+									List<Piece> board);
+
+	public abstract Piece copy();
+
 	public boolean isWithinBoard(int targetCol, int targetRow) {
         return targetCol >= 0 && targetCol <= 7 && targetRow >= 0 && targetRow <= 7;
     }
@@ -201,6 +207,43 @@ public abstract class Piece {
 	    return null;
 	}
 
+	public boolean isPathClear(int targetCol, int targetRow, List<Piece> board) {
+		int colDiff = targetCol - getCol();
+		int rowDiff = targetRow - getRow();
+
+		if (Math.abs(colDiff) != Math.abs(rowDiff)) {
+			return false;
+		}
+
+		int colStep = Integer.signum(colDiff);
+		int rowStep = Integer.signum(rowDiff);
+
+		int c = getCol() + colStep;
+		int r = getRow() + rowStep;
+
+		while (c != targetCol && r != targetRow) {
+			for (Piece p : board) {
+				if (p == this) { continue; }
+				if (p.getCol() == c && p.getRow() == r) {
+					return false;
+				}
+			}
+			c += colStep;
+			r += rowStep;
+		}
+		return true;
+	}
+
+	public boolean isValidSquare(int targetCol, int targetRow,
+							   List<Piece> board) {
+		for(Piece p : board) {
+			if(p.getCol() == targetCol && p.getRow() == targetRow) {
+				return p.getColor() != this.getColor();
+			}
+		}
+		return true;
+	}
+
 	public boolean isValidSquare(int targetCol, int targetRow, BoardPanel board) {
 	    for (Piece p : board.getPieces()) {
 	        if (p.getCol() == targetCol && p.getRow() == targetRow) {
@@ -209,27 +252,6 @@ public abstract class Piece {
 	    }
 	    return true;
 	}
-
-	public boolean isPieceOnTheWay(int targetCol, int targetRow,
-								   BoardPanel board) {
-		int colStep = Integer.compare(targetCol, getCol());
-		int rowStep = Integer.compare(targetRow, getRow());
-
-		int c = getCol() + colStep;
-		int r = getRow() + rowStep;
-
-		while(c != targetCol || r != targetRow) {
-			for(Piece p : board.getPieces()) {
-				if(p.getCol() == c && p.getRow() == r) {
-					otherPiece = p;
-					return true;
-				}
-			}
-			c += (c != targetCol) ? colStep : 0;
-			r += (r != targetRow) ? rowStep : 0;
-		}
-        return false;
-    }
 
 	public BufferedImage getImage(String path) {
 	    BufferedImage img = null;
@@ -241,7 +263,6 @@ public abstract class Piece {
 	    }
 	    return img;
 	}
-
 
 	public void draw(Graphics2D g2) {
 		int square = Board.getSquare();

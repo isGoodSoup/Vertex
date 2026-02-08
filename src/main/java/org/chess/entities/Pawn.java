@@ -4,6 +4,8 @@ import org.chess.enums.Tint;
 import org.chess.enums.Type;
 import org.chess.gui.BoardPanel;
 
+import java.util.List;
+
 public class Pawn extends Piece {
 
 	public Pawn(Tint color, int col, int row) {
@@ -36,13 +38,15 @@ public class Pawn extends Piece {
 
 			if(targetCol == getPreCol() && targetRow == getPreRow() + moveValue * 2 
 					&& getOtherPiece() == null
-					&& hasMoved() && !isPieceOnTheWay(targetCol, targetRow,
-					board)) {
+					&& hasMoved() && isPathClear(targetCol, targetRow,
+					board.getPieces())) {
 				return true;
 			}
 
-			if(Math.abs(targetCol - getPreCol()) == 1 && targetRow == getPreRow() + moveValue
-					&& getOtherPiece() != null && getOtherPiece().getColor() != this.getColor()) {
+			if(Math.abs(targetCol - getPreCol()) == 1
+					&& targetRow == getPreRow() + moveValue
+					&& getOtherPiece() != null
+					&& getOtherPiece().getColor() != this.getColor()) {
 				return true;
 			}
 			
@@ -57,5 +61,37 @@ public class Pawn extends Piece {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
+		if (!isWithinBoard(targetCol, targetRow)) { return false; }
+		int direction = (getColor() == Tint.WHITE) ? -1 : 1;
+		int startRow = (getColor() == Tint.WHITE) ? 6 : 1;
+
+		if (targetCol == getCol() && targetRow == getRow() + direction) {
+			return isValidSquare(targetCol, targetRow, board);
+		}
+
+		if (getRow() == startRow && targetCol == getCol()
+				&& targetRow == getRow() + 2 * direction) {
+			if (isPathClear(targetCol, targetRow, board)) {
+				return true;
+			}
+		}
+
+		if (Math.abs(targetCol - getCol()) == 1
+				&& targetRow == getRow() + direction) {
+			return isValidSquare(targetCol, targetRow, board);
+		}
+		return false;
+	}
+
+	@Override
+	public Piece copy() {
+		Pawn p = new Pawn(getColor(), getCol(), getRow());
+		p.setHasMoved(hasMoved());
+		p.setTwoStepsAhead(this.isTwoStepsAhead());
+		return p;
 	}
 }

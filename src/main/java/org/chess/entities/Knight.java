@@ -4,6 +4,8 @@ import org.chess.enums.Tint;
 import org.chess.enums.Type;
 import org.chess.gui.BoardPanel;
 
+import java.util.List;
+
 public class Knight extends Piece {
 
 	public Knight(Tint color, int col, int row) {
@@ -20,11 +22,31 @@ public class Knight extends Piece {
 	public boolean canMove(int targetCol, int targetRow, BoardPanel board) {
 	    if(isWithinBoard(targetCol, targetRow)) {
 	        if(Math.abs(targetCol - getPreCol()) * Math.abs(targetRow - getPreRow()) == 2) {
-	        	if(isValidSquare(targetCol, targetRow, board)) {
-	        		return true;
-	        	}
+                return isValidSquare(targetCol, targetRow, board);
 	        }
 	    }
 	    return false;
+	}
+
+	@Override
+	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
+		if (!isWithinBoard(targetCol, targetRow)) {
+			return false;
+		}
+
+		int colDiff = Math.abs(targetCol - getCol());
+		int rowDiff = Math.abs(targetRow - getRow());
+
+		if ((colDiff == 2 && rowDiff == 1) || (colDiff == 1 && rowDiff == 2)) {
+			return isValidSquare(targetCol, targetRow, board);
+		}
+		return false;
+	}
+
+	@Override
+	public Piece copy() {
+		Knight p = new Knight(getColor(), getCol(), getRow());
+		p.setHasMoved(hasMoved());
+		return p;
 	}
 }

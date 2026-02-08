@@ -4,6 +4,8 @@ import org.chess.enums.Tint;
 import org.chess.enums.Type;
 import org.chess.gui.BoardPanel;
 
+import java.util.List;
+
 public class King extends Piece {
 
 	public King(Tint color, int col, int row) {
@@ -30,7 +32,7 @@ public class King extends Piece {
 
 			if(hasMoved()) {
 				if(targetCol == getPreCol() + 2 && targetRow == getPreRow()
-						&& !isPieceOnTheWay(targetCol, targetRow, board)) {
+						&& isPathClear(targetCol, targetRow, board.getPieces())) {
 					for(Piece p : board.getPieces()) {
 						board.setCastlingPiece(p);
 						return true;
@@ -38,7 +40,7 @@ public class King extends Piece {
 				}
 
 				if(targetCol == getPreCol() - 2 && targetRow == getPreRow()
-						&& !isPieceOnTheWay(targetCol, targetRow, board)) {
+						&& isPathClear(targetCol, targetRow, board.getPieces())) {
 					Piece[] ps = new Piece[2];
 					for(Piece p : board.getPieces()) {
 						if(p.getCol() == getPreCol() - 3 && p.getRow() == targetRow) { 
@@ -58,5 +60,23 @@ public class King extends Piece {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
+		if(!isWithinBoard(targetCol, targetRow)) { return false; }
+		int colDiff = Math.abs(targetCol - getCol());
+		int rowDiff = Math.abs(targetRow - getRow());
+		if((colDiff + rowDiff == 1) || (colDiff * rowDiff == 1)) {
+			return isValidSquare(targetCol, targetRow, board);
+		}
+		return false;
+	}
+
+	@Override
+	public Piece copy() {
+		King p = new King(getColor(), getCol(), getRow());
+		p.setHasMoved(hasMoved());
+		return p;
 	}
 }

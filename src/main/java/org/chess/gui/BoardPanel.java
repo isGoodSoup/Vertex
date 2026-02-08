@@ -1,11 +1,12 @@
 package org.chess.gui;
 
-import org.chess.Move;
+import org.chess.records.Move;
 import org.chess.entities.*;
 import org.chess.enums.GameState;
 import org.chess.enums.PlayState;
 import org.chess.enums.Tint;
 import org.chess.enums.Type;
+import org.chess.records.MoveScore;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -26,29 +27,27 @@ public class BoardPanel extends JPanel implements Runnable {
 	private final int FPS = 60;
 	private Thread thread;
 
+    private final Piece[][] boardState;
 	private final Board board;
 	private final Mouse mouse;
     private static final Random random = new Random();
-	private Tint currentTurn = Tint.WHITE;
-    private int aiTurn;
+	private Tint turn = Tint.WHITE;
 
 	private GameState state;
 	private PlayState mode;
 
-	private final List<Piece> pieces = new ArrayList<>();
-	private final List<Piece> promoted = new ArrayList<>();
-    private final List<Piece> snapshot = new ArrayList<>(pieces);
-    private final List<Move> legalMoves = new ArrayList<>();
-    private final List<Integer> moveScores = new ArrayList<>();
-
+	private final List<Piece> pieces;
 	private Piece currentPiece;
     private Piece castlingPiece;
 	private Piece promotingPawn;
 	private Piece checkingPiece;
     private int dragOffsetX;
 	private int dragOffsetY;
+    private long promotionStartTime = -1;
+    private final long PROMOTION_DELAY = 3000;
     private Tint promotionColor;
 
+    private final BufferedImage logo;
 	private final BufferedImage yes;
 	private final BufferedImage no;
 	private final BufferedImage whitePawn, blackPawn;
@@ -60,33 +59,40 @@ public class BoardPanel extends JPanel implements Runnable {
 
 	private boolean canMove;
 	private boolean validSquare;
-	private boolean isPromoted;
+    private boolean isPromotionPending;
 	private boolean isDragging;
-	private boolean isLegalPreview;
+	private boolean isLegal;
     private boolean isAIPlaying;
+    private boolean isChaosActive;
 	private boolean isGameOver;
 
-	private static final String[] optionsMenu = { "New Game", "Exit" };
-	private static final String[] optionsMode = { "Player", "AI" };
-	private static final int MENU_SPACING = 50;
+	private static final String[] optionsMenu = { "PLAY AGAINST", "EXIT" };
+	private static final String[] optionsMode = { "PLAYER", "AI", "CHAOS" };
+	private static final int MENU_SPACING = 40;
 	private static final int MENU_START_Y = 80;
     private static final int MENU_FONT = 32;
+    private static Color background;
+    private static Color foreground;
 
 	public BoardPanel() {
 		super();
 		this.board = new Board();
+        this.pieces = new ArrayList<>();
 		this.mouse = new Mouse();
+        this.boardState = new Piece[board.getCOL()][board.getROW()];
 		this.state = GameState.MENU;
         this.mode = null;
 		WIDTH = Board.getSquare() * 8;
 		HEIGHT = Board.getSquare() * 8;
+        drawRandomBackground(getBoolean());
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		setBackground(Color.BLACK);
 		addMouseMotionListener(mouse);
 		addMouseListener(mouse);
 		setPieces();
 
-		try {
+        try {
+            logo = getImage("/ui/logo");
 			yes = getImage("/ticks/tick_yes");
 			no = getImage("/ticks/tick_no");
 			whitePawn = getImage("/pieces/pawn-h");
@@ -122,12 +128,12 @@ public class BoardPanel extends JPanel implements Runnable {
 		return FPS;
 	}
 
-	public Tint getCurrentTurn() {
-		return currentTurn;
+	public Tint getTurn() {
+		return turn;
 	}
 
-	public void setCurrentTurn(Tint currentTurn) {
-		this.currentTurn = currentTurn;
+	public void setTurn(Tint turn) {
+		this.turn = turn;
 	}
 
 	public List<Piece> getPieces() {
@@ -162,18 +168,6 @@ public class BoardPanel extends JPanel implements Runnable {
 		this.castlingPiece = castlingPiece;
 	}
 
-	public List<Piece> getPromoted() {
-		return promoted;
-	}
-
-	public boolean isPromoted() {
-		return isPromoted;
-	}
-
-	public void setPromoted(boolean isPromoted) {
-		this.isPromoted = isPromoted;
-	}
-
 	public Piece getPromotingPawn() {
 		return promotingPawn;
 	}
@@ -186,10 +180,6 @@ public class BoardPanel extends JPanel implements Runnable {
 		return promotionColor;
 	}
 
-	public void setPromotionColor(Tint promotionColor) {
-		this.promotionColor = promotionColor;
-	}
-
 	public Piece getCheckingPiece() {
 		return checkingPiece;
 	}
@@ -198,10 +188,6 @@ public class BoardPanel extends JPanel implements Runnable {
 		return isGameOver;
 	}
 
-    public static Font getFont(int size) {
-        return new Font("Roboto", Font.BOLD, size);
-    }
-
 	public GameState getState() {
 		return state;
 	}
@@ -209,8 +195,7 @@ public class BoardPanel extends JPanel implements Runnable {
     private void startBoard() {
         pieces.clear();
         setPieces();
-        currentTurn = Tint.WHITE;
-        isPromoted = false;
+        turn = Tint.WHITE;
         isGameOver = false;
         currentPiece = null;
         state = GameState.BOARD;
@@ -232,6 +217,9 @@ public class BoardPanel extends JPanel implements Runnable {
 	}
 
 	public void setPieces() {
+        pieces.clear();
+        clearBoardState();
+
 		for(int col = 0; col < 8; col++) {
 			pieces.add(new Pawn(Tint.WHITE, col, 6));
 			pieces.add(new Pawn(Tint.BLACK, col, 1));
@@ -261,7 +249,7 @@ public class BoardPanel extends JPanel implements Runnable {
 		for(Piece p : pieces) {
 			if(p.getCol() == hoverCol && p.getRow() ==
 					hoverRow && p != currentPiece) {
-                if(isAIPlaying && p.getColor() != Tint.WHITE) {
+                if(isAIPlaying && p.getColor() != Tint.WHITE || isDragging) {
                     return null;
                 }
 				return p;
@@ -286,21 +274,45 @@ public class BoardPanel extends JPanel implements Runnable {
 		return null;
 	}
 
-	@Override
+    private void clearBoardState() {
+        for(int c = 0; c < 8; c++) {
+            for(int r = 0; r < 8; r++) {
+                boardState[c][r] = null;
+            }
+        }
+    }
+
+    private void addPiece(Piece p) {
+        pieces.add(p);
+        boardState[p.getCol()][p.getRow()] = p;
+    }
+
+    private void removePiece(Piece p) {
+        pieces.remove(p);
+        boardState[p.getCol()][p.getRow()] = null;
+    }
+
+    private void movePiece(Piece p, int newCol, int newRow) {
+        boardState[p.getCol()][p.getRow()] = null;
+        p.setCol(newCol);
+        p.setRow(newRow);
+        p.updatePos();
+        boardState[newCol][newRow] = p;
+    }
+
+    @Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 		switch(state) {
-			case MENU -> drawMenu(g2);
-			case MODE -> drawModes(g2);
+			case MENU -> drawGraphics(g2, optionsMenu);
+			case MODE -> drawGraphics(g2, optionsMode);
 			case BOARD -> drawBoard(g2);
 		}
 	}
 
     private void drawPromotions(Graphics2D g2) {
-        if(!isPromoted) {
-            return;
-        }
+        if(!isPromotionPending) { return; }
 
         int size = Board.getSquare();
         int totalWidth = size * 4;
@@ -350,9 +362,18 @@ public class BoardPanel extends JPanel implements Runnable {
         }
     }
 
+    private boolean getBoolean() {
+        return random.nextBoolean();
+    }
+
     public BufferedImage getImage(String path) throws IOException {
         return ImageIO.read(Objects.requireNonNull(
                 getClass().getResourceAsStream(path + ".png")));
+    }
+
+    private void drawRandomBackground(boolean isColor) {
+        background = isColor ? Board.getEven() : Board.getOdd();
+        foreground = isColor ? Board.getOdd() : Board.getEven();
     }
 
     private void drawTick(Graphics2D g2, boolean isLegal) {
@@ -364,43 +385,29 @@ public class BoardPanel extends JPanel implements Runnable {
         g2.drawImage(image, x, y, size, size, null);
     }
 
-    private void drawMenu(Graphics2D g2) {
-        g2.setColor(new Color(0,0,0,255));
-        g2.fillRect(0, 0, WIDTH, HEIGHT);
-        g2.setFont(getFont(MENU_FONT));
-        g2.setColor(Color.WHITE);
-
-        int startY = HEIGHT/2 + 80;
-        int spacing = 50;
-
-        for(int i = 0; i < optionsMenu.length; i++) {
-            int textWidth = g2.getFontMetrics().stringWidth(optionsMenu[i]);
-            int x = (WIDTH - textWidth)/2;
-            int y = startY + i * spacing;
-            boolean isHovered = getHitbox(y).contains(mouse.getX(),
-                    mouse.getY());
-            g2.setColor(isHovered ? Color.YELLOW : Color.WHITE);
-            g2.drawString(optionsMenu[i], x, y);
-        }
+    private void drawLogo(Graphics2D g2) {
+        g2.drawImage(logo,WIDTH/3 + 5,HEIGHT/7,
+                logo.getWidth()/3,logo.getHeight()/3, null);
     }
 
-    private void drawModes(Graphics2D g2) {
-        g2.setColor(new Color(0,0,0,255));
+    private void drawGraphics(Graphics2D g2, String[] options) {
+        g2.setColor(background);
         g2.fillRect(0, 0, WIDTH, HEIGHT);
-        g2.setFont(getFont(MENU_FONT));
-        g2.setColor(Color.WHITE);
+        g2.setFont(Board.getFont(MENU_FONT));
+        g2.setColor(foreground);
+        drawLogo(g2);
 
         int startY = HEIGHT/2 + MENU_START_Y;
         int spacing = MENU_SPACING;
 
-        for(int i = 0; i < optionsMode.length; i++) {
-            int textWidth = g2.getFontMetrics().stringWidth(optionsMode[i]);
+        for(int i = 0; i < options.length; i++) {
+            int textWidth = g2.getFontMetrics().stringWidth(options[i]);
             int x = (WIDTH - textWidth)/2;
             int y = startY + i * spacing;
             boolean isHovered = getHitbox(y).contains(mouse.getX(),
                     mouse.getY());
-            g2.setColor(isHovered ? Color.YELLOW : Color.WHITE);
-            g2.drawString(optionsMode[i], x, y);
+            g2.setColor(isHovered ? Color.WHITE : foreground);
+            g2.drawString(options[i], x, y);
         }
     }
 
@@ -428,7 +435,7 @@ public class BoardPanel extends JPanel implements Runnable {
         }
 
         if(currentPiece != null && isDragging) {
-            drawTick(g2, isLegalPreview);
+            drawTick(g2, isLegal);
         }
         drawPromotions(g2);
     }
@@ -447,7 +454,8 @@ public class BoardPanel extends JPanel implements Runnable {
 
 			if(delta >= 1) {
 				update();
-                if(!isAIPlaying || currentTurn == Tint.WHITE) {
+                if(!isAIPlaying || turn == Tint.WHITE
+                        || isPromotionPending) {
                     repaint();
                 }
                 delta--;
@@ -471,6 +479,7 @@ public class BoardPanel extends JPanel implements Runnable {
         switch(mode) {
             case PLAYER -> isAIPlaying = false;
             case AI -> isAIPlaying = true;
+            case CHAOS -> isChaosActive = true;
         }
 	}
 
@@ -479,22 +488,21 @@ public class BoardPanel extends JPanel implements Runnable {
             return;
         }
 
-        if(isAIPlaying && currentTurn == Tint.BLACK) {
+        if(isAIPlaying && turn == Tint.BLACK) {
             return;
         }
 
         int hoverCol = mouse.getX() / Board.getSquare();
         int hoverRow = mouse.getY() / Board.getSquare();
 
-        if(isPromoted) {
+        if(isPromotionPending) {
             promotion();
             mouse.setClicked(false);
-            return;
         }
 
         if(mouse.isPressed() && !isDragging && currentPiece == null) {
             for(Piece p : pieces) {
-                if(p.getColor() == currentTurn &&
+                if(p.getColor() == turn &&
                         p.getCol() == hoverCol &&
                         p.getRow() == hoverRow) {
                     currentPiece = p;
@@ -512,49 +520,35 @@ public class BoardPanel extends JPanel implements Runnable {
         if(isDragging && mouse.isPressed() && currentPiece != null) {
             currentPiece.setX(mouse.getX() - dragOffsetX);
             currentPiece.setY(mouse.getY() - dragOffsetY);
-
             int targetCol = mouse.getX() / Board.getSquare();
             int targetRow = mouse.getY() / Board.getSquare();
-
-            isLegalPreview =
-                    currentPiece.canMove(targetCol, targetRow, this) &&
+            isLegal = currentPiece.canMove(targetCol, targetRow, this) &&
                             !wouldLeaveKingInCheck(currentPiece, targetCol, targetRow);
         }
 
         if(isDragging && mouse.isClicked() && currentPiece != null) {
             isDragging = false;
-
             int targetCol = mouse.getX() / Board.getSquare();
             int targetRow = mouse.getY() / Board.getSquare();
 
-            if(isLegalPreview) {
-                Piece capturedPiece = null;
-                for(Piece p : pieces) {
-                    if(p != currentPiece &&
-                            p.getCol() == targetCol &&
-                            p.getRow() == targetRow) {
-                        capturedPiece = p;
-                        break;
-                    }
+            if(isLegal) {
+                Piece captured = getPieceAt(targetCol, targetRow);
+                if(captured != null) {
+                    removePiece(captured);
                 }
 
-                if(capturedPiece != null) {
-                    pieces.remove(capturedPiece);
-                }
-
-                if(currentPiece instanceof King) {
+                if (currentPiece instanceof King) {
                     int colDiff = targetCol - currentPiece.getCol();
 
-                    if(Math.abs(colDiff) == 2 && currentPiece.hasMoved()) {
+                    if (Math.abs(colDiff) == 2 && !currentPiece.hasMoved()) {
                         int step = (colDiff > 0) ? 1 : -1;
                         int rookStartCol = (colDiff > 0) ? 7 : 0;
                         int rookTargetCol = (colDiff > 0) ? 5 : 3;
 
-                        if(isKingInCheck(currentPiece.getColor()) ||
+                        if (isKingInCheck(currentPiece.getColor()) ||
                                 wouldLeaveKingInCheck(currentPiece,
                                         currentPiece.getCol() + step,
                                         currentPiece.getRow())) {
-
                             currentPiece.updatePos();
                             currentPiece = null;
                             return;
@@ -562,7 +556,7 @@ public class BoardPanel extends JPanel implements Runnable {
 
                         boolean pathClear = true;
                         for(int c = currentPiece.getCol() + step; c != rookStartCol; c += step) {
-                            if(boardHasPieceAt(c, currentPiece.getRow())) {
+                            if(getPieceAt(c, currentPiece.getRow()) != null) {
                                 pathClear = false;
                                 break;
                             }
@@ -585,21 +579,19 @@ public class BoardPanel extends JPanel implements Runnable {
                     }
                 }
 
-                currentPiece.setCol(targetCol);
-                currentPiece.setRow(targetRow);
-                currentPiece.updatePos();
+                movePiece(currentPiece, targetCol, targetRow);
                 currentPiece.setHasMoved(true);
 
-                if(currentPiece instanceof Pawn) {
+                if (currentPiece instanceof Pawn) {
                     int oldRow = currentPiece.getPreRow();
                     int movedSquares = Math.abs(targetRow - oldRow);
 
-                    if(capturedPiece == null && Math.abs(targetCol -
+                    if (captured == null && Math.abs(targetCol -
                             currentPiece.getPreCol()) == 1) {
                         int dir = (currentPiece.getColor() == Tint.WHITE) ? -1 : 1;
-                        if(targetRow - oldRow == dir) {
-                            for(Piece p : pieces) {
-                                if(p instanceof Pawn &&
+                        if (targetRow - oldRow == dir) {
+                            for (Piece p : pieces) {
+                                if (p instanceof Pawn &&
                                         p.getColor() != currentPiece.getColor() &&
                                         p.getCol() == targetCol &&
                                         p.getRow() == oldRow &&
@@ -613,32 +605,35 @@ public class BoardPanel extends JPanel implements Runnable {
                     currentPiece.setTwoStepsAhead(movedSquares == 2);
                 }
 
-                for(Piece p : pieces) {
-                    if(p instanceof Pawn && p.getColor() != currentPiece.getColor()) {
+                for (Piece p : pieces) {
+                    if (p instanceof Pawn && p.getColor() != currentPiece.getColor()) {
                         p.resetEnPassant();
                     }
                 }
 
-                if(canPromote()) {
-                    isPromoted = true;
+                if (checkPromotion(currentPiece)) {
+                    isPromotionPending = true;
                     promotionColor = currentPiece.getColor();
                 } else {
-                    currentTurn = (currentTurn == Tint.WHITE)
+                    turn = (turn == Tint.WHITE)
                             ? Tint.BLACK : Tint.WHITE;
 
-                    if(currentPiece != null) {
+                    if (currentPiece != null) {
                         currentPiece.setScale(currentPiece.getDEFAULT_SCALE());
                         currentPiece = null;
                     }
 
-                    if(isAIPlaying && currentTurn == Tint.BLACK && !isDragging && !isPromoted) {
+                    if (isAIPlaying && !isPromotionPending) {
                         Move move = getAiTurn();
-                        if(move != null) {
+                        if (move != null) {
                             executeMove(move);
                         }
-                        return;
                     }
-                    isKingInCheck(currentTurn);
+
+                    if (isKingInCheck(turn) && getAiTurn() == null) {
+                        isGameOver = true;
+                    }
+
                 }
 
             } else {
@@ -651,68 +646,77 @@ public class BoardPanel extends JPanel implements Runnable {
         }
     }
 
-	private boolean canPromote() {
-		if(currentPiece.getId() == Type.PAWN) {
-			if((currentPiece.getColor() == Tint.WHITE && currentPiece.getRow() == 0)
-					|| (currentPiece.getColor() == Tint.BLACK && currentPiece.getRow() == 7)) {
-				promotingPawn = currentPiece;
-				promoted.clear();
-				promoted.add(new Rook(currentPiece.getColor(), 9, 2));
-				promoted.add(new Knight(currentPiece.getColor(), 9, 3));
-				promoted.add(new Bishop(currentPiece.getColor(), 9, 4));
-				promoted.add(new Queen(currentPiece.getColor(), 9, 5));
-				return true;
-			}
-		}
-		return false;
-	}
+    private boolean checkPromotion(Piece p) {
+        if(p instanceof Pawn) {
+            if((p.getColor() == Tint.WHITE && p.getRow() == 0) ||
+                    (p.getColor() == Tint.BLACK && p.getRow() == 7)) {
+                isPromotionPending = true;
+                promotingPawn = p;
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void promotion() {
-        if(!isPromoted || !mouse.isClicked()) {
-            return;
-        }
+        if(!isPromotionPending) { return; }
 
         int size = Board.getSquare();
         int totalWidth = size * 4;
         int startX = (WIDTH - totalWidth) / 2;
         int startY = (HEIGHT - size) / 2;
 
-        Type[] options = {
-                Type.QUEEN,
-                Type.ROOK,
-                Type.BISHOP,
-                Type.KNIGHT
-        };
+        Type[] options = {Type.QUEEN, Type.ROOK, Type.BISHOP, Type.KNIGHT};
+        int selectedIndex = -1;
+
+        if (promotionStartTime == -1) {
+            promotionStartTime = System.currentTimeMillis();
+        }
 
         for(int i = 0; i < options.length; i++) {
             int x0 = startX + i * size;
             int x1 = x0 + size;
-            int y1 = startY + size;
 
-            if(mouse.getX() >= x0 && mouse.getX() <= x1 &&
-                    mouse.getY() >= startY && mouse.getY() <= y1) {
-                pieces.remove(promotingPawn);
-                Piece promotedPiece = switch(options[i]) {
-                    case QUEEN -> new Queen(promotingPawn.getColor(),
-                            promotingPawn.getCol(), promotingPawn.getRow());
-                    case ROOK -> new Rook(promotingPawn.getColor(),
-                            promotingPawn.getCol(), promotingPawn.getRow());
-                    case BISHOP -> new Bishop(promotingPawn.getColor(),
-                            promotingPawn.getCol(), promotingPawn.getRow());
-                    case KNIGHT -> new Knight(promotingPawn.getColor(),
-                            promotingPawn.getCol(), promotingPawn.getRow());
-                    default -> throw new IllegalStateException("Unexpected promotion type");
-                };
-
-                pieces.add(promotedPiece);
-
-                promotingPawn = null;
-                isPromoted = false;
-                currentTurn = (currentTurn == Tint.WHITE) ? Tint.BLACK : Tint.WHITE;
-                mouse.setClicked(false);
+            if(mouse.isClicked() &&
+                    mouse.getX() >= x0 && mouse.getX() <= x1 &&
+                    mouse.getY() >= startY && mouse.getY() <= startY + size) {
+                selectedIndex = i;
                 break;
             }
         }
+
+        if (selectedIndex == -1 && System.currentTimeMillis() - promotionStartTime >= PROMOTION_DELAY) {
+            selectedIndex = 0; // QUEEN by default
+        }
+
+        if(selectedIndex == -1) { selectedIndex = 0; }
+        pieces.remove(promotingPawn);
+        Piece promotedPiece = switch(options[selectedIndex]) {
+            case QUEEN -> new Queen(promotingPawn.getColor(),
+                    promotingPawn.getCol(), promotingPawn.getRow());
+            case ROOK -> new Rook(promotingPawn.getColor(),
+                    promotingPawn.getCol(), promotingPawn.getRow());
+            case BISHOP -> new Bishop(promotingPawn.getColor(),
+                    promotingPawn.getCol(), promotingPawn.getRow());
+            case KNIGHT -> new Knight(promotingPawn.getColor(),
+                    promotingPawn.getCol(), promotingPawn.getRow());
+            default -> throw new IllegalStateException("Unexpected promotion type");
+        };
+
+        pieces.add(promotedPiece);
+        boardState[promotedPiece.getCol()][promotedPiece.getRow()] = promotedPiece;
+        promotingPawn = null;
+        isPromotionPending = false;
+        turn = (turn == Tint.WHITE) ? Tint.BLACK : Tint.WHITE;
+        mouse.setClicked(false);
+    }
+
+    private List<Piece> clonePieces() {
+        List<Piece> copy = new ArrayList<>();
+        for (Piece p : pieces) {
+            copy.add(p.copy());
+        }
+        return copy;
     }
 
     private boolean isKingInCheck(Tint kingColor) {
@@ -740,45 +744,39 @@ public class BoardPanel extends JPanel implements Runnable {
 		throw new IllegalStateException("King not found for color: " + color);
 	}
 
-	private boolean wouldLeaveKingInCheck(Piece piece, int targetCol, int targetRow) {
-		int oldCol = piece.getCol();
-		int oldRow = piece.getRow();
+    private boolean wouldLeaveKingInCheck(Piece piece, int targetCol, int targetRow) {
+        List<Piece> simPieces = clonePieces();
 
-		Piece captured = null;
-		for(Piece p : pieces) {
-			if(p != piece && p.getCol() == targetCol && p.getRow() == targetRow) {
-				captured = p;
-				break;
-			}
-		}
+        Piece simPiece = simPieces.stream()
+                .filter(p -> p.getCol() == piece.getCol()
+                        && p.getRow() == piece.getRow()
+                        && p.getColor() == piece.getColor()
+                        && p.getClass() == piece.getClass())
+                .findFirst()
+                .orElse(null);
 
-        if(captured != null) {
-			snapshot.remove(captured);
-		}
-
-		piece.setCol(targetCol);
-		piece.setRow(targetRow);
-        boolean inCheck = isKingInCheckSimulated(piece.getColor(), snapshot);
-		piece.setCol(oldCol);
-		piece.setRow(oldRow);
-		return inCheck;
-	}
-
-    private boolean isKingInCheckSimulated(Tint kingColor, List<Piece> snapshot) {
-        Piece king = null;
-        for(Piece p : snapshot) {
-            if(p instanceof King && p.getColor() == kingColor) {
-                king = p;
-                break;
-            }
+        if (simPiece == null) {
+            return true;
         }
 
-        for(Piece p : snapshot) {
-            if(p.getColor() != kingColor) {
-                assert king != null;
-                if(p.canMove(king.getCol(), king.getRow(), this)) {
-                    return true;
-                }
+        simPieces.removeIf(p -> p != simPiece
+                && p.getCol() == targetCol
+                && p.getRow() == targetRow
+                && !(p instanceof King));
+
+        simPiece.setCol(targetCol);
+        simPiece.setRow(targetRow);
+
+        Piece king = simPieces.stream()
+                .filter(p -> p instanceof King
+                        && p.getColor() == piece.getColor())
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("King must exist after cloning"));
+
+        for (Piece enemy : simPieces) {
+            if (enemy.getColor() != piece.getColor() &&
+                    enemy.canMove(king.getCol(), king.getRow(), simPieces)) {
+                return true;
             }
         }
         return false;
@@ -786,7 +784,7 @@ public class BoardPanel extends JPanel implements Runnable {
 
     private boolean isPieceThreatened(Piece piece) {
         for(Piece enemy : pieces) {
-            if(enemy.getColor() == piece.getColor()) continue;
+            if(enemy.getColor() == piece.getColor()) { continue; }
             if(enemy.canMove(piece.getCol(), piece.getRow(), this)) {
                 return true;
             }
@@ -795,40 +793,45 @@ public class BoardPanel extends JPanel implements Runnable {
     }
 
     private Move getAiTurn() {
-        legalMoves.clear();
-        moveScores.clear();
+        List<MoveScore> moves = getAllLegalMoves(turn);
+        if(moves.isEmpty()) return null;
+        moves.sort((a,b) -> Integer.compare(b.score(), a.score()));
+        return moves.getFirst().move();
+    }
 
-        for(Piece p : pieces) {
-            if(p.getColor() != currentTurn) {
-                continue;
-            }
-
-            for(int col = 0; col < 8; col++) {
-                for(int row = 0; row < 8; row++) {
-                    if(p.canMove(col, row, this)
-                            && !wouldLeaveKingInCheck(p, col, row)) {
-                        Move move = new Move(p, col, row);
-                        int score = evaluateMove(move);
-                        legalMoves.add(new Move(p, col, row));
-                        moveScores.add(score);
-                    }
+    private List<MoveScore> getAllLegalMoves(Tint color) {
+        List<MoveScore> moves = new ArrayList<>();
+        for (Piece p : pieces) {
+            if (p.getColor() != color) { continue; }
+            for (int col = 0; col < 8; col++) {
+                for (int row = 0; row < 8; row++) {
+                    if (!isLegalMove(p, col, row)) { continue; }
+                    Move move = new Move(p, col, row);
+                    moves.add(new MoveScore(move, evaluateMove(move)));
                 }
             }
         }
+        return moves;
+    }
 
-        if(legalMoves.isEmpty()) {
+    private boolean isLegalMove(Piece p, int col, int row) {
+        Piece target = getPieceAt(col, row);
+        if (!p.canMove(col, row, this)) {
+            return false;
+        }
+
+        if (target != null && target.getColor() == p.getColor()) {
+            return false;
+        }
+        return !wouldLeaveKingInCheck(p, col, row);
+    }
+
+
+    public Piece getPieceAt(int col, int row) {
+        if(col < 0 || col > 7 || row < 0 || row > 7) {
             return null;
         }
-
-        int maxScore = Integer.MIN_VALUE;
-        int bestIndex = 0;
-        for(int i = 0; i < moveScores.size(); i++) {
-            if(moveScores.get(i) > maxScore) {
-                maxScore = moveScores.get(i);
-                bestIndex = i;
-            }
-        }
-        return legalMoves.get(random.nextInt(legalMoves.size()));
+        return boardState[col][row];
     }
 
     private int evaluateMove(Move move) {
@@ -871,37 +874,19 @@ public class BoardPanel extends JPanel implements Runnable {
         p.setPreCol(p.getCol());
         p.setPreRow(p.getRow());
 
-        Piece captured = null;
-        for(Piece other : pieces) {
-            if(other != p &&
-                    other.getCol() == move.targetCol() &&
-                    other.getRow() == move.targetRow()) {
-                captured = other;
-                break;
-            }
+        Piece captured = getPieceAt(move.targetCol(), move.targetRow());
+        if (captured != null) {
+            removePiece(captured);
         }
 
-        if(captured != null) {
-            pieces.remove(captured);
-        }
-
-        p.setCol(move.targetCol());
-        p.setRow(move.targetRow());
-        p.updatePos();
+        movePiece(p, move.targetCol(), move.targetRow());
         p.setHasMoved(true);
+
         currentPiece = null;
         isDragging = false;
-        isLegalPreview = false;
-        currentTurn = Tint.WHITE;
+        isLegal = false;
+        turn = Tint.WHITE;
     }
-
-    public boolean boardHasPieceAt(int col, int row) {
-		for(Piece p : pieces) {
-			if(p.getCol() == col && p.getRow() == row)
-				return true;
-		}
-		return false;
-	}
 
     private void handleMenuInput() {
 		if(!mouse.isClicked()) {
