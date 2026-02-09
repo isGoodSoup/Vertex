@@ -214,11 +214,12 @@ public class PieceService {
         return true;
     }
 
-    public static boolean isValidSquare(int targetCol, int targetRow,
+    public static boolean isValidSquare(Piece piece, int targetCol,
+                                        int targetRow,
                                  List<Piece> board) {
         for(Piece p : board) {
             if(p.getCol() == targetCol && p.getRow() == targetRow) {
-                return p.getColor() != currentPiece.getColor();
+                return p.getColor() != piece.getColor();
             }
         }
         return true;

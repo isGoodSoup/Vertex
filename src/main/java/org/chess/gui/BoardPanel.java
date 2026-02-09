@@ -2,7 +2,6 @@ package org.chess.gui;
 
 import org.chess.entities.*;
 import org.chess.enums.GameState;
-import org.chess.enums.Tint;
 import org.chess.service.*;
 
 import javax.swing.*;
@@ -14,13 +13,11 @@ public class BoardPanel extends JPanel implements Runnable {
     private static final long serialVersionUID = -5189356863277669172L;
 	private final int FPS = 60;
 	private Thread thread;
-    private final Sound sound;
     private static ServiceFactory service;
 
 	public BoardPanel() {
         super();
         service = new ServiceFactory();
-        this.sound = new Sound();
         GameService.setState(GameState.MENU);
         final int WIDTH = GUIService.getWIDTH();
         final int HEIGHT = GUIService.getHEIGHT();

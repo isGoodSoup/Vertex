@@ -199,8 +199,8 @@ public abstract class Piece {
 		return PieceService.isPathClear(piece, targetCol, targetRow, board);
 	}
 
-	public boolean isValidSquare(int targetCol, int targetRow,
+	public boolean isValidSquare(Piece piece, int targetCol, int targetRow,
 							   List<Piece> board) {
-		return PieceService.isValidSquare(targetCol, targetRow, board);
+		return PieceService.isValidSquare(piece, targetCol, targetRow, board);
 	}
 }

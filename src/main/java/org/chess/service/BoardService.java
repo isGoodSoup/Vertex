@@ -4,6 +4,7 @@ import org.chess.entities.*;
 import org.chess.enums.GameState;
 import org.chess.enums.Tint;
 import org.chess.gui.Mouse;
+import org.chess.gui.Sound;
 import org.chess.records.Move;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Objects;
 public class BoardService {
     private static Piece[][] boardState;
     private final Board board;
+    private final Sound fx;
 
     private final PieceService pieceService;
     private final Mouse mouse;
@@ -22,6 +24,7 @@ public class BoardService {
                         PromotionService promotionService,
                         ModelService modelService) {
         this.board = new Board();
+        this.fx = new Sound();
         this.pieceService = pieceService;
         this.mouse = mouse;
         this.promotionService = promotionService;
@@ -88,8 +91,8 @@ public class BoardService {
         pieces.add(new Bishop(Tint.BLACK, 5, 0));
         pieces.add(new Queen(Tint.WHITE, 3, 7));
         pieces.add(new Queen(Tint.BLACK, 3, 0));
-        pieces.add(new King(Tint.WHITE, 4, 7));
-        pieces.add(new King(Tint.BLACK, 4, 0));
+        pieces.add(new King(pieceService, Tint.WHITE, 4, 7));
+        pieces.add(new King(pieceService, Tint.BLACK, 4, 0));
     }
 
     private void clearBoardState() {
@@ -211,7 +214,7 @@ public class BoardService {
                                 if(p instanceof Rook &&
                                         p.getCol() == rookStartCol &&
                                         p.getRow() == currentPiece.getRow() &&
-                                        p.hasMoved()) {
+                                        !p.hasMoved()) {
 
                                     p.setCol(rookTargetCol);
                                     PieceService.updatePos(p);
@@ -225,6 +228,7 @@ public class BoardService {
 
                 PieceService.movePiece(currentPiece, targetCol, targetRow);
                 currentPiece.setHasMoved(true);
+                fx.playFX(0);
 
                 if (currentPiece instanceof Pawn) {
                     int oldRow = currentPiece.getPreRow();

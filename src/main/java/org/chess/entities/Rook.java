@@ -23,7 +23,7 @@ public class Rook extends Piece {
 		if(isWithinBoard(targetCol, targetRow) && !isSameSquare(this, targetCol,
 				targetRow)) {
 			if(targetCol == getPreCol() || targetRow == getPreRow()) {
-				return isValidSquare(targetCol, targetRow, board)
+				return isValidSquare(this, targetCol, targetRow, board)
 						&& isPathClear(this, targetCol, targetRow, board);
 			}
 		}

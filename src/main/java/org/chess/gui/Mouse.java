@@ -1,7 +1,5 @@
 package org.chess.gui;
 
-import org.chess.service.ServiceFactory;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 

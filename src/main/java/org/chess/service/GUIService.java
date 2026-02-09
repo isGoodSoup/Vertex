@@ -4,6 +4,7 @@ import org.chess.entities.*;
 import org.chess.enums.Tint;
 import org.chess.enums.Type;
 import org.chess.gui.Mouse;
+import org.chess.gui.Sound;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -18,8 +19,10 @@ public class GUIService {
     private static final int MENU_SPACING = 40;
     private static final int MENU_START_Y = 80;
     private static final int MENU_FONT = 32;
+    private int lastHoveredIndex = -1;
     private static Color background;
     private static Color foreground;
+    private final Sound fx;
 
     private static BufferedImage logo;
     private final BufferedImage yes;
@@ -37,6 +40,7 @@ public class GUIService {
         this.boardService = boardService;
         this.gameService = gameService;
         this.mouse = mouse;
+        this.fx = new Sound();
         boardService.setPieces();
         logo = null;
 
@@ -126,6 +130,11 @@ public class GUIService {
                     mouse.getY());
             g2.setColor(isHovered ? Color.WHITE : getNewForeground());
             g2.drawString(options[i], x, y);
+
+            if (isHovered && lastHoveredIndex != i) {
+                fx.play(BooleanService.getRandom(1, 2));
+                lastHoveredIndex = i;
+            }
         }
     }
 
@@ -270,6 +279,7 @@ public class GUIService {
             boolean isHovered = getHitbox(y).contains(mouse.getX(),
                     mouse.getY());
             if(isHovered) {
+                fx.play(3);
                 switch(i) {
                     case 0 -> gameService.startNewGame();
                     case 1 -> System.exit(0);

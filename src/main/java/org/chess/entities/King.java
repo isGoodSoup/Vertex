@@ -7,10 +7,12 @@ import org.chess.service.PieceService;
 import java.util.List;
 
 public class King extends Piece {
+	private final PieceService pieceService;
 
-	public King(Tint color, int col, int row) {
+	public King(PieceService pieceService, Tint color, int col, int row) {
 		super(color, col, row);
 		this.id = Type.KING;
+		this.pieceService = pieceService;
 		if(color == Tint.WHITE) {
 			image = PieceService.getImage("/pieces/king");
 		} else {
@@ -23,15 +25,36 @@ public class King extends Piece {
 		if(!isWithinBoard(targetCol, targetRow)) { return false; }
 		int colDiff = Math.abs(targetCol - getCol());
 		int rowDiff = Math.abs(targetRow - getRow());
+
 		if((colDiff + rowDiff == 1) || (colDiff * rowDiff == 1)) {
-			return isValidSquare(targetCol, targetRow, board);
+			return isValidSquare(this, targetCol, targetRow, board);
 		}
+
+		if (rowDiff == 0 && colDiff == 2 && !hasMoved()) {
+			int rookCol = (targetCol > getCol()) ? 7 : 0;
+			Piece rook = PieceService.getPieceAt(rookCol, getRow(), board);
+			if (rook instanceof Rook && !rook.hasMoved()) {
+				int step = (targetCol > getCol()) ? 1 : -1;
+				for (int c = getCol() + step; c != rookCol; c += step) {
+					if (PieceService.getPieceAt(c, getRow(), board) != null) {
+						return false;
+					}
+				}
+				for (int c = getCol(); c != targetCol + step; c += step) {
+					if (pieceService.wouldLeaveKingInCheck(this, c, getRow())) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+
 		return false;
 	}
 
 	@Override
 	public Piece copy() {
-		King p = new King(getColor(), getCol(), getRow());
+		King p = new King(pieceService, getColor(), getCol(), getRow());
 		p.setHasMoved(hasMoved());
 		return p;
 	}

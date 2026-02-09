@@ -20,43 +20,39 @@ public class Pawn extends Piece {
 
 	@Override
 	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
-		if (isWithinBoard(targetCol, targetRow) && !isSameSquare(this,
-				targetCol, targetRow)) {
-			int moveValue = (getColor() == Tint.WHITE) ? -1 : 1;
-			setOtherPiece(isColliding(targetCol, targetRow, board));
+		if(!isWithinBoard(targetCol, targetRow) || isSameSquare(this, targetCol, targetRow))
+			return false;
 
-			if (targetCol == getPreCol() && targetRow == getPreRow() +
-					moveValue && getOtherPiece() == null) {
+		int direction = (getColor() == Tint.WHITE) ? -1 : 1;
+
+		Piece pieceAtTarget = PieceService.getPieceAt(targetCol, targetRow, board);
+
+		if(targetCol == getCol() && targetRow == getRow() + direction) {
+			return pieceAtTarget == null;
+		}
+
+		if(targetCol == getCol() && targetRow == getRow() + 2 * direction
+				&& !hasMoved() && isPathClear(this, targetCol, targetRow, board)) {
+			return pieceAtTarget == null;
+		}
+
+		if(Math.abs(targetCol - getCol()) == 1 && targetRow == getRow() + direction) {
+			if(pieceAtTarget != null && pieceAtTarget.getColor() != this.getColor()) {
 				return true;
 			}
 
-			if (targetCol == getPreCol() && targetRow == getPreRow() +
-					moveValue * 2 &&
-					getOtherPiece() == null && !hasMoved()
-					&& isPathClear(this, targetCol, targetRow, board)) {
-				return true;
-			}
-
-			if (Math.abs(targetCol - getPreCol()) == 1 && targetRow == getPreRow()
-					+ moveValue && getOtherPiece() != null &&
-					getOtherPiece().getColor() != this.getColor()) {
-				return true;
-			}
-
-			if (Math.abs(targetCol - getPreCol()) == 1 &&
-					targetRow == getPreRow() + moveValue) {
-				for (Piece p : board) {
-					if (p instanceof Pawn && p.getColor() != this.getColor()
-							&& p.getCol() == targetCol && p.getRow() == getPreRow()
-							&& p.isTwoStepsAhead()) {
-						setOtherPiece(p);
-						return true;
-					}
+			for(Piece p : board) {
+				if(p instanceof Pawn && p.getColor() != this.getColor()
+						&& p.getCol() == targetCol && p.getRow() == getRow()
+						&& p.isTwoStepsAhead()) {
+					setOtherPiece(p);
+					return true;
 				}
 			}
 		}
 		return false;
 	}
+
 
 	@Override
 	public boolean isPathClear(Piece piece, int targetCol, int targetRow,

@@ -16,6 +16,8 @@ public class Sound {
     public Sound() {
         setSound(0, "piece-fx");
         setSound(1, "menu");
+        setSound(2, "menu-select_1");
+        setSound(3, "menu-select_2");
         preload();
     }
 
@@ -100,5 +102,10 @@ public class Sound {
         if (volumeScale > 5) volumeScale = 5;
         this.volumeScale = volumeScale;
         checkVolume();
+    }
+
+    public void playFX(int i) {
+        play(i);
+        stop(i);
     }
 }

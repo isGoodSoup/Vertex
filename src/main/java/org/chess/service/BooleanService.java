@@ -17,4 +17,8 @@ public class BooleanService {
     public static boolean getBoolean() {
         return random.nextBoolean();
     }
+
+    public static int getRandom(int i, int i1) {
+        return random.nextInt(i, i1);
+    }
 }
