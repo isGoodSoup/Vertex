@@ -57,6 +57,7 @@ public class PromotionService {
 
     public void promotion() {
         if(!BooleanService.isPromotionPending) { return; }
+        if (promotingPawn == null) { return; }
 
         int size = Board.getSquare();
         int totalWidth = size * 4;
@@ -86,6 +87,10 @@ public class PromotionService {
             selectedIndex = 0;
         }
 
+        if (selectedIndex == -1) {
+            return;
+        }
+
         pieceService.getPieces().remove(promotingPawn);
 
         Piece promotedPiece = switch(options[selectedIndex]) {
@@ -105,6 +110,7 @@ public class PromotionService {
                 promotedPiece;
         promotingPawn = null;
         BooleanService.isPromotionPending = false;
+        promotionStartTime = -1;
         pieceService.switchTurns();
     }
 }

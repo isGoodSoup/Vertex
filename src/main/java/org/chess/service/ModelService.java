@@ -7,6 +7,8 @@ import org.chess.records.Move;
 import org.chess.records.MoveScore;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ModelService {
@@ -19,10 +21,15 @@ public class ModelService {
         this.animationService = animationService;
     }
 
+    public List<Move> getMoves() {
+        return BoardService.getMoves();
+    }
+
     public Move getAiTurn() {
         List<MoveScore> moves = getAllLegalMoves(GameService.getCurrentTurn());
         if(moves.isEmpty()) { return null; }
-        moves.sort((a,b) -> Integer.compare(b.score(), a.score()));
+        Collections.shuffle(moves);
+        moves.sort(Comparator.comparingInt(MoveScore::score).reversed());
         Move bestMove = moves.getFirst().move();
 
         Piece p = bestMove.piece();
@@ -40,7 +47,7 @@ public class ModelService {
         return bestMove;
     }
 
-    private List<MoveScore> getAllLegalMoves(Tint color) {
+    public List<MoveScore> getAllLegalMoves(Tint color) {
         List<MoveScore> moves = new ArrayList<>();
         for(Piece p : pieceService.getPieces()) {
             if(p.getColor() != color) { continue; }
@@ -114,6 +121,10 @@ public class ModelService {
         PieceService.movePiece(p, move.targetCol(),
                 move.targetRow());
         p.setHasMoved(true);
+
+        getMoves().add(new Move(p, p.getPreCol(), p.getPreRow(),
+                p.getCol(),
+                p.getRow(), Tint.BLACK));
 
         PieceService.nullThisPiece();
         BooleanService.isDragging = false;

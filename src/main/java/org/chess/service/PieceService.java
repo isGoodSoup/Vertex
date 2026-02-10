@@ -150,8 +150,15 @@ public class PieceService {
     }
 
     public Piece getHoveredPiece() {
-        int hoverCol = mouse.getX() / Board.getSquare();
-        int hoverRow = mouse.getY() / Board.getSquare();
+        int boardMouseX = mouse.getX() - GUIService.getBOARD_OFFSET_X();
+        int boardMouseY = mouse.getY();
+
+        if (boardMouseX < 0 || boardMouseY < 0) {
+            return null;
+        }
+
+        int hoverCol = boardMouseX  / Board.getSquare();
+        int hoverRow = boardMouseY / Board.getSquare();
 
         for (Piece p : pieces) {
             if (p.getCol() == hoverCol && p.getRow() == hoverRow && p != currentPiece) {

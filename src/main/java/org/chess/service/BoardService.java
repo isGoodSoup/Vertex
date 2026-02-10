@@ -17,7 +17,7 @@ public class BoardService {
     private static Piece[][] boardState;
     private final Board board;
     private final Sound fx;
-    private final List<Move> moves;
+    private static List<Move> moves;
 
     private final PieceService pieceService;
     private final Mouse mouse;
@@ -46,7 +46,7 @@ public class BoardService {
         return boardState;
     }
 
-    public List<Move> getMoves() {
+    public static List<Move> getMoves() {
         return moves;
     }
 
@@ -123,7 +123,8 @@ public class BoardService {
         }
 
         Piece currentPiece = PieceService.getPiece();
-        int hoverCol = mouse.getX() / Board.getSquare();
+        int boardMouseX = mouse.getX() - GUIService.getBOARD_OFFSET_X();
+        int hoverCol = boardMouseX / Board.getSquare();
         int hoverRow = mouse.getY() / Board.getSquare();
         checkPiece(currentPiece, hoverCol, hoverRow);
     }
@@ -155,7 +156,8 @@ public class BoardService {
                             + currentPiece.getMORE_SCALE());
                     BooleanService.isDragging = true;
                     PieceService.setPiece(currentPiece);
-                    PieceService.getPiece().setDragOffsetX(mouse.getX() - p.getX());
+                    int boardMouseX = mouse.getX() - GUIService.getBOARD_OFFSET_X();
+                    PieceService.getPiece().setDragOffsetX(boardMouseX - p.getX());
                     PieceService.getPiece().setDragOffsetY(mouse.getY() - p.getY());
                     currentPiece.setPreCol(p.getCol());
                     currentPiece.setPreRow(p.getRow());
@@ -168,10 +170,11 @@ public class BoardService {
     }
 
     private Piece dragPiece(Piece currentPiece) {
+        int boardMouseX = mouse.getX() - GUIService.getBOARD_OFFSET_X();
         if (BooleanService.isDragging && mouse.isHeld()) {
-            currentPiece.setX(mouse.getX() - PieceService.getPiece().getDragOffsetX());
+            currentPiece.setX(boardMouseX - PieceService.getPiece().getDragOffsetX());
             currentPiece.setY(mouse.getY() - PieceService.getPiece().getDragOffsetY());
-            int targetCol = mouse.getX() / Board.getSquare();
+            int targetCol = boardMouseX / Board.getSquare();
             int targetRow = mouse.getY() / Board.getSquare();
 
             BooleanService.isLegal = currentPiece.canMove(targetCol,
@@ -184,10 +187,17 @@ public class BoardService {
     }
 
     private Piece dropPiece(Piece currentPiece) {
+        int boardMouseX = mouse.getX() - GUIService.getBOARD_OFFSET_X();
         if (BooleanService.isDragging && mouse.wasReleased()
                 && currentPiece != null) {
             BooleanService.isDragging = false;
-            int targetCol = mouse.getX() / Board.getSquare();
+
+            if (boardMouseX < 0 || boardMouseX >= Board.getSquare() * 8) {
+                BooleanService.isLegal = false;
+                return currentPiece;
+            }
+
+            int targetCol = boardMouseX / Board.getSquare();
             int targetRow = mouse.getY() / Board.getSquare();
 
             if(BooleanService.isLegal) {

@@ -2,6 +2,7 @@ package org.chess.gui;
 
 import org.chess.enums.GameState;
 import org.chess.enums.PlayState;
+import org.chess.render.MenuRender;
 import org.chess.service.*;
 
 import javax.swing.*;
@@ -22,9 +23,9 @@ public class BoardPanel extends JPanel implements Runnable {
         BooleanService.isChaosActive = false;
         final int WIDTH = GUIService.getWIDTH();
         final int HEIGHT = GUIService.getHEIGHT();
-        GUIService.drawRandomBackground(BooleanService.getBoolean());
-        setPreferredSize(new Dimension(WIDTH + GUIService.getEXTRA_WIDTH(),
-                HEIGHT));
+        MenuRender.drawRandomBackground(BooleanService.getBoolean());
+        setPreferredSize(new Dimension(WIDTH +
+                GUIService.getEXTRA_WIDTH(), HEIGHT));
         setBackground(GUIService.getNewBackground());
         addMouseMotionListener(service.getMouseService());
         addMouseListener(service.getMouseService());
@@ -62,13 +63,13 @@ public class BoardPanel extends JPanel implements Runnable {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         switch(GameService.getState()) {
-            case MENU -> service.getGuiService().drawGraphics(g2,
-                    GUIService.optionsMenu);
-            case MODE -> service.getGuiService().drawGraphics(g2,
-                    GUIService.optionsMode);
+            case MENU -> service.getGuiService().getMenuRender().drawGraphics(g2,
+                    MenuRender.optionsMenu);
+            case MODE -> service.getGuiService().getMenuRender().drawGraphics(g2,
+                    MenuRender.optionsMode);
             case BOARD -> {
-                service.getGuiService().drawBoard(g2);
-                service.getGuiService().drawMoves(g2);
+                service.getGuiService().getBoardRender().drawBoard(g2);
+                service.getGuiService().getMovesRender().drawMoves(g2);
             }
         }
     }
@@ -76,7 +77,7 @@ public class BoardPanel extends JPanel implements Runnable {
     private void update() {
         switch(GameService.getState()) {
             case MENU -> {
-                service.getGuiService().handleMenuInput();
+                service.getGuiService().getMenuRender().handleMenuInput();
                 return;
             }
             case MODE -> {

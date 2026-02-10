@@ -20,7 +20,7 @@ public class ServiceFactory {
         this.model = new ModelService(piece, animation);
         this.board = new BoardService(piece, mouse, promotion, model);
         this.gs = new GameService(board, mouse);
-        this.gui = new GUIService(piece, board, gs, mouse);
+        this.gui = new GUIService(piece, board, gs, promotion, model, mouse);
     }
 
     public PieceService getPieceService() {
