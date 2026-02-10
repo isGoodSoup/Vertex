@@ -80,12 +80,7 @@ public class BoardPanel extends JPanel implements Runnable {
     }
 
     private void update() {
-        if((GameService.getState() == GameState.OPTIONS
-                || GameService.getState() == GameState.MODE)
-                && service.getKeyboard().wasBPressed()) {
-            GameService.setState(GameState.MENU);
-        }
-
+        checkKeyboard();
         switch(GameService.getState()) {
             case MENU -> {
                 service.getGuiService().getMenuRender().handleMenuInput();
@@ -108,6 +103,18 @@ public class BoardPanel extends JPanel implements Runnable {
                 case PLAYER -> BooleanService.isAIPlaying = false;
                 case AI -> BooleanService.isAIPlaying = true;
             }
+        }
+    }
+
+    private void checkKeyboard() {
+        if((GameService.getState() == GameState.OPTIONS
+                || GameService.getState() == GameState.MODE)
+                && service.getKeyboard().wasBPressed()) {
+            GameService.setState(GameState.MENU);
+        }
+
+        if(service.getKeyboard().wasSelectPressed()) {
+
         }
     }
 }

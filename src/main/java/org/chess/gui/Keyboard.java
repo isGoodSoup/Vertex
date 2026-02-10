@@ -2,107 +2,46 @@ package org.chess.gui;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Keyboard implements KeyListener {
-    private boolean wPressedEvent = false;
-    private boolean aPressedEvent = false;
-    private boolean sPressedEvent = false;
-    private boolean dPressedEvent = false;
-    private boolean bPressedEvent = false;
-    private boolean zPressedEvent = false;
-    private boolean spacePressedEvent = false;
+    private final Map<Integer, Boolean> keyStates;
+
+    public Keyboard() {
+        this.keyStates = new HashMap<>();
+    }
 
     @Override
     public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-        if(key == KeyEvent.VK_W) {
-            wPressedEvent = true;
-        }
-
-        if(key == KeyEvent.VK_A) {
-            aPressedEvent = true;
-        }
-
-        if(key == KeyEvent.VK_S) {
-            sPressedEvent = true;
-        }
-
-        if(key == KeyEvent.VK_D) {
-            dPressedEvent = true;
-        }
-
-        if(key == KeyEvent.VK_SPACE) {
-            bPressedEvent = true;
-        }
-
-        if(key == KeyEvent.VK_B) {
-            spacePressedEvent = true;
-        }
-
-        if(key == KeyEvent.VK_Z) {
-            zPressedEvent = true;
-        }
+        keyStates.put(e.getKeyCode(), true);
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {
+        keyStates.put(e.getKeyCode(), false);
+    }
 
-    public boolean wasWPressed() {
-        if(wPressedEvent) {
-            wPressedEvent = false;
+    public boolean wasKeyPressed(int keyCode) {
+        if (keyStates.getOrDefault(keyCode, false)) {
+            keyStates.put(keyCode, false);
             return true;
         }
         return false;
     }
 
-    public boolean wasAPressed() {
-        if(aPressedEvent) {
-            aPressedEvent = false;
-            return true;
-        }
-        return false;
-    }
+    public boolean wasWPressed() { return wasKeyPressed(KeyEvent.VK_W); }
+    public boolean wasAPressed() { return wasKeyPressed(KeyEvent.VK_A); }
+    public boolean wasSPressed() { return wasKeyPressed(KeyEvent.VK_S); }
+    public boolean wasDPressed() { return wasKeyPressed(KeyEvent.VK_D); }
+    public boolean wasEnterPressed() { return wasKeyPressed(KeyEvent.VK_ENTER); }
+    public boolean wasZPressed() { return wasKeyPressed(KeyEvent.VK_Z); }
+    public boolean wasBPressed() { return wasKeyPressed(KeyEvent.VK_B); }
 
-    public boolean wasSPressed() {
-        if(sPressedEvent) {
-            sPressedEvent = false;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean wasDPressed() {
-        if(dPressedEvent) {
-            dPressedEvent = false;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean wasSpacePressed() {
-        if(spacePressedEvent) {
-            spacePressedEvent = false;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean wasZPressed() {
-        if(zPressedEvent) {
-            zPressedEvent = false;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean wasBPressed() {
-        if(bPressedEvent) {
-            bPressedEvent = false;
-            return true;
-        }
-        return false;
+    public boolean wasSelectPressed() {
+        return wasEnterPressed() || wasZPressed();
     }
 }
