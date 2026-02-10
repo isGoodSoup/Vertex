@@ -20,7 +20,7 @@ public class BoardPanel extends JPanel implements Runnable {
         super();
         service = new ServiceFactory();
         GameService.setState(GameState.MENU);
-        BooleanService.isChaosActive = false;
+        BooleanService.defaultToggles();
         final int WIDTH = GUIService.getWIDTH();
         final int HEIGHT = GUIService.getHEIGHT();
         MenuRender.drawRandomBackground(BooleanService.getBoolean());
@@ -29,6 +29,9 @@ public class BoardPanel extends JPanel implements Runnable {
         setBackground(GUIService.getNewBackground());
         addMouseMotionListener(service.getMouseService());
         addMouseListener(service.getMouseService());
+        addKeyListener(service.getKeyboard());
+        setFocusable(true);
+        requestFocusInWindow();
 	}
 
     public void launch() {
@@ -67,6 +70,8 @@ public class BoardPanel extends JPanel implements Runnable {
                     MenuRender.optionsMenu);
             case MODE -> service.getGuiService().getMenuRender().drawGraphics(g2,
                     MenuRender.optionsMode);
+            case OPTIONS -> service.getGuiService().getMenuRender()
+                    .drawOptionsMenu(g2, MenuRender.optionsTweaks);
             case BOARD -> {
                 service.getGuiService().getBoardRender().drawBoard(g2);
                 service.getGuiService().getMovesRender().drawMoves(g2);
@@ -75,6 +80,12 @@ public class BoardPanel extends JPanel implements Runnable {
     }
 
     private void update() {
+        if((GameService.getState() == GameState.OPTIONS
+                || GameService.getState() == GameState.MODE)
+                && service.getKeyboard().wasBPressed()) {
+            GameService.setState(GameState.MENU);
+        }
+
         switch(GameService.getState()) {
             case MENU -> {
                 service.getGuiService().getMenuRender().handleMenuInput();
@@ -82,6 +93,10 @@ public class BoardPanel extends JPanel implements Runnable {
             }
             case MODE -> {
                 GameService.setMode();
+                return;
+            }
+            case OPTIONS -> {
+                service.getGuiService().getMenuRender().handleOptionsInput();
                 return;
             }
             default -> service.getBoardService().getGame();
@@ -92,10 +107,6 @@ public class BoardPanel extends JPanel implements Runnable {
             switch(mode) {
                 case PLAYER -> BooleanService.isAIPlaying = false;
                 case AI -> BooleanService.isAIPlaying = true;
-                case CHAOS -> {
-                    BooleanService.isChaosActive = true;
-                    BooleanService.isAIPlaying = true;
-                }
             }
         }
     }

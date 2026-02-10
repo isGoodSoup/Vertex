@@ -55,7 +55,6 @@ public class BoardRender {
         if(currentPiece != null && BooleanService.isDragging) {
             guiService.drawTick(g2, BooleanService.isLegal);
         }
-        guiService.getPromotionRender().drawPromotions(g2);
     }
 
     public void drawBaseBoard(Graphics2D g2) {

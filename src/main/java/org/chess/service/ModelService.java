@@ -14,11 +14,14 @@ import java.util.List;
 public class ModelService {
     private final PieceService pieceService;
     private final AnimationService animationService;
+    private final PromotionService promotionService;
 
     public ModelService(PieceService pieceService,
-                        AnimationService animationService) {
+                        AnimationService animationService,
+                        PromotionService promotionService) {
         this.pieceService = pieceService;
         this.animationService = animationService;
+        this.promotionService = promotionService;
     }
 
     public List<Move> getMoves() {
@@ -42,7 +45,7 @@ public class ModelService {
             boolean hasReachedEnd =
                     (p.getColor() == Tint.WHITE && p.getRow() == 0)
                             || (p.getColor() == Tint.BLACK && p.getCol() == 8);
-            if(hasReachedEnd) { autoPromote(p); }
+            if(hasReachedEnd) { promotionService.autoPromote(p); }
         }
         return bestMove;
     }
@@ -130,23 +133,5 @@ public class ModelService {
         BooleanService.isDragging = false;
         BooleanService.isLegal = false;
         GameService.setCurrentTurn(Tint.WHITE);
-    }
-
-    public void autoPromote(Piece pawn) {
-        if(!(pawn instanceof Pawn)) { return; }
-        if(pawn == null) { return; }
-
-        Tint side = pawn.getColor();
-        Piece promotedPiece = BooleanService.getRandomPiece(pawn, pawn.getColor());
-        Piece promotingPawn = pawn;
-
-        pieceService.getPieces().remove(pawn);
-        pieceService.getPieces().add(promotedPiece);
-        BoardService.getBoardState()
-                [promotedPiece.getCol()][promotedPiece.getRow()] = promotedPiece;
-
-        if(promotingPawn == pawn) { promotingPawn = null; }
-        BooleanService.isPromotionPending = false;
-        pieceService.switchTurns();
     }
 }

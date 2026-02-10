@@ -3,6 +3,7 @@ package org.chess.service;
 import org.chess.enums.GameState;
 import org.chess.enums.PlayState;
 import org.chess.enums.Tint;
+import org.chess.gui.BoardPanel;
 import org.chess.gui.Mouse;
 import org.chess.render.MenuRender;
 
@@ -51,7 +52,6 @@ public class GameService {
                 switch(i) {
                     case 0 -> mode = PlayState.PLAYER;
                     case 1 -> mode = PlayState.AI;
-                    case 2 -> mode = PlayState.CHAOS;
                 }
                 boardService.startBoard();
                 return;
@@ -73,5 +73,9 @@ public class GameService {
 
     public void startNewGame() {
         setState(GameState.MODE);
+    }
+
+    public void optionsMenu() {
+        setState(GameState.OPTIONS);
     }
 }

@@ -6,7 +6,6 @@ import org.chess.gui.Sound;
 import org.chess.render.BoardRender;
 import org.chess.render.MenuRender;
 import org.chess.render.MovesRender;
-import org.chess.render.PromotionRender;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -29,11 +28,10 @@ public class GUIService {
     private final BoardRender boardRender;
     private final MenuRender menuRender;
     private final MovesRender moveRender;
-    private final PromotionRender promotionRender;
 
     private static BufferedImage logo;
-    private final BufferedImage yes;
-    private final BufferedImage no;
+    private final BufferedImage YES;
+    private final BufferedImage NO;
 
     private final PieceService pieceService;
     private final BoardService boardService;
@@ -52,12 +50,10 @@ public class GUIService {
         this.gameService = gameService;
         this.modelService = modelService;
         this.mouse = mouse;
-
         this.fx = new Sound();
         this.boardRender = new BoardRender(this, pieceService, boardService, promotionService);
         this.menuRender  = new MenuRender(this, gameService, mouse);
         this.moveRender  = new MovesRender(this);
-        this.promotionRender = new PromotionRender(this, promotionService);
 
         this.boardService.setPieces();
         GUIService.promotionService = promotionService;
@@ -65,8 +61,8 @@ public class GUIService {
 
         try {
             logo = getImage("/ui/logo");
-            yes = getImage("/ticks/tick_yes");
-            no = getImage("/ticks/tick_no");
+            YES = getImage("/ticks/tick_yes");
+            NO = getImage("/ticks/tick_no");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -94,10 +90,6 @@ public class GUIService {
 
     public static int getHEIGHT() {
         return Board.getSquare() * 8;
-    }
-
-    public static int getBOARD_OFFSET_X() {
-        return getEXTRA_WIDTH();
     }
 
     public static Font getFont(int size) {
@@ -148,10 +140,6 @@ public class GUIService {
         return MOVES_CAP;
     }
 
-    public Sound getFx() {
-        return fx;
-    }
-
     public BoardRender getBoardRender() {
         return boardRender;
     }
@@ -164,8 +152,8 @@ public class GUIService {
         return moveRender;
     }
 
-    public PromotionRender getPromotionRender() {
-        return promotionRender;
+    public Sound getFx() {
+        return fx;
     }
 
     public Mouse getMouse() {
@@ -181,9 +169,9 @@ public class GUIService {
         Piece currentPiece = PieceService.getPiece();
         double scale = PieceService.getPiece().getScale();
         int size = (int) (Board.getSquare() * scale);
-        int x = currentPiece.getX() - size/2 + getBOARD_OFFSET_X();
+        int x = currentPiece.getX() - size/2 + getEXTRA_WIDTH();
         int y = currentPiece.getY() - size/2;
-        BufferedImage image = isLegal ? yes : no;
+        BufferedImage image = isLegal ? YES : NO;
         g2.drawImage(image, x, y, size, size, null);
     }
 

@@ -2,6 +2,7 @@ package org.chess.entities;
 
 import org.chess.enums.Tint;
 import org.chess.enums.Type;
+import org.chess.service.BooleanService;
 import org.chess.service.PieceService;
 
 import java.util.List;
@@ -32,25 +33,26 @@ public class King extends Piece {
 			return isValidSquare(this, targetCol, targetRow, board);
 		}
 
-		if (rowDiff == 0 && colDiff == 2 && !hasMoved()) {
-			int rookCol = (targetCol > getCol()) ? 7 : 0;
-			Piece rook = PieceService.getPieceAt(rookCol, getRow(), board);
-			if (rook instanceof Rook && !rook.hasMoved()) {
-				int step = (targetCol > getCol()) ? 1 : -1;
-				for (int c = getCol() + step; c != rookCol; c += step) {
-					if (PieceService.getPieceAt(c, getRow(), board) != null) {
-						return false;
+		if(BooleanService.isCastlingActive) {
+			if (rowDiff == 0 && colDiff == 2 && !hasMoved()) {
+				int rookCol = (targetCol > getCol()) ? 7 : 0;
+				Piece rook = PieceService.getPieceAt(rookCol, getRow(), board);
+				if (rook instanceof Rook && !rook.hasMoved()) {
+					int step = (targetCol > getCol()) ? 1 : -1;
+					for (int c = getCol() + step; c != rookCol; c += step) {
+						if (PieceService.getPieceAt(c, getRow(), board) != null) {
+							return false;
+						}
 					}
-				}
-				for (int c = getCol(); c != targetCol + step; c += step) {
-					if (pieceService.wouldLeaveKingInCheck(this, c, getRow())) {
-						return false;
+					for (int c = getCol(); c != targetCol + step; c += step) {
+						if (pieceService.wouldLeaveKingInCheck(this, c, getRow())) {
+							return false;
+						}
 					}
+					return true;
 				}
-				return true;
 			}
 		}
-
 		return false;
 	}
 

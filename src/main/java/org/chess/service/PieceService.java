@@ -1,8 +1,6 @@
 package org.chess.service;
 
-import org.chess.entities.Board;
-import org.chess.entities.King;
-import org.chess.entities.Piece;
+import org.chess.entities.*;
 import org.chess.enums.Tint;
 import org.chess.enums.Type;
 import org.chess.gui.Mouse;
@@ -85,6 +83,19 @@ public class PieceService {
         return false;
     }
 
+    public Piece getRandomPiece(Tint color, int col, int row) {
+        int index = BooleanService.getRandom(1, 6);
+        return switch(index) {
+            case 1 -> new Pawn(color, col, row);
+            case 2 -> new Rook(color, col, row);
+            case 3 -> new Bishop(color, col, row);
+            case 4 -> new Knight(color, col, row);
+            case 5 -> new Queen(color, col, row);
+            case 6 -> new King(this, color, col, row);
+            default -> new Pawn(color, col, row);
+        };
+    }
+
     public Piece getKing(Tint color) {
         for(Piece p : pieces) {
             if(p instanceof King && p.getColor() == color) {
@@ -150,7 +161,7 @@ public class PieceService {
     }
 
     public Piece getHoveredPiece() {
-        int boardMouseX = mouse.getX() - GUIService.getBOARD_OFFSET_X();
+        int boardMouseX = mouse.getX() - GUIService.getEXTRA_WIDTH();
         int boardMouseY = mouse.getY();
 
         if (boardMouseX < 0 || boardMouseY < 0) {

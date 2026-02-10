@@ -11,11 +11,27 @@ public class BooleanService {
     public static boolean isDragging;
     public static boolean isLegal;
     public static boolean isAIPlaying;
-    public static boolean isChaosActive;
     public static boolean isGameOver;
     public static boolean isPromotionPending;
     public static boolean isTurn;
+
+    public static boolean canUndoMoves;
+    public static boolean canPromote;
+    public static boolean isTestingToggle;
+    public static boolean isChaosActive;
+    public static boolean isEasyModeActive;
+    public static boolean isCastlingActive;
+    public static boolean isEnPassantActive;
+
     private static final Random random = new Random();
+
+    public static void defaultToggles() {
+        isCastlingActive = true;
+        isEnPassantActive = true;
+        canPromote = true;
+        isGameOver = false;
+        isChaosActive = false;
+    }
 
     public static boolean getBoolean() {
         return random.nextBoolean();
