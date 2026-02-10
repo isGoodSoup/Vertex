@@ -204,6 +204,7 @@ public class MoveManager {
                 }
             }
         } else {
+            service.getAnimationService().startMove(selectedPiece, moveX, moveY);
             attemptMove(selectedPiece, moveX, moveY);
             selectedPiece.setScale(selectedPiece.getDEFAULT_SCALE());
             selectedPiece = null;

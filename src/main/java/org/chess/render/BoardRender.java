@@ -43,10 +43,6 @@ public class BoardRender {
                     Board.getSquare());
         }
 
-        if(currentPiece != null && BooleanService.isDragging) {
-            guiService.drawTick(g2, currentPiece, BooleanService.isLegal);
-        }
-
         Piece selectedPiece = pieceService.getMoveManager() != null
                 ? pieceService.getMoveManager().getSelectedPiece() : null;
 
@@ -75,6 +71,10 @@ public class BoardRender {
                 currentPiece.setScale(currentPiece.getDEFAULT_SCALE());
             }
             drawPiece(g2, currentPiece);
+        }
+
+        if(currentPiece != null && BooleanService.isDragging) {
+            guiService.drawTick(g2, currentPiece, BooleanService.isLegal);
         }
     }
 

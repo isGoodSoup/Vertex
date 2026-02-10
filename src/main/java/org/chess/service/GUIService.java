@@ -179,7 +179,8 @@ public class GUIService {
     public void drawTick(Graphics2D g2, Piece piece, boolean isLegal) {
         int size = (int) (Board.getSquare() * piece.getScale());
         BufferedImage image = isLegal ? YES : NO;
-        g2.drawImage(image, piece.getX() + getEXTRA_WIDTH(), piece.getY(), size, size, null);
+        g2.drawImage(image, piece.getX() + getEXTRA_WIDTH() - 25,
+                piece.getY() - 15, size, size, null);
     }
 
     public static Rectangle getHITBOX(int y) {
