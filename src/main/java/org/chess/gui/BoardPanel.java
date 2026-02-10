@@ -2,6 +2,8 @@ package org.chess.gui;
 
 import org.chess.enums.GameState;
 import org.chess.enums.PlayState;
+import org.chess.input.Keyboard;
+import org.chess.input.MoveManager;
 import org.chess.render.MenuRender;
 import org.chess.service.*;
 
@@ -53,7 +55,7 @@ public class BoardPanel extends JPanel implements Runnable {
 
             if(delta >= 1) {
                 update();
-                AnimationService.animateMove();
+                service.getAnimationService().update();
                 service.getMouseService().update();
                 repaint();
                 delta--;
@@ -107,34 +109,37 @@ public class BoardPanel extends JPanel implements Runnable {
     }
 
     private void checkKeyboard() {
-        MenuRender menu = service.getGuiService().getMenuRender();
+        MoveManager move = BoardService.getManager();
         Keyboard keyboard = service.getKeyboard();
         GameState state = GameService.getState();
 
-        // Global back button
-        if((state == GameState.RULES || state == GameState.MODE) && keyboard.wasBPressed()) {
+        if((state == GameState.RULES || state == GameState.MODE)
+                && keyboard.wasBPressed()) {
             GameService.setState(GameState.MENU);
         }
 
-        // Handle input per game state
         switch(state) {
             case MENU -> {
-                if(keyboard.wasUpPressed()) menu.moveUp(MenuRender.optionsMenu);
-                if(keyboard.wasDownPressed()) menu.moveDown(MenuRender.optionsMenu);
-                if(keyboard.wasSelectPressed()) menu.activate(GameState.MENU);
+                if(keyboard.wasUpPressed()) { move.moveUp(MenuRender.optionsMenu); }
+                if(keyboard.wasDownPressed()) { move.moveDown(MenuRender.optionsMenu); }
+                if(keyboard.wasSelectPressed()) { move.activate(GameState.MENU); }
             }
             case MODE -> {
-                if(keyboard.wasUpPressed()) menu.moveUp(MenuRender.optionsMode);
-                if(keyboard.wasDownPressed()) menu.moveDown(MenuRender.optionsMode);
-                if(keyboard.wasSelectPressed()) menu.activate(GameState.MODE);
+                if(keyboard.wasUpPressed()) { move.moveUp(MenuRender.optionsMode); }
+                if(keyboard.wasDownPressed()) { move.moveDown(MenuRender.optionsMode); }
+                if(keyboard.wasSelectPressed()) { move.activate(GameState.MODE); }
             }
             case RULES -> {
-                if(keyboard.wasUpPressed()) menu.moveUp(MenuRender.optionsTweaks);
-                if(keyboard.wasDownPressed()) menu.moveDown(MenuRender.optionsTweaks);
-                if(keyboard.wasSelectPressed()) menu.activate(GameState.RULES);
+                if(keyboard.wasUpPressed()) { move.moveUp(MenuRender.optionsTweaks); }
+                if(keyboard.wasDownPressed()) { move.moveDown(MenuRender.optionsTweaks); }
+                if(keyboard.wasSelectPressed()) { move.activate(GameState.RULES); }
             }
             case BOARD -> {
-
+                if(keyboard.wasUpPressed()) { move.moveUp(); move.updateKeyboardHover(); }
+                if(keyboard.wasLeftPressed()) { move.moveLeft(); move.updateKeyboardHover(); }
+                if(keyboard.wasDownPressed()) { move.moveDown(); move.updateKeyboardHover(); }
+                if(keyboard.wasRightPressed()) { move.moveRight(); move.updateKeyboardHover(); }
+                if(keyboard.wasSelectPressed()) { move.activate(GameState.BOARD); }
             }
         }
     }

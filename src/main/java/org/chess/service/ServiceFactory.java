@@ -1,7 +1,9 @@
 package org.chess.service;
 
-import org.chess.gui.Keyboard;
-import org.chess.gui.Mouse;
+import org.chess.input.Keyboard;
+import org.chess.input.Mouse;
+import org.chess.input.MoveManager;
+import org.chess.render.MenuRender;
 
 public class ServiceFactory {
     private final PieceService piece;
@@ -11,6 +13,7 @@ public class ServiceFactory {
     private final GUIService gui;
     private final GameService gs;
     private final PromotionService promotion;
+    private final MoveManager manager;
     private final ModelService model;
     private final AnimationService animation;
 
@@ -21,9 +24,14 @@ public class ServiceFactory {
         this.piece = new PieceService(mouse);
         this.promotion = new PromotionService(piece, mouse);
         this.model = new ModelService(piece, animation, promotion);
-        this.board = new BoardService(piece, mouse, promotion, model);
+        this.manager = new MoveManager();
+        this.piece.setMoveManager(manager);
+        this.board = new BoardService(piece, mouse, promotion, model, manager);
+        this.model.setBoardService(board);
         this.gs = new GameService(board, mouse);
-        this.gui = new GUIService(piece, board, gs, promotion, model, mouse);
+        this.gui = new GUIService(piece, board, gs, promotion, model, manager
+                , mouse);
+        this.manager.init(this);
     }
 
     public PieceService getPieceService() {
@@ -48,6 +56,10 @@ public class ServiceFactory {
 
     public PromotionService getPromotionService() {
         return promotion;
+    }
+
+    public MoveManager getManager() {
+        return manager;
     }
 
     public ModelService getModelService() {

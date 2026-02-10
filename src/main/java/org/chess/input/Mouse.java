@@ -1,4 +1,4 @@
-package org.chess.gui;
+package org.chess.input;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;

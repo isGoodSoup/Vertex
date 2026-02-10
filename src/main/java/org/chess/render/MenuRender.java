@@ -2,18 +2,15 @@ package org.chess.render;
 
 import org.chess.entities.Board;
 import org.chess.enums.GameState;
-import org.chess.gui.Mouse;
-import org.chess.service.BoardService;
-import org.chess.service.BooleanService;
-import org.chess.service.GUIService;
-import org.chess.service.GameService;
+import org.chess.input.Mouse;
+import org.chess.input.MoveManager;
+import org.chess.service.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class MenuRender {
-
     public static final String[] optionsMenu = { "PLAY AGAINST", "RULES",
             "EXIT" };
     public static final String[] optionsMode = { "PLAYER", "AI" };
@@ -26,19 +23,21 @@ public class MenuRender {
     private final BufferedImage TOGGLE_ON_HIGHLIGHTED;
     private final BufferedImage TOGGLE_OFF_HIGHLIGHTED;
     private int lastHoveredIndex = -1;
-    private int selectedIndex = 0;
     private FontMetrics fontMetrics;
 
-    private final GUIService guiService;
-    private final Mouse mouse;
     private final GameService gameService;
     private final BoardService boardService;
+    private final MoveManager moveManager;
+    private final GUIService guiService;
+    private final Mouse mouse;
 
     public MenuRender(GUIService guiService, GameService gameService,
-                      BoardService boardService, Mouse mouse) {
+                      BoardService boardService, MoveManager moveManager,
+                      Mouse mouse) {
         this.guiService = guiService;
         this.gameService = gameService;
         this.boardService = boardService;
+        this.moveManager = moveManager;
         this.mouse = mouse;
 
         try {
@@ -68,7 +67,7 @@ public class MenuRender {
         };
     }
 
-    private void toggleOption(String option) {
+    public void toggleOption(String option) {
         switch(option) {
             case "Undo Moves" -> BooleanService.canUndoMoves ^= true;
             case "Promotion" -> BooleanService.canPromote ^= true;
@@ -118,7 +117,7 @@ public class MenuRender {
             int y = startY + i * spacing;
 
             boolean isHovered = GUIService.getHITBOX(y).contains(mouse.getX(), mouse.getY());
-            boolean isSelected = (i == selectedIndex);
+            boolean isSelected = (i == moveManager.getSelectedIndex());
 
             g2.setColor(isSelected ? Color.YELLOW : isHovered ? Color.WHITE : GUIService.getNewForeground());
             g2.drawString(options[i], x + GUIService.getGRAPHICS_OFFSET(), y);
@@ -165,7 +164,7 @@ public class MenuRender {
             int toggleX = centerX + 200;
             int toggleY = y - toggleHeight + 16;
             boolean isEnabled = getOptionState(options[i]);
-            boolean isSelected = (i == selectedIndex);
+            boolean isSelected = (i == moveManager.getSelectedIndex());
 
             g2.setColor(isSelected ? Color.YELLOW : isHovered ? Color.WHITE
                     : GUIService.getNewForeground());
@@ -240,68 +239,5 @@ public class MenuRender {
                 break;
             }
         }
-    }
-
-    public void moveUp(String[] options) {
-        GameState state = GameService.getState();
-        if(state == GameState.MENU || state == GameState.MODE
-                || state == GameState.RULES) {
-            selectedIndex--;
-            guiService.getFx().play(BooleanService.getRandom(1, 2));
-            if (selectedIndex < 0) {
-                selectedIndex = options.length - 1;
-            }
-        }
-
-    }
-
-    public void moveLeft() {
-
-    }
-
-    public void moveDown(String[] options) {
-        GameState state = GameService.getState();
-        if(state == GameState.MENU || state == GameState.MODE
-                || state == GameState.RULES) {
-            selectedIndex++;
-            guiService.getFx().play(BooleanService.getRandom(1, 2));
-            if(selectedIndex >= options.length) {
-                selectedIndex = 0;
-            }
-        }
-
-    }
-
-    public void moveRight() {
-
-    }
-
-    public void activate(GameState state) {
-        guiService.getFx().play(0);
-        switch (state) {
-            case MENU -> {
-                switch (selectedIndex) {
-                    case 0 -> gameService.startNewGame();
-                    case 1 -> gameService.optionsMenu();
-                    case 2 -> System.exit(0);
-                }
-            }
-            case MODE -> {
-                switch (selectedIndex) {
-                    case 0 -> boardService.startBoard();
-                    case 1 -> {
-                        BooleanService.isAIPlaying = true;
-                        boardService.startBoard();
-                    }
-                }
-            }
-            case RULES -> {
-                String option = optionsTweaks[selectedIndex];
-                guiService.getFx().play(0);
-                toggleOption(option);
-            }
-            case BOARD -> {}
-        }
-
     }
 }

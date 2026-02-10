@@ -8,10 +8,11 @@ import org.chess.service.GUIService;
 import java.awt.*;
 
 public class MovesRender {
-
+    private final BoardService boardService;
     private final GUIService guiService;
 
-    public MovesRender(GUIService guiService) {
+    public MovesRender(BoardService boardService, GUIService guiService) {
+        this.boardService = boardService;
         this.guiService = guiService;
     }
 
@@ -30,7 +31,7 @@ public class MovesRender {
         int leftX = OFFSET_X;
         int rightX = GUIService.getWIDTH() + OFFSET_X;
 
-        var moves = BoardService.getMoves();
+        var moves = boardService.getMoves();
         int startIndex = Math.max(0, moves.size() - GUIService.getMOVES_CAP());
 
         for (int i = startIndex; i < moves.size(); i++) {

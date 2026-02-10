@@ -3,7 +3,8 @@ package org.chess.service;
 import org.chess.entities.*;
 import org.chess.enums.Tint;
 import org.chess.enums.Type;
-import org.chess.gui.Mouse;
+import org.chess.input.Mouse;
+import org.chess.input.MoveManager;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -16,14 +17,26 @@ public class PieceService {
     private static Piece currentPiece;
     private final List<Piece> pieces;
     private Piece checkingPiece;
+    private Piece hoveredPieceKeyboard;
     private int dragOffsetX;
     private int dragOffsetY;
+    private int hoveredSquareX = -1;
+    private int hoveredSquareY = -1;
 
+    private MoveManager moveManager;
     private final Mouse mouse;
 
     public PieceService(Mouse mouse) {
         this.mouse = mouse;
         pieces = new ArrayList<>();
+    }
+
+    public MoveManager getMoveManager() {
+        return moveManager;
+    }
+
+    public void setMoveManager(MoveManager moveManager) {
+        this.moveManager = moveManager;
     }
 
     public static Piece getPiece() {
@@ -32,6 +45,27 @@ public class PieceService {
 
     public static void setPiece(Piece p) {
         currentPiece = p;
+    }
+
+    public Piece getHoveredPieceKeyboard() {
+        return hoveredPieceKeyboard;
+    }
+
+    public void setHoveredPieceKeyboard(Piece hpk) {
+        this.hoveredPieceKeyboard = hpk;
+    }
+
+    public void setHoveredSquare(int col, int row) {
+        this.hoveredSquareX = col;
+        this.hoveredSquareY = row;
+    }
+
+    public int getHoveredSquareX() {
+        return hoveredSquareX;
+    }
+
+    public int getHoveredSquareY() {
+        return hoveredSquareY;
     }
 
     public static void nullThisPiece() {

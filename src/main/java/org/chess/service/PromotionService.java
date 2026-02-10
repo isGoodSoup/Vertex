@@ -2,8 +2,7 @@ package org.chess.service;
 
 import org.chess.entities.*;
 import org.chess.enums.Tint;
-import org.chess.enums.Type;
-import org.chess.gui.Mouse;
+import org.chess.input.Mouse;
 
 public class PromotionService {
     private Tint promotionColor;

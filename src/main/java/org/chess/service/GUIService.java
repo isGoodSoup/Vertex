@@ -1,8 +1,9 @@
 package org.chess.service;
 
 import org.chess.entities.*;
-import org.chess.gui.Mouse;
+import org.chess.input.Mouse;
 import org.chess.gui.Sound;
+import org.chess.input.MoveManager;
 import org.chess.render.BoardRender;
 import org.chess.render.MenuRender;
 import org.chess.render.MovesRender;
@@ -44,6 +45,7 @@ public class GUIService {
                       GameService gameService,
                       PromotionService promotionService,
                       ModelService modelService,
+                      MoveManager moveManager,
                       Mouse mouse) {
         this.pieceService = pieceService;
         this.boardService = boardService;
@@ -52,8 +54,9 @@ public class GUIService {
         this.mouse = mouse;
         this.fx = new Sound();
         this.boardRender = new BoardRender(this, pieceService, boardService, promotionService);
-        this.menuRender  = new MenuRender(this, gameService, boardService, mouse);
-        this.moveRender  = new MovesRender(this);
+        this.menuRender  = new MenuRender(this, gameService, boardService,
+                moveManager, mouse);
+        this.moveRender  = new MovesRender(boardService, this);
 
         this.boardService.setPieces();
         GUIService.promotionService = promotionService;
@@ -112,6 +115,14 @@ public class GUIService {
         return MENU_FONT;
     }
 
+    public BufferedImage getYES() {
+        return YES;
+    }
+
+    public BufferedImage getNO() {
+        return NO;
+    }
+
     public static Color getNewBackground() {
         return background;
     }
@@ -165,14 +176,10 @@ public class GUIService {
                 getClass().getResourceAsStream(path + ".png")));
     }
 
-    public void drawTick(Graphics2D g2, boolean isLegal) {
-        Piece currentPiece = PieceService.getPiece();
-        double scale = PieceService.getPiece().getScale();
-        int size = (int) (Board.getSquare() * scale);
-        int x = currentPiece.getX() - size/2 + getEXTRA_WIDTH();
-        int y = currentPiece.getY() - size/2;
+    public void drawTick(Graphics2D g2, Piece piece, boolean isLegal) {
+        int size = (int) (Board.getSquare() * piece.getScale());
         BufferedImage image = isLegal ? YES : NO;
-        g2.drawImage(image, x, y, size, size, null);
+        g2.drawImage(image, piece.getX() + getEXTRA_WIDTH(), piece.getY(), size, size, null);
     }
 
     public static Rectangle getHITBOX(int y) {

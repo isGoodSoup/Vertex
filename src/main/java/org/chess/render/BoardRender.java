@@ -25,22 +25,47 @@ public class BoardRender {
 
     public void drawBoard(Graphics2D g2) {
         Piece currentPiece = PieceService.getPiece();
+        Piece hoveredPiece = pieceService.getHoveredPieceKeyboard();
+        int hoverX = pieceService.getHoveredSquareX();
+        int hoverY = pieceService.getHoveredSquareY();
+
         drawBaseBoard(g2);
-        Piece hovered = pieceService.getHoveredPiece();
         g2.setRenderingHint(
                 RenderingHints.KEY_INTERPOLATION,
                 RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
         );
 
+        if(hoverX >= 0 && hoverY >= 0) {
+            g2.setColor(new Color(200, 155, 100, 180));
+            g2.fillRect(GUIService.getEXTRA_WIDTH() + hoverX * Board.getSquare(),
+                    hoverY * Board.getSquare(),
+                    Board.getSquare(),
+                    Board.getSquare());
+        }
+
+        if(currentPiece != null && BooleanService.isDragging) {
+            guiService.drawTick(g2, currentPiece, BooleanService.isLegal);
+        }
+
+        Piece selectedPiece = pieceService.getMoveManager() != null
+                ? pieceService.getMoveManager().getSelectedPiece() : null;
+
+        if(selectedPiece != null && !BooleanService.isDragging) {
+            boolean legal = selectedPiece.canMove(
+                    pieceService.getHoveredSquareX(),
+                    pieceService.getHoveredSquareY(),
+                    pieceService.getPieces()
+            ) && !pieceService.wouldLeaveKingInCheck(
+                    selectedPiece,
+                    pieceService.getHoveredSquareX(),
+                    pieceService.getHoveredSquareY()
+            );
+            guiService.drawTick(g2, selectedPiece, legal);
+        }
+
         for(Piece p : pieceService.getPieces()) {
             if(p != currentPiece) {
-                BufferedImage img;
-                if(p == hovered) {
-                    img = pieceService.getHoveredPiece().getHovered();
-                } else {
-                    img = p.getImage();
-                    p.setScale(p.getDEFAULT_SCALE());
-                }
+                BufferedImage img = (p == hoveredPiece) ? hoveredPiece.getHovered() : p.getImage();
                 drawPiece(g2, p, img);
             }
         }
@@ -50,10 +75,6 @@ public class BoardRender {
                 currentPiece.setScale(currentPiece.getDEFAULT_SCALE());
             }
             drawPiece(g2, currentPiece);
-        }
-
-        if(currentPiece != null && BooleanService.isDragging) {
-            guiService.drawTick(g2, BooleanService.isLegal);
         }
     }
 
