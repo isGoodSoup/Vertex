@@ -36,7 +36,7 @@ public class BoardRender {
         );
 
         if(hoverX >= 0 && hoverY >= 0) {
-            g2.setColor(new Color(200, 155, 100, 180));
+            g2.setColor(Colorblindness.filter(new Color(200, 155, 100, 180)));
             g2.fillRect(GUIService.getEXTRA_WIDTH() + hoverX * Board.getSquare(),
                     hoverY * Board.getSquare(),
                     Board.getSquare(),
@@ -101,7 +101,8 @@ public class BoardRender {
         int offset = (square - drawSize)/2;
 
         g2.drawImage(
-                override != null ? override : piece.getImage(),
+                override != null ? override :
+                        piece.getColorblindImage(piece.getImage()),
                 piece.getX() + offset + GUIService.getEXTRA_WIDTH(),
                 piece.getY() + offset,
                 drawSize,

@@ -42,6 +42,9 @@ public class Keyboard implements KeyListener {
     public boolean wasZPressed() { return wasKeyPressed(KeyEvent.VK_Z); }
     public boolean wasBPressed() { return wasKeyPressed(KeyEvent.VK_B); }
     public boolean wasRPressed() { return wasKeyPressed(KeyEvent.VK_R); }
+    public boolean wasOnePressed() { return wasKeyPressed(KeyEvent.VK_1); }
+    public boolean wasTwoPressed() { return wasKeyPressed(KeyEvent.VK_2); }
+    public boolean wasThreePressed() { return wasKeyPressed(KeyEvent.VK_3); }
 
     public boolean wasSelectPressed() {
         return wasEnterPressed() || wasSpacePressed();

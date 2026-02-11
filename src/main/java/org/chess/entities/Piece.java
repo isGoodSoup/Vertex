@@ -2,8 +2,11 @@ package org.chess.entities;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
+
+import org.chess.enums.ColorblindType;
 import org.chess.enums.Tint;
 import org.chess.enums.Type;
+import org.chess.render.Colorblindness;
 import org.chess.service.PieceService;
 
 public abstract class Piece {
@@ -42,6 +45,10 @@ public abstract class Piece {
 
 	public BufferedImage getImage() {
 		return image;
+	}
+
+	public BufferedImage getColorblindImage(BufferedImage image) {
+		return Colorblindness.filter(image);
 	}
 
 	public BufferedImage getHovered() {

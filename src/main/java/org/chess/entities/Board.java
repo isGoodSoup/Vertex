@@ -1,5 +1,8 @@
 package org.chess.entities;
 
+import org.chess.render.Colorblindness;
+import org.chess.service.BooleanService;
+
 import java.awt.*;
 
 public class Board {
@@ -35,12 +38,15 @@ public class Board {
 	}
 
 	public static Color getEven() {
-		return EVEN;
+		return BooleanService.canBeColorblind
+				? Colorblindness.filter(EVEN) : EVEN;
 	}
 
 	public static Color getOdd() {
-		return ODD;
+		return BooleanService.canBeColorblind
+				? Colorblindness.filter(ODD) : ODD;
 	}
+
 
 	public String[][] getSquares() {
 		return squares;

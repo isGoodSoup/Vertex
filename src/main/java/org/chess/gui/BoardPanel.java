@@ -1,5 +1,6 @@
 package org.chess.gui;
 
+import org.chess.enums.ColorblindType;
 import org.chess.enums.GameState;
 import org.chess.enums.PlayState;
 import org.chess.input.Keyboard;
@@ -125,6 +126,12 @@ public class BoardPanel extends JPanel implements Runnable {
                 && keyboard.wasBPressed()) {
             GameService.setState(GameState.MENU);
             service.getGuiService().getFx().playFX(3);
+        }
+
+        if(BooleanService.canBeColorblind) {
+            if(keyboard.wasOnePressed()) { MenuRender.setCb(ColorblindType.PROTANOPIA); }
+            if(keyboard.wasTwoPressed()) { MenuRender.setCb(ColorblindType.DEUTERANOPIA); }
+            if(keyboard.wasThreePressed()) { MenuRender.setCb(ColorblindType.TRITANOPIA); }
         }
 
         switch(state) {

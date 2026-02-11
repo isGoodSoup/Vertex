@@ -57,7 +57,7 @@ public class GameService {
             int y = startY + i * spacing;
             boolean isHovered =
                     GUIService.getHITBOX(getServiceFactory().getGuiService()
-                            .getMenuRender().getOFFSET_X(), y).contains(mouse.getX(),
+                            .getMenuRender().getOFFSET_X(), y, 200, 40).contains(mouse.getX(),
                     mouse.getY());
             if(isHovered) {
                 switch(i) {

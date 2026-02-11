@@ -5,6 +5,7 @@ import org.chess.input.Mouse;
 import org.chess.gui.Sound;
 import org.chess.input.MoveManager;
 import org.chess.render.BoardRender;
+import org.chess.render.Colorblindness;
 import org.chess.render.MenuRender;
 import org.chess.render.MovesRender;
 
@@ -129,11 +130,15 @@ public class GUIService {
     }
 
     public static Color getNewBackground() {
-        return background;
+        return BooleanService.canBeColorblind
+                ? Colorblindness.filter(background)
+                : background;
     }
 
     public static Color getNewForeground() {
-        return foreground;
+        return BooleanService.canBeColorblind
+                ? Colorblindness.filter(foreground)
+                : foreground;
     }
 
     public static void setNewBackground(Color color) {
@@ -181,27 +186,36 @@ public class GUIService {
                 getClass().getResourceAsStream(path + ".png")));
     }
 
+    public void drawTimer(Graphics2D g2) {
+        g2.setFont(GUIService.getFont(24));
+        Color filtered = BooleanService.canBeColorblind
+                ? Colorblindness.filter(foreground)
+                : foreground;
+        g2.setColor(filtered);
+
+        FontMetrics fm = g2.getFontMetrics();
+        String time = timerService.getTimeString();
+        int textWidth = fm.stringWidth(time);
+        int x = LEFT_PANEL_CENTER_X - textWidth/2;
+        g2.drawString(time, x, TIMER_Y);
+    }
+
     public void drawTick(Graphics2D g2, boolean isLegal) {
         if(!BooleanService.canTick) { return; }
-        FontMetrics fm = g2.getFontMetrics(GUIService.getFont(24));
+        if(PieceService.getPiece() == null) { return; }
         BufferedImage image = isLegal ? YES : NO;
+        if(BooleanService.canBeColorblind) {
+            image = Colorblindness.filter(image);
+        }
+
+        FontMetrics fm = g2.getFontMetrics(GUIService.getFont(24));
         int size = Board.getSquare();
         int x = LEFT_PANEL_CENTER_X - size/2;
         int y = TIMER_Y - fm.getAscent() - size - 5;
         g2.drawImage(image, x, y, size, size, null);
     }
 
-    public static Rectangle getHITBOX(int x, int y) {
-        return new Rectangle(x, y, 200, 40);
-    }
-
-    public void drawTimer(Graphics2D g2) {
-        g2.setFont(GUIService.getFont(24));
-        g2.setColor(foreground);
-        FontMetrics fm = g2.getFontMetrics();
-        String time = timerService.getTimeString();
-        int textWidth = fm.stringWidth(time);
-        int x = LEFT_PANEL_CENTER_X - textWidth/2;
-        g2.drawString(timerService.getTimeString(), x, TIMER_Y);
+    public static Rectangle getHITBOX(int x, int y, int width, int height) {
+        return new Rectangle(x, y, width, height);
     }
 }
