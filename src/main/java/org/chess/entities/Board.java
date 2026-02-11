@@ -1,6 +1,6 @@
 package org.chess.entities;
 
-import org.chess.render.Colorblindness;
+import org.chess.render.ColorRender;
 import org.chess.service.BooleanService;
 
 import java.awt.*;
@@ -38,13 +38,13 @@ public class Board {
 	}
 
 	public static Color getEven() {
-		return BooleanService.canBeColorblind
-				? Colorblindness.filter(EVEN) : EVEN;
+		return BooleanService.canBeColorblind || BooleanService.isDarkMode
+				? ColorRender.getColor(EVEN, false) : EVEN;
 	}
 
 	public static Color getOdd() {
-		return BooleanService.canBeColorblind
-				? Colorblindness.filter(ODD) : ODD;
+		return BooleanService.canBeColorblind || BooleanService.isDarkMode
+				? ColorRender.getColor(ODD, false) : ODD;
 	}
 
 

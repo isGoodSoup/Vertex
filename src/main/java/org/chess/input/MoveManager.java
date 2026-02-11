@@ -112,7 +112,8 @@ public class MoveManager {
 
     public void attemptMove(Piece piece, int targetCol, int targetRow) {
         BooleanService.isLegal = piece.canMove(targetCol, targetRow,
-                service.getPieceService().getPieces()) && !service.getPieceService().wouldLeaveKingInCheck(
+                service.getPieceService().getPieces())
+                && !service.getPieceService().wouldLeaveKingInCheck(
                 piece, targetCol, targetRow);
 
         if(!BooleanService.isLegal) {
@@ -292,11 +293,14 @@ public class MoveManager {
 
     public void updateKeyboardHover() {
         service.getPieceService().setHoveredSquare(moveX, moveY);
-        Piece p = PieceService.getPieceAt(moveX, moveY, service.getPieceService().getPieces());
-        if (p != null && p.getColor() == GameService.getCurrentTurn()) {
-            service.getPieceService().setHoveredPieceKeyboard(p);
+        Piece hoveredPiece = PieceService.getPieceAt(moveX, moveY, service.getPieceService().getPieces());
+        if (hoveredPiece != null && hoveredPiece.getColor() == GameService.getCurrentTurn()) {
+            service.getPieceService().setHoveredPieceKeyboard(hoveredPiece);
+            BooleanService.isLegal = hoveredPiece.canMove(moveX, moveY, service.getPieceService().getPieces())
+                    && !service.getPieceService().wouldLeaveKingInCheck(hoveredPiece, moveX, moveY);
         } else {
             service.getPieceService().setHoveredPieceKeyboard(null);
+            BooleanService.isLegal = false;
         }
     }
 

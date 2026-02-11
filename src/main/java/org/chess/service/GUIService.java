@@ -4,10 +4,7 @@ import org.chess.entities.*;
 import org.chess.input.Mouse;
 import org.chess.gui.Sound;
 import org.chess.input.MoveManager;
-import org.chess.render.BoardRender;
-import org.chess.render.Colorblindness;
-import org.chess.render.MenuRender;
-import org.chess.render.MovesRender;
+import org.chess.render.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -130,15 +127,13 @@ public class GUIService {
     }
 
     public static Color getNewBackground() {
-        return BooleanService.canBeColorblind
-                ? Colorblindness.filter(background)
-                : background;
+        return BooleanService.canBeColorblind || BooleanService.isDarkMode
+                ? ColorRender.getColor(background, false) : background;
     }
 
     public static Color getNewForeground() {
-        return BooleanService.canBeColorblind
-                ? Colorblindness.filter(foreground)
-                : foreground;
+        return BooleanService.canBeColorblind || BooleanService.isDarkMode
+                ? ColorRender.getColor(foreground, true) : foreground;
     }
 
     public static void setNewBackground(Color color) {
@@ -188,9 +183,8 @@ public class GUIService {
 
     public void drawTimer(Graphics2D g2) {
         g2.setFont(GUIService.getFont(24));
-        Color filtered = BooleanService.canBeColorblind
-                ? Colorblindness.filter(foreground)
-                : foreground;
+        Color filtered = BooleanService.canBeColorblind || BooleanService.isDarkMode
+                ? ColorRender.getColor(foreground, true) : foreground;
         g2.setColor(filtered);
 
         FontMetrics fm = g2.getFontMetrics();
@@ -201,12 +195,12 @@ public class GUIService {
     }
 
     public void drawTick(Graphics2D g2, boolean isLegal) {
-        if(!BooleanService.canTick) { return; }
-        if(PieceService.getPiece() == null) { return; }
-        BufferedImage image = isLegal ? YES : NO;
-        if(BooleanService.canBeColorblind) {
-            image = Colorblindness.filter(image);
+        if(pieceService.getHeldPiece() == null) {
+            return;
         }
+
+        BufferedImage image = isLegal ? YES : NO;
+        image = ColorRender.getSprite(image, true);
 
         FontMetrics fm = g2.getFontMetrics(GUIService.getFont(24));
         int size = Board.getSquare();

@@ -36,7 +36,8 @@ public class BoardRender {
         );
 
         if(hoverX >= 0 && hoverY >= 0) {
-            g2.setColor(Colorblindness.filter(new Color(200, 155, 100, 180)));
+            g2.setColor(ColorRender.getColor(new Color(200, 155, 100, 180),
+                    false));
             g2.fillRect(GUIService.getEXTRA_WIDTH() + hoverX * Board.getSquare(),
                     hoverY * Board.getSquare(),
                     Board.getSquare(),
@@ -49,12 +50,8 @@ public class BoardRender {
         for(Piece p : pieceService.getPieces()) {
             if(p != currentPiece) {
                 BufferedImage img = (p == hoveredPiece) ? hoveredPiece.getHovered() : p.getImage();
-                drawPiece(g2, p, img);
+                drawPiece(g2, p, ColorRender.getSprite(img, true));
             }
-        }
-
-        if(selectedPiece != null && !BooleanService.isDragging) {
-            guiService.drawTick(g2, BooleanService.isLegal);
         }
 
         if(currentPiece != null) {
@@ -102,7 +99,7 @@ public class BoardRender {
 
         g2.drawImage(
                 override != null ? override :
-                        piece.getColorblindImage(piece.getImage()),
+                        piece.getFilteredSprite(piece.getImage()),
                 piece.getX() + offset + GUIService.getEXTRA_WIDTH(),
                 piece.getY() + offset,
                 drawSize,

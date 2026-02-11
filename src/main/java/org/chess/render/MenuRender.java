@@ -14,8 +14,8 @@ public class MenuRender {
     public static final String[] optionsMenu = { "PLAY AGAINST", "RULES", "EXIT" };
     public static final String[] optionsMode = { "PLAYER", "AI" };
     public static final String[] optionsTweaks = { "RULES",
-            "Promotion", "Training Mode", "Continue",
-            "Tick", "Castling", "En Passant", "Timer", "Stopwatch", "Chaos " +
+            "Dark Mode", "Promotion", "Training Mode", "Continue", "Castling",
+            "En Passant", "Timer", "Stopwatch", "Chaos " +
             "Mode", "Testing", "Undo Moves", "Reset Table", "Colorblind"};
     private static final String ENABLE = "Enable ";
     private static final int OPTION_X = 100;
@@ -73,15 +73,15 @@ public class MenuRender {
         }
         OFFSET_X = GUIService.getWIDTH()/2 - 100
                 + GUIService.getGRAPHICS_OFFSET() - 30;
-        cbDARK_MODE_ON = Colorblindness.filter(DARK_MODE_ON);
-        cbDARK_MODE_OFF = Colorblindness.filter(DARK_MODE_OFF);
-        cbDARK_MODE_ON_HIGHLIGHTED = Colorblindness.filter(DARK_MODE_ON_HIGHLIGHTED);
+        cbDARK_MODE_ON = ColorRender.getSprite(DARK_MODE_ON, false);
+        cbDARK_MODE_OFF = ColorRender.getSprite(DARK_MODE_OFF, true);
+        cbDARK_MODE_ON_HIGHLIGHTED = ColorRender.getSprite(DARK_MODE_ON_HIGHLIGHTED, false);
         cbDARK_MODE_OFF_HIGHLIGHTED =
-                Colorblindness.filter(DARK_MODE_OFF_HIGHLIGHTED);
-        cbTOGGLE_ON = Colorblindness.filter(TOGGLE_ON);
-        cbTOGGLE_OFF = Colorblindness.filter(TOGGLE_OFF);
-        cbTOGGLE_ON_HIGHLIGHTED = Colorblindness.filter(TOGGLE_ON_HIGHLIGHTED);
-        cbTOGGLE_OFF_HIGHLIGHTED = Colorblindness.filter(TOGGLE_OFF_HIGHLIGHTED);
+                ColorRender.getSprite(DARK_MODE_OFF_HIGHLIGHTED, false);
+        cbTOGGLE_ON = ColorRender.getSprite(TOGGLE_ON, false);
+        cbTOGGLE_OFF = ColorRender.getSprite(TOGGLE_OFF, true);
+        cbTOGGLE_ON_HIGHLIGHTED = ColorRender.getSprite(TOGGLE_ON_HIGHLIGHTED, false);
+        cbTOGGLE_OFF_HIGHLIGHTED = ColorRender.getSprite(TOGGLE_OFF_HIGHLIGHTED, false);
     }
 
     public static ColorblindType getCb() {
@@ -102,10 +102,10 @@ public class MenuRender {
 
     private boolean getOptionState(String option) {
         return switch(option) {
+            case "Dark Mode" -> BooleanService.isDarkMode;
             case "Promotion" -> BooleanService.canPromote;
             case "Training Mode" -> BooleanService.canTrain;
             case "Continue" -> BooleanService.canContinue;
-            case "Tick" -> BooleanService.canTick;
             case "Castling" -> BooleanService.canDoCastling;
             case "En Passant" -> BooleanService.canDoEnPassant;
             case "Timer" -> BooleanService.canTime;
@@ -121,10 +121,10 @@ public class MenuRender {
 
     public void toggleOption(String option) {
         switch(option) {
+            case "Dark Mode" -> BooleanService.isDarkMode ^= true;
             case "Promotion" -> BooleanService.canPromote ^= true;
             case "Training Mode" -> BooleanService.canTrain ^= true;
             case "Continue" -> BooleanService.canContinue ^= true;
-            case "Tick" -> BooleanService.canTick ^= true;
             case "Castling" -> BooleanService.canDoCastling ^= true;
             case "En Passant" -> BooleanService.canDoEnPassant ^= true;
             case "Timer" -> {
@@ -152,13 +152,13 @@ public class MenuRender {
         Color background = isColor ? Board.getEven() : Board.getOdd();
         Color foreground = isColor ? Board.getOdd() : Board.getEven();
 
-        GUIService.setNewBackground(Colorblindness.filter(background));
-        GUIService.setNewForeground(Colorblindness.filter(foreground));
+        GUIService.setNewBackground(background);
+        GUIService.setNewForeground(foreground);
     }
 
     private static void drawLogo(Graphics2D g2) {
         if(GUIService.getLogo() == null) { return; }
-        BufferedImage img = Colorblindness.filter(GUIService.getLogo());
+        BufferedImage img = ColorRender.getSprite(GUIService.getLogo(), true);
         int boardWidth = Board.getSquare() * 8;
         int boardCenterX = GUIService.getEXTRA_WIDTH() + boardWidth/2;
         int logoWidth = GUIService.getLogo().getWidth()/3;
@@ -171,11 +171,10 @@ public class MenuRender {
     public void drawGraphics(Graphics2D g2, String[] options) {
         int boardWidth = Board.getSquare() * 8;
         int totalWidth = boardWidth + 2 * GUIService.getEXTRA_WIDTH();
-        g2.setColor(Colorblindness.filter(GUIService.getNewBackground()));
+        g2.setColor(ColorRender.getColor(GUIService.getNewBackground(), false));
         g2.fillRect(0, 0, totalWidth, GUIService.getHEIGHT());
         g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
         drawLogo(g2);
-        drawDarkModeToggle(g2);
 
         int startY = GUIService.getHEIGHT() / 2 + GUIService.getMENU_START_Y();
         int spacing = GUIService.getMENU_SPACING();
@@ -188,7 +187,8 @@ public class MenuRender {
                     GUIService.getHITBOX(OFFSET_X, y, 200, 40)
                             .contains(mouse.getX(), mouse.getY());
             boolean isSelected = (i == moveManager.getSelectedIndexY());
-            Color foreground = Colorblindness.filter(GUIService.getNewForeground());
+            Color foreground =
+                    ColorRender.getColor(GUIService.getNewForeground(), true);
             Color textColor = isSelected ? Color.YELLOW :
                     isHovered ? Color.WHITE : foreground;
 
@@ -202,41 +202,15 @@ public class MenuRender {
         }
     }
 
-    public void drawDarkModeToggle(Graphics2D g2) {
-        int x = 15;
-        int y = 15;
-        Rectangle hitbox = GUIService.getHITBOX(x, y,
-                DARK_MODE_ON.getWidth()/2, DARK_MODE_ON.getHeight()/2);
-        boolean isHovered = hitbox.contains(mouse.getX(), mouse.getY());
-
-        if (isHovered && !BooleanService.isDarkModeLastFrame) {
-            guiService.getFx().play(BooleanService.getRandom(1, 2));
-        }
-
-        BooleanService.isDarkModeLastFrame = isHovered;
-        BufferedImage img;
-        if (BooleanService.isDarkMode) {
-            img = isHovered ? cbDARK_MODE_ON_HIGHLIGHTED
-                    : cbDARK_MODE_ON;
-        } else {
-            img = isHovered ? cbDARK_MODE_OFF_HIGHLIGHTED
-                    : cbDARK_MODE_OFF;
-        }
-        g2.drawImage(img, x, y,
-                img.getWidth() / 2,
-                img.getHeight() / 2,
-                null);
-    }
-
     public void drawOptionsMenu(Graphics2D g2, String[] options) {
         int boardWidth = Board.getSquare() * 8;
         int totalWidth = boardWidth + 2 * GUIService.getEXTRA_WIDTH();
-        g2.setColor(BooleanService.canBeColorblind
-                ? Colorblindness.filter(GUIService.getNewBackground())
+        g2.setColor(BooleanService.canBeColorblind || BooleanService.isDarkMode
+                ? ColorRender.getColor(GUIService.getNewBackground(), false)
                 : GUIService.getNewBackground());
         g2.fillRect(0, 0, totalWidth, GUIService.getHEIGHT());
-        g2.setColor(BooleanService.canBeColorblind
-                ? Colorblindness.filter(GUIService.getNewForeground())
+        g2.setColor(BooleanService.canBeColorblind || BooleanService.isDarkMode
+                ? ColorRender.getColor(GUIService.getNewForeground(), true)
                 : GUIService.getNewForeground());
         g2.setFont(GUIService.getFont(32));
         updatePage();
@@ -289,16 +263,25 @@ public class MenuRender {
             boolean isSelected = (i == moveManager.getSelectedIndexY());
             boolean isEnabled = getOptionState(options[i]);
 
-            Color foreground = Colorblindness.filter(GUIService.getNewForeground());
+            Color foreground = ColorRender.getColor(GUIService.getNewForeground(), true);
             g2.setColor(foreground);
             g2.drawString(enabledOption, x, y);
 
-            BufferedImage toggleImage = isEnabled
-                    ? (isSelected || isHovered ? cbTOGGLE_ON_HIGHLIGHTED :
-                    cbTOGGLE_ON)
-                    : (isSelected || isHovered ? cbTOGGLE_OFF_HIGHLIGHTED :
-                    cbTOGGLE_OFF);
-
+            BufferedImage toggleImage;
+            if(options[i].equals("Dark Mode")) {
+                toggleImage = isEnabled
+                        ? (isSelected || isHovered ? cbDARK_MODE_ON_HIGHLIGHTED :
+                        cbDARK_MODE_ON)
+                        : (isSelected || isHovered ?
+                        cbDARK_MODE_OFF_HIGHLIGHTED :
+                        cbDARK_MODE_OFF);
+            } else {
+                toggleImage = isEnabled
+                        ? (isSelected || isHovered ? cbTOGGLE_ON_HIGHLIGHTED :
+                        cbTOGGLE_ON)
+                        : (isSelected || isHovered ? cbTOGGLE_OFF_HIGHLIGHTED :
+                        cbTOGGLE_OFF);
+            }
             drawToggle(g2, toggleImage, toggleX, toggleY,
                     toggleWidth, toggleHeight);
             y += lineHeight;
@@ -391,9 +374,5 @@ public class MenuRender {
                 break;
             }
         }
-    }
-
-    public void handleDarkModeInput() {
-
     }
 }

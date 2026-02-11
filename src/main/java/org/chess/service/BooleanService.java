@@ -15,12 +15,10 @@ public class BooleanService {
     public static boolean isPromotionPending;
     public static boolean isTurn;
     public static boolean isDarkMode;
-    public static boolean isDarkModeLastFrame;
 
     public static boolean canUndoMoves;
     public static boolean canPromote;
     public static boolean canContinue;
-    public static boolean canTick;
     public static boolean canDoTest;
     public static boolean canDoChaos;
     public static boolean canTrain;
@@ -35,14 +33,12 @@ public class BooleanService {
 
     public static void defaultToggles() {
         isDarkMode = false;
-        isDarkModeLastFrame = false;
         canDoCastling = true;
         canDoEnPassant = true;
         canPromote = true;
         canContinue = true;
         canResetTable = true;
         canStopwatch = true;
-        canTick = true;
         isGameOver = false;
         canDoChaos = false;
     }

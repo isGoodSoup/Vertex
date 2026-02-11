@@ -39,6 +39,11 @@ public class PieceService {
         this.moveManager = moveManager;
     }
 
+    public Piece getHeldPiece() {
+        return PieceService.getPiece() != null ? PieceService.getPiece()
+                : moveManager.getSelectedPiece();
+    }
+
     public static Piece getPiece() {
         return currentPiece;
     }
