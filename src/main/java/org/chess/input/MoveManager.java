@@ -216,6 +216,9 @@ public class MoveManager {
                 }
             }
         } else {
+            if (!BooleanService.isLegal) {
+                return;
+            }
             service.getAnimationService().startMove(selectedPiece, moveX, moveY);
             attemptMove(selectedPiece, moveX, moveY);
             selectedPiece.setScale(selectedPiece.getDEFAULT_SCALE());
@@ -293,15 +296,26 @@ public class MoveManager {
 
     public void updateKeyboardHover() {
         service.getPieceService().setHoveredSquare(moveX, moveY);
-        Piece hoveredPiece = PieceService.getPieceAt(moveX, moveY, service.getPieceService().getPieces());
-        if (hoveredPiece != null && hoveredPiece.getColor() == GameService.getCurrentTurn()) {
-            service.getPieceService().setHoveredPieceKeyboard(hoveredPiece);
-            BooleanService.isLegal = hoveredPiece.canMove(moveX, moveY, service.getPieceService().getPieces())
-                    && !service.getPieceService().wouldLeaveKingInCheck(hoveredPiece, moveX, moveY);
-        } else {
-            service.getPieceService().setHoveredPieceKeyboard(null);
+        if(selectedPiece == null) {
+            Piece hoveredPiece =
+                    PieceService.getPieceAt(moveX, moveY,
+                            service.getPieceService().getPieces());
+
+            if(hoveredPiece != null &&
+                    hoveredPiece.getColor() == GameService.getCurrentTurn()) {
+                service.getPieceService().setHoveredPieceKeyboard(hoveredPiece);
+            } else {
+                service.getPieceService().setHoveredPieceKeyboard(null);
+            }
             BooleanService.isLegal = false;
+            return;
         }
+
+        BooleanService.isLegal =
+                selectedPiece.canMove(moveX, moveY,
+                        service.getPieceService().getPieces())
+                        && !service.getPieceService().wouldLeaveKingInCheck(
+                        selectedPiece, moveX, moveY);
     }
 
     public void moveUp(String[] options) {
