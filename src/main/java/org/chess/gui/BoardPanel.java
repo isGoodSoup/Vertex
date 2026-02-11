@@ -67,6 +67,7 @@ public class BoardPanel extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+
         switch(GameService.getState()) {
             case MENU -> service.getGuiService().getMenuRender().drawGraphics(g2,
                     MenuRender.optionsMenu);
@@ -82,12 +83,14 @@ public class BoardPanel extends JPanel implements Runnable {
 
         if(service.getTimerService().isActive()) {
             service.getGuiService().drawTimer(g2);
+            service.getGuiService().drawTick(g2, BooleanService.isLegal);
         }
     }
 
     private void update() {
         checkKeyboard();
         service.getTimerService().update();
+        service.getBoardService().resetBoard();
         switch(GameService.getState()) {
             case MENU -> {
                 service.getGuiService().getMenuRender().handleMenuInput();
@@ -137,7 +140,9 @@ public class BoardPanel extends JPanel implements Runnable {
             }
             case RULES -> {
                 if(keyboard.wasUpPressed()) { move.moveUp(MenuRender.optionsTweaks); }
+                if(keyboard.wasLeftPressed()) { move.moveLeft(MenuRender.optionsTweaks); }
                 if(keyboard.wasDownPressed()) { move.moveDown(MenuRender.optionsTweaks); }
+                if(keyboard.wasRightPressed()) { move.moveRight(MenuRender.optionsTweaks); }
                 if(keyboard.wasSelectPressed()) { move.activate(GameState.RULES); }
             }
             case BOARD -> {

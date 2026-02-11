@@ -19,7 +19,8 @@ public class MoveManager {
     private Mouse mouse;
     private Sound fx;
     private List<Move> moves;
-    private int selectedIndex;
+    private int selectedIndexY;
+    private int selectedIndexX;
 
     public MoveManager() {}
 
@@ -28,19 +29,28 @@ public class MoveManager {
         this.mouse = service.getMouseService();
         this.fx = service.getGuiService().getFx();
         this.moves = service.getBoardService().getMoves();
-        this.selectedIndex = service.getManager().getSelectedIndex();
+        this.selectedIndexY = 0;
+        this.selectedIndexX = 0;
     }
 
     public Piece getSelectedPiece() {
         return selectedPiece;
     }
 
-    public int getSelectedIndex() {
-        return selectedIndex;
+    public int getSelectedIndexX() {
+        return selectedIndexX;
     }
 
-    public void setSelectedIndex(int selectedIndex) {
-        this.selectedIndex = selectedIndex;
+    public void setSelectedIndexX(int selectedIndexX) {
+        this.selectedIndexX = selectedIndexX;
+    }
+
+    public int getSelectedIndexY() {
+        return selectedIndexY;
+    }
+
+    public void setSelectedIndexY(int selectedIndexY) {
+        this.selectedIndexY = selectedIndexY;
     }
 
     public void setMoves(List<Move> moves) {
@@ -213,7 +223,7 @@ public class MoveManager {
     }
 
     private void executeCastling(Piece currentPiece, int targetCol) {
-        if(!BooleanService.isCastlingActive) { return; }
+        if(!BooleanService.canDoCastling) { return; }
         int colDiff = targetCol - currentPiece.getCol();
 
         if(Math.abs(colDiff) == 2 && !currentPiece.hasMoved()) {
@@ -258,7 +268,7 @@ public class MoveManager {
 
     private void executeEnPassant(Piece currentPiece, Piece captured,
                                   int targetCol, int targetRow) {
-        if(!BooleanService.isEnPassantActive) { return; }
+        if(!BooleanService.canDoEnPassant) { return; }
         int oldRow = currentPiece.getPreRow();
         int movedSquares = Math.abs(targetRow - oldRow);
 
@@ -290,20 +300,29 @@ public class MoveManager {
         }
     }
 
+    public void moveUp(String[] options) {
+        selectedIndexY--;
+        getFx().playFX(BooleanService.getRandom(1, 2));
+        if(selectedIndexY < 0) {
+            selectedIndexY = options.length - 1;
+        }
+    }
+
     public void moveUp() {
         GameState state = GameService.getState();
         if(state == GameState.BOARD) {
             moveY = Math.max(0, moveY - 1);
             updateKeyboardHover();
-            getFx().play(4);
+            getFx().playFX(BooleanService.getRandom(1, 2));
         }
     }
 
-    public void moveUp(String[] options) {
-        selectedIndex--;
-        service.getGuiService().getFx().play(BooleanService.getRandom(1, 2));
-        if(selectedIndex < 0) {
-            selectedIndex = options.length - 1;
+    public void moveLeft(String[] options) {
+        selectedIndexX--;
+        service.getGuiService().getMenuRender().previousPage();
+        getFx().playFX(4);
+        if(selectedIndexX >= options.length) {
+            selectedIndexX = 0;
         }
     }
 
@@ -311,7 +330,15 @@ public class MoveManager {
         if(GameService.getState() == GameState.BOARD) {
             moveX = Math.max(0, moveX - 1);
             updateKeyboardHover();
-            getFx().play(4);
+            getFx().playFX(BooleanService.getRandom(1, 2));
+        }
+    }
+
+    public void moveDown(String[] options) {
+        selectedIndexY++;
+        getFx().playFX(BooleanService.getRandom(1, 2));
+        if(selectedIndexY >= options.length) {
+            selectedIndexY = 0;
         }
     }
 
@@ -320,15 +347,16 @@ public class MoveManager {
         if(state == GameState.BOARD) {
             moveY = Math.min(7, moveY + 1);
             updateKeyboardHover();
-            getFx().play(4);
+            getFx().playFX(BooleanService.getRandom(1, 2));
         }
     }
 
-    public void moveDown(String[] options) {
-        selectedIndex++;
-        service.getGuiService().getFx().play(BooleanService.getRandom(1, 2));
-        if(selectedIndex >= options.length) {
-            selectedIndex = 0;
+    public void moveRight(String[] options) {
+        selectedIndexX++;
+        service.getGuiService().getMenuRender().nextPage();
+        getFx().playFX(4);
+        if(selectedIndexX >= options.length) {
+            selectedIndexX = 0;
         }
     }
 
@@ -336,23 +364,23 @@ public class MoveManager {
         if(GameService.getState() == GameState.BOARD) {
             moveX = Math.min(7, moveX + 1);
             updateKeyboardHover();
-            getFx().play(4);
+            getFx().playFX(BooleanService.getRandom(1, 2));
         }
     }
 
     public void activate(GameState state) {
         switch (state) {
             case MENU -> {
-                service.getGuiService().getFx().play(3);
-                switch (selectedIndex) {
+                getFx().playFX(3);
+                switch (selectedIndexY) {
                     case 0 -> service.getGameService().startNewGame();
                     case 1 -> service.getGameService().optionsMenu();
                     case 2 -> System.exit(0);
                 }
             }
             case MODE -> {
-                service.getGuiService().getFx().play(3);
-                switch (selectedIndex) {
+                getFx().playFX(3);
+                switch (selectedIndexY) {
                     case 0 -> service.getBoardService().startBoard();
                     case 1 -> {
                         BooleanService.isAIPlaying = true;
@@ -361,10 +389,10 @@ public class MoveManager {
                 }
             }
             case RULES -> {
-                service.getGuiService().getFx().play(3);
-                if (selectedIndex == 0) { return; }
-                String option = MenuRender.optionsTweaks[selectedIndex];
-                service.getGuiService().getFx().playFX(0);
+                getFx().playFX(3);
+                if (selectedIndexY == 0) { return; }
+                String option = MenuRender.optionsTweaks[selectedIndexY];
+                getFx().playFX(0);
                 service.getGuiService().getMenuRender().toggleOption(option);
             }
             case BOARD -> keyboardMove();

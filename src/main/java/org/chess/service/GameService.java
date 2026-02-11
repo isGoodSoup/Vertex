@@ -14,9 +14,19 @@ public class GameService {
     private static BoardService boardService;
     private static Mouse mouse;
 
+    private static ServiceFactory service;
+
     public GameService(BoardService boardService, Mouse mouse) {
         GameService.boardService = boardService;
         GameService.mouse = mouse;
+    }
+
+    public static ServiceFactory getServiceFactory() {
+        return service;
+    }
+
+    public void setServiceFactory(ServiceFactory service) {
+        GameService.service = service;
     }
 
     public static GameState getState() {
@@ -45,7 +55,9 @@ public class GameService {
 
         for(int i = 0; i < MenuRender.optionsMode.length; i++) {
             int y = startY + i * spacing;
-            boolean isHovered = GUIService.getHITBOX(y).contains(mouse.getX(),
+            boolean isHovered =
+                    GUIService.getHITBOX(getServiceFactory().getGuiService()
+                            .getMenuRender().getOFFSET_X(), y).contains(mouse.getX(),
                     mouse.getY());
             if(isHovered) {
                 switch(i) {

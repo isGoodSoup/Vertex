@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class BooleanService {
     public static boolean canMove;
-    public static boolean validSquare;
+    public static boolean isValidSquare;
     public static boolean isDragging;
     public static boolean isLegal;
     public static boolean isAIPlaying;
@@ -17,22 +17,30 @@ public class BooleanService {
 
     public static boolean canUndoMoves;
     public static boolean canPromote;
-    public static boolean isTestingToggle;
-    public static boolean isChaosActive;
-    public static boolean isTrainingModeActive;
-    public static boolean isCastlingActive;
-    public static boolean isEnPassantActive;
-    public static boolean isTimerActive;
-    public static boolean isStopwatchActive;
+    public static boolean canContinue;
+    public static boolean canTick;
+    public static boolean canDoTest;
+    public static boolean canDoChaos;
+    public static boolean canTrain;
+    public static boolean canDoCastling;
+    public static boolean canDoEnPassant;
+    public static boolean canTime;
+    public static boolean canStopwatch;
+    public static boolean canResetTable;
+    public static boolean canBeColorblind;
 
     private static final Random random = new Random();
 
     public static void defaultToggles() {
-        isCastlingActive = true;
-        isEnPassantActive = true;
+        canDoCastling = true;
+        canDoEnPassant = true;
         canPromote = true;
+        canContinue = true;
+        canResetTable = true;
+        canStopwatch = true;
+        canTick = true;
         isGameOver = false;
-        isChaosActive = false;
+        canDoChaos = false;
     }
 
     public static boolean getBoolean() {

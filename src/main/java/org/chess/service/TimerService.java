@@ -26,13 +26,12 @@ public class TimerService {
     }
 
     public void update() {
-        if (!isActive) return;
-
+        if(!isActive) { return; }
         frames++;
-        if (frames >= 60) {
+        if(frames >= 60) {
             frames = 0;
             seconds++;
-            if (seconds >= 60) {
+            if(seconds >= 60) {
                 seconds = 0;
                 minutes++;
             }

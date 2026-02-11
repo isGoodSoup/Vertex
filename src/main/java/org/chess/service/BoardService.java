@@ -8,16 +8,14 @@ import org.chess.input.MoveManager;
 import org.chess.gui.Sound;
 import org.chess.records.Move;
 
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class BoardService {
     private static Piece[][] boardState;
     private final Board board;
     private final Sound fx;
     private final List<Move> moves;
+    private final Map<List<Integer>, List<Integer>> columns;
 
     private final PieceService pieceService;
     private final Mouse mouse;
@@ -40,6 +38,7 @@ public class BoardService {
         BoardService.manager = manager;
         boardState = new Piece[board.getROW()][board.getCOL()];
         this.moves = new ArrayList<>();
+        this.columns = new HashMap<>();
         precomputeSquares();
     }
 
@@ -67,6 +66,10 @@ public class BoardService {
         return moves;
     }
 
+    public Map<List<Integer>, List<Integer>> getColumns() {
+        return columns;
+    }
+
     private void precomputeSquares() {
         for(int row = 0; row < Objects.requireNonNull(board).getROW(); row++) {
             for(int col = 0; col < board.getCOL(); col++) {
@@ -87,21 +90,30 @@ public class BoardService {
 
     public void startBoard() {
         pieceService.getPieces().clear();
-        if(BooleanService.isTestingToggle) { setPiecesTest(); }
-        else if(BooleanService.isChaosActive) { setPiecesChaos(); }
-        else{ setPieces(); }
+        if(BooleanService.canDoTest) { setPiecesTest(); }
+        else if(BooleanService.canDoChaos) { setPiecesChaos(); }
+        else { setPieces(); }
         GameService.setCurrentTurn(Tint.WHITE);
         PieceService.nullThisPiece();
         GameService.setState(GameState.BOARD);
 
-        if(BooleanService.isStopwatchActive) {
-            BooleanService.isTimerActive = false;
+        if(BooleanService.canStopwatch) {
+            BooleanService.canTime = false;
+            getServiceFactory().getTimerService().reset();
             getServiceFactory().getTimerService().start();
         }
 
-        if(BooleanService.isTimerActive) {
-            BooleanService.isStopwatchActive = false;
+        if(BooleanService.canTime) {
+            BooleanService.canStopwatch = false;
+            getServiceFactory().getTimerService().reset();
             getServiceFactory().getTimerService().start();
+        }
+    }
+
+    public void resetBoard() {
+        if(BooleanService.canResetTable
+                && getServiceFactory().getKeyboard().wasRPressed()) {
+            startBoard();
         }
     }
 
@@ -133,36 +145,37 @@ public class BoardService {
     }
 
     public void setPiecesChaos() {
-        if(!BooleanService.isChaosActive) {
+        if(!BooleanService.canDoChaos) {
             return;
         }
 
         List<Piece> pieces = pieceService.getPieces();
+        columns.clear();
         pieces.clear();
         clearBoardState();
 
-        for(int col = 0; col < 8; col++) {
-            pieces.add(pieceService.getRandomPiece(Tint.WHITE, col, 6));
-            pieces.add(pieceService.getRandomPiece(Tint.BLACK, col, 1));
+        List<Integer> f = new ArrayList<>(List.of(0, 1, 2, 3, 4, 5, 6, 7));
+        List<Integer> b = new ArrayList<>(List.of(0, 1, 2, 3, 4, 5, 6, 7));
+        Collections.shuffle(f);
+        Collections.shuffle(b);
+        columns.put(f, b);
+
+        for(Map.Entry<List<Integer>, List<Integer>> entry :
+                columns.entrySet()) {
+            List<Integer> front = entry.getKey();
+            List<Integer> back = entry.getValue();
+
+            for(int col : front) {
+                pieces.add(pieceService.getRandomPiece(Tint.WHITE, col, 6));
+                pieces.add(pieceService.getRandomPiece(Tint.BLACK, col, 1));
+            }
+
+            for(int col : back) {
+                if(col == 4) { continue; }
+                pieces.add(pieceService.getRandomPiece(Tint.WHITE, col, 7));
+                pieces.add(pieceService.getRandomPiece(Tint.BLACK, col, 0));
+            }
         }
-
-        pieces.add(pieceService.getRandomPiece(Tint.WHITE, 0, 7));
-        pieces.add(pieceService.getRandomPiece(Tint.BLACK, 7, 7));
-        pieces.add(pieceService.getRandomPiece(Tint.WHITE, 0, 0));
-        pieces.add(pieceService.getRandomPiece(Tint.BLACK,7, 0));
-        pieces.add(pieceService.getRandomPiece(Tint.WHITE, 1, 7));
-        pieces.add(pieceService.getRandomPiece(Tint.BLACK,6, 7));
-        pieces.add(pieceService.getRandomPiece(Tint.WHITE, 1, 0));
-        pieces.add(pieceService.getRandomPiece(Tint.BLACK,6, 0));
-
-        pieces.add(pieceService.getRandomPiece(Tint.WHITE, 2, 7));
-        pieces.add(pieceService.getRandomPiece(Tint.BLACK,5, 7));
-        pieces.add(pieceService.getRandomPiece(Tint.WHITE, 2, 0));
-        pieces.add(pieceService.getRandomPiece(Tint.BLACK,5, 0));
-
-        pieces.add(pieceService.getRandomPiece(Tint.WHITE, 3, 7));
-        pieces.add(pieceService.getRandomPiece(Tint.BLACK,3, 0));
-
         pieces.add(new King(pieceService, Tint.WHITE, 4, 7));
         pieces.add(new King(pieceService, Tint.BLACK, 4, 0));
     }
@@ -202,7 +215,9 @@ public class BoardService {
         if(GameService.getState() != GameState.BOARD) { return; }
 
         if(BooleanService.isAIPlaying &&
-                GameService.getCurrentTurn() == Tint.BLACK) return;
+                GameService.getCurrentTurn() == Tint.BLACK) {
+            return;
+        }
 
         manager.pickUpPiece(currentPiece, hoverCol, hoverRow);
     }

@@ -3,9 +3,6 @@ package org.chess.service;
 import org.chess.input.Keyboard;
 import org.chess.input.Mouse;
 import org.chess.input.MoveManager;
-import org.chess.render.MenuRender;
-
-import java.util.Timer;
 
 public class ServiceFactory {
     private final PieceService piece;
@@ -34,6 +31,7 @@ public class ServiceFactory {
         this.board.setServiceFactory(this);
         this.model.setBoardService(board);
         this.gs = new GameService(board, mouse);
+        this.gs.setServiceFactory(this);
         this.timer = new TimerService();
         this.gui = new GUIService(piece, board, gs, promotion,
                 model, manager, timer, mouse);

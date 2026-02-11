@@ -46,19 +46,6 @@ public class BoardRender {
         Piece selectedPiece = pieceService.getMoveManager() != null
                 ? pieceService.getMoveManager().getSelectedPiece() : null;
 
-        if(selectedPiece != null && !BooleanService.isDragging) {
-            boolean legal = selectedPiece.canMove(
-                    pieceService.getHoveredSquareX(),
-                    pieceService.getHoveredSquareY(),
-                    pieceService.getPieces()
-            ) && !pieceService.wouldLeaveKingInCheck(
-                    selectedPiece,
-                    pieceService.getHoveredSquareX(),
-                    pieceService.getHoveredSquareY()
-            );
-            guiService.drawTick(g2, selectedPiece, legal);
-        }
-
         for(Piece p : pieceService.getPieces()) {
             if(p != currentPiece) {
                 BufferedImage img = (p == hoveredPiece) ? hoveredPiece.getHovered() : p.getImage();
@@ -66,15 +53,15 @@ public class BoardRender {
             }
         }
 
+        if(selectedPiece != null && !BooleanService.isDragging) {
+            guiService.drawTick(g2, BooleanService.isLegal);
+        }
+
         if(currentPiece != null) {
             if(!BooleanService.isDragging) {
                 currentPiece.setScale(currentPiece.getDEFAULT_SCALE());
             }
             drawPiece(g2, currentPiece);
-        }
-
-        if(currentPiece != null && BooleanService.isDragging) {
-            guiService.drawTick(g2, currentPiece, BooleanService.isLegal);
         }
     }
 

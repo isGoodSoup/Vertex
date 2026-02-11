@@ -20,8 +20,10 @@ public class GUIService {
     private static final int MENU_START_Y = 80;
     private static final int MENU_FONT = 32;
     private static final int EXTRA_WIDTH = 150;
+    private static final int LEFT_PANEL_CENTER_X = EXTRA_WIDTH/2;
     private static final int GRAPHICS_OFFSET = EXTRA_WIDTH/2;
     private static final int MOVES_CAP = 14;
+    private final int TIMER_Y;
     private static Color background;
     private static Color foreground;
 
@@ -83,6 +85,7 @@ public class GUIService {
             System.err.println(e.getMessage());
             font = new Font("Helvetica", Font.BOLD, 30);
         }
+        TIMER_Y = 475;
     }
 
     public static int getWIDTH() {
@@ -178,27 +181,27 @@ public class GUIService {
                 getClass().getResourceAsStream(path + ".png")));
     }
 
-    public void drawTick(Graphics2D g2, Piece piece, boolean isLegal) {
-        int size = (int) (Board.getSquare() * piece.getScale());
+    public void drawTick(Graphics2D g2, boolean isLegal) {
+        if(!BooleanService.canTick) { return; }
+        FontMetrics fm = g2.getFontMetrics(GUIService.getFont(24));
         BufferedImage image = isLegal ? YES : NO;
-        g2.drawImage(image, piece.getX() + getEXTRA_WIDTH() - 25,
-                piece.getY() - 15, size, size, null);
+        int size = Board.getSquare();
+        int x = LEFT_PANEL_CENTER_X - size/2;
+        int y = TIMER_Y - fm.getAscent() - size - 5;
+        g2.drawImage(image, x, y, size, size, null);
     }
 
-    public static Rectangle getHITBOX(int y) {
-        Rectangle hitbox = new Rectangle(
-                getWIDTH()/2 - 100 + GRAPHICS_OFFSET,
-                y - 30,
-                200,
-                40
-        );
-        return hitbox;
+    public static Rectangle getHITBOX(int x, int y) {
+        return new Rectangle(x, y, 200, 40);
     }
 
     public void drawTimer(Graphics2D g2) {
         g2.setFont(GUIService.getFont(24));
         g2.setColor(foreground);
-        g2.drawString(timerService.getTimeString(),
-                getEXTRA_WIDTH()/3.75f, 475);
+        FontMetrics fm = g2.getFontMetrics();
+        String time = timerService.getTimeString();
+        int textWidth = fm.stringWidth(time);
+        int x = LEFT_PANEL_CENTER_X - textWidth/2;
+        g2.drawString(timerService.getTimeString(), x, TIMER_Y);
     }
 }

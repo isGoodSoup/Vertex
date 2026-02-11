@@ -1,7 +1,6 @@
 package org.chess.render;
 
 import org.chess.entities.Board;
-import org.chess.enums.GameState;
 import org.chess.input.Mouse;
 import org.chess.input.MoveManager;
 import org.chess.service.*;
@@ -11,20 +10,24 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class MenuRender {
-    public static final String[] optionsMenu = { "PLAY AGAINST", "RULES",
-            "EXIT" };
+    public static final String[] optionsMenu = { "PLAY AGAINST", "RULES", "EXIT" };
     public static final String[] optionsMode = { "PLAYER", "AI" };
-    public static final String[] optionsTweaks = { "RULES", "Undo Moves",
-            "Promotion", "Training Mode", "Chaos Mode",
-            "Timer", "Stopwatch", "Testing", "Castling",
-            "En Passant"};
+    public static final String[] optionsTweaks = { "RULES",
+            "Promotion", "Protanopia", "Training Mode", "Continue", "Tick",
+            "Castling",
+            "En Passant", "Timer", "Stopwatch", "Chaos Mode", "Testing",
+            "Undo Moves", "Reset Table"};
     private static final String ENABLE = "Enable ";
+    private static final int OPTION_X = 100;
+    private static final int OPTION_Y = 80;
     private final BufferedImage TOGGLE_ON;
     private final BufferedImage TOGGLE_OFF;
     private final BufferedImage TOGGLE_ON_HIGHLIGHTED;
     private final BufferedImage TOGGLE_OFF_HIGHLIGHTED;
     private int lastHoveredIndex = -1;
+    private final int OFFSET_X;
     private FontMetrics fontMetrics;
+    private int currentPage = 1;
 
     private final GameService gameService;
     private final BoardService boardService;
@@ -49,6 +52,12 @@ public class MenuRender {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        OFFSET_X = GUIService.getWIDTH()/2 - 100
+                + GUIService.getGRAPHICS_OFFSET() - 30;
+    }
+
+    public int getOFFSET_X() {
+        return OFFSET_X;
     }
 
     private int getOptionsStartY() {
@@ -57,36 +66,44 @@ public class MenuRender {
 
     private boolean getOptionState(String option) {
         return switch(option) {
-            case "Undo Moves" -> BooleanService.canUndoMoves;
             case "Promotion" -> BooleanService.canPromote;
-            case "Training Mode" -> BooleanService.isTrainingModeActive;
-            case "Chaos Mode" -> BooleanService.isChaosActive;
-            case "Timer" -> BooleanService.isTimerActive;
-            case "Stopwatch" -> BooleanService.isStopwatchActive;
-            case "Testing" -> BooleanService.isTestingToggle;
-            case "Castling" -> BooleanService.isCastlingActive;
-            case "En Passant" -> BooleanService.isEnPassantActive;
+            case "Protanopia" -> BooleanService.canBeColorblind;
+            case "Training Mode" -> BooleanService.canTrain;
+            case "Continue" -> BooleanService.canContinue;
+            case "Tick" -> BooleanService.canTick;
+            case "Castling" -> BooleanService.canDoCastling;
+            case "En Passant" -> BooleanService.canDoEnPassant;
+            case "Timer" -> BooleanService.canTime;
+            case "Stopwatch" -> BooleanService.canStopwatch;
+            case "Testing" -> BooleanService.canDoTest;
+            case "Chaos Mode" -> BooleanService.canDoChaos;
+            case "Undo Moves" -> BooleanService.canUndoMoves;
+            case "Reset Table" -> BooleanService.canResetTable;
             default -> false;
         };
     }
 
     public void toggleOption(String option) {
         switch(option) {
-            case "Undo Moves" -> BooleanService.canUndoMoves ^= true;
             case "Promotion" -> BooleanService.canPromote ^= true;
-            case "Training Mode" -> BooleanService.isTrainingModeActive ^= true;
-            case "Chaos Mode" -> BooleanService.isChaosActive ^= true;
+            case "Protanopia" -> BooleanService.canBeColorblind ^= true;
+            case "Training Mode" -> BooleanService.canTrain ^= true;
+            case "Continue" -> BooleanService.canContinue ^= true;
+            case "Tick" -> BooleanService.canTick ^= true;
+            case "Castling" -> BooleanService.canDoCastling ^= true;
+            case "En Passant" -> BooleanService.canDoEnPassant ^= true;
             case "Timer" -> {
-                BooleanService.isTimerActive ^= true;
-                BooleanService.isStopwatchActive = false;
+                BooleanService.canTime ^= true;
+                BooleanService.canStopwatch = false;
             }
             case "Stopwatch" -> {
-                BooleanService.isStopwatchActive ^= true;
-                BooleanService.isTimerActive = false;
+                BooleanService.canStopwatch ^= true;
+                BooleanService.canTime = false;
             }
-            case "Testing" -> BooleanService.isTestingToggle ^= true;
-            case "Castling" -> BooleanService.isCastlingActive ^= true;
-            case "En Passant" -> BooleanService.isEnPassantActive ^= true;
+            case "Testing" -> BooleanService.canDoTest ^= true;
+            case "Chaos Mode" -> BooleanService.canDoChaos ^= true;
+            case "Undo Moves" -> BooleanService.canUndoMoves ^= true;
+            case "Reset Table" -> BooleanService.canResetTable ^= true;
         }
     }
 
@@ -127,8 +144,10 @@ public class MenuRender {
             int x = (GUIService.getWIDTH() - textWidth)/2;
             int y = startY + i * spacing;
 
-            boolean isHovered = GUIService.getHITBOX(y).contains(mouse.getX(), mouse.getY());
-            boolean isSelected = (i == moveManager.getSelectedIndex());
+            boolean isHovered =
+                    GUIService.getHITBOX(OFFSET_X, y).contains(mouse.getX(),
+                            mouse.getY());
+            boolean isSelected = (i == moveManager.getSelectedIndexY());
 
             g2.setColor(isSelected ? Color.YELLOW : isHovered ? Color.WHITE : GUIService.getNewForeground());
             g2.drawString(options[i], x + GUIService.getGRAPHICS_OFFSET(), y);
@@ -142,48 +161,61 @@ public class MenuRender {
 
     public void drawOptionsMenu(Graphics2D g2, String[] options) {
         g2.setFont(GUIService.getFont(32));
+        updatePage();
         fontMetrics = g2.getFontMetrics();
         g2.setColor(GUIService.getNewForeground());
         int textWidth = fontMetrics.stringWidth(options[0]);
         int boardWidth = Board.getSquare() * 8;
         int totalWidth = boardWidth + 2 * GUIService.getEXTRA_WIDTH();
         int centerX = totalWidth/2;
-        int headerTextWidth = g2.getFontMetrics().stringWidth(options[0]);
-        int y = 60;
-        g2.drawString(options[0], centerX - headerTextWidth/2, y);
+        int headerTextWidth = fontMetrics.stringWidth(options[0]);
+        int y = OPTION_Y;
 
-        int lineHeight = g2.getFontMetrics().getHeight() + 6;
+        int itemsPerPage = 8;
+        int numberOfToggles = options.length - 1;
+        int totalPages = (numberOfToggles + itemsPerPage - 1) / itemsPerPage;
+        String pageText = "< " + currentPage + "/" + totalPages + " >";
+        int pageTextWidth = fontMetrics.stringWidth(pageText);
+        int pageY = y + fontMetrics.getHeight() + 350;
+
+        g2.drawString(options[0], centerX - headerTextWidth/2, y);
+        g2.drawString(pageText, centerX - pageTextWidth/2, pageY);
+
+        int lineHeight = fontMetrics.getHeight() + 4;
         y += lineHeight;
 
+        int startIndex = (currentPage - 1) * itemsPerPage + 1;
+        int endIndex = Math.min(startIndex + itemsPerPage, options.length);
+
         String enabledOption = "";
-        for (int i = 1; i < options.length; i++) {
-            boolean isHovered = GUIService.getHITBOX(y).contains(mouse.getX(),
-                    mouse.getY());
+        for(int i = startIndex; i < endIndex; i++) {
+            enabledOption = ENABLE + options[i];
 
-            if(i == options.length - 1) {
-                enabledOption = options[i];
-            } else {
-                enabledOption = ENABLE + options[i];
-            }
-
-            int optionWidth = g2.getFontMetrics().stringWidth(enabledOption);
-            int x = 100;
+            int optionWidth = fontMetrics.stringWidth(enabledOption);
+            int x = OPTION_X;
 
             g2.setFont(GUIService.getFontBold(24));
             int toggleWidth = TOGGLE_ON.getWidth()/2;
             int toggleHeight = TOGGLE_ON.getHeight()/2;
             int toggleX = centerX + 200;
             int toggleY = y - toggleHeight + 16;
+            boolean isHovered = GUIService.getHITBOX(OFFSET_X, y).contains(mouse.getX(),
+                            mouse.getY());
+            boolean isSelected = (i == moveManager.getSelectedIndexY());
             boolean isEnabled = getOptionState(options[i]);
-            boolean isSelected = (i == moveManager.getSelectedIndex());
 
-            g2.setColor(isSelected ? Color.YELLOW : isHovered ? Color.WHITE
-                    : GUIService.getNewForeground());
+            if(moveManager.getSelectedIndexY() > options.length
+                    || moveManager.getSelectedIndexY() < 0) {
+                moveManager.setSelectedIndexY(0);
+            }
+
+            g2.setColor(GUIService.getNewForeground());
             g2.drawString(enabledOption, x, y);
 
             BufferedImage toggleImage = isEnabled
-                    ? (isSelected ? TOGGLE_ON_HIGHLIGHTED : TOGGLE_ON)
-                    : (isSelected ? TOGGLE_OFF_HIGHLIGHTED : TOGGLE_OFF);
+                    ? (isSelected || isHovered ? TOGGLE_ON_HIGHLIGHTED : TOGGLE_ON)
+                    : (isSelected || isHovered ? TOGGLE_OFF_HIGHLIGHTED :
+                    TOGGLE_OFF);
 
             drawToggle(g2, toggleImage, toggleX, toggleY,
                     toggleWidth, toggleHeight);
@@ -191,39 +223,64 @@ public class MenuRender {
         }
     }
 
+    private boolean updatePage() {
+        int itemsPerPage = 8;
+        int selectedX = moveManager.getSelectedIndexX();
+        int totalPages = (optionsTweaks.length - 1 + itemsPerPage - 1) / itemsPerPage;
+        int newPage = Math.max(1, Math.min(selectedX, totalPages));
+        if(newPage != currentPage) {
+            currentPage = newPage;
+            moveManager.setSelectedIndexY(0);
+            return true;
+        }
+        return false;
+    }
+
+    public void previousPage() {
+        int selectedX = moveManager.getSelectedIndexX();
+        if (selectedX > 1) moveManager.setSelectedIndexX(selectedX - 1);
+        updatePage();
+    }
+
+    public void nextPage() {
+        int selectedX = moveManager.getSelectedIndexX();
+        int itemsPerPage = 8;
+        int totalPages = (optionsTweaks.length - 1 + itemsPerPage - 1) / itemsPerPage;
+
+        if (selectedX < totalPages) moveManager.setSelectedIndexX(selectedX + 1);
+        updatePage();
+    }
+
     public void handleOptionsInput() {
         if(!mouse.wasPressed()) { return; }
-        int y = 100 + GUIService.getFontBold(32).getSize() + 16;
-        int lineHeight = GUIService.getFontBold(32).getSize() + 8;
+
+        int lineHeight = fontMetrics.getHeight() + 4;
+        int y = OPTION_Y + lineHeight;
 
         int boardWidth = Board.getSquare() * 8;
         int totalWidth = boardWidth + 2 * GUIService.getEXTRA_WIDTH();
-        int centerX = totalWidth/2;
-
-        int toggleWidth = TOGGLE_ON.getWidth()/2;
-        int toggleHeight = TOGGLE_ON.getHeight()/2;
+        int centerX = totalWidth / 2;
+        int toggleWidth = TOGGLE_ON.getWidth() / 2;
+        int toggleHeight = TOGGLE_ON.getHeight() / 2;
         int toggleX = centerX + 200;
 
         for (int i = 1; i < optionsTweaks.length; i++) {
             String option = optionsTweaks[i];
+            String enabledOption = ENABLE + option;
+            int textX = OPTION_X;
+            int textY = y;
+            int textWidth = fontMetrics.stringWidth(enabledOption);
 
-            Rectangle textHitbox = GUIService.getHITBOX(y);
             Rectangle toggleHitbox = new Rectangle(
                     toggleX,
-                    y - toggleHeight + 8,
+                    textY - toggleHeight + 16,
                     toggleWidth,
                     toggleHeight
             );
 
-            boolean clickedText = textHitbox.contains(mouse.getX(), mouse.getY());
-            boolean clickedToggle = toggleHitbox.contains(mouse.getX(), mouse.getY());
-            if(clickedText || clickedToggle) {
+            if (toggleHitbox.contains(mouse.getX(), mouse.getY())) {
                 guiService.getFx().play(0);
-                if(option.equals("Back")) {
-                    GameService.setState(GameState.MENU);
-                } else {
-                    toggleOption(option);
-                }
+                toggleOption(option);
                 break;
             }
             y += lineHeight;
@@ -238,7 +295,9 @@ public class MenuRender {
 
         for(int i = 0; i < optionsMenu.length; i++) {
             int y = startY + i * spacing;
-            boolean isHovered = GUIService.getHITBOX(y).contains(mouse.getX(), mouse.getY());
+            boolean isHovered =
+                    GUIService.getHITBOX(OFFSET_X, y).contains(mouse.getX(),
+                            mouse.getY());
 
             if(isHovered) {
                 guiService.getFx().play(0);
