@@ -350,13 +350,6 @@ public class MoveManager {
                         selectedPiece, moveX, moveY);
     }
 
-    public void moveUp(List<Achievement> achievements) {
-        selectedIndexY--;
-        if(selectedIndexY < 0) selectedIndexY = 0;
-        int achievementPage = selectedIndexY/ITEMS_PER_PAGE + 1;
-        getFx().playFX(BooleanService.getRandom(1, 2));
-    }
-
     public void moveUp(String[] options) {
         selectedIndexY--;
         getFx().playFX(BooleanService.getRandom(1, 2));
@@ -375,12 +368,8 @@ public class MoveManager {
     }
 
     public void moveLeft(String[] options) {
-        selectedIndexX--;
-        service.getRender().getMenuRender().getMenuInput().previousPage(options);
+        service.getRender().getMenuRender().getMenuInput().previousPage();
         getFx().playFX(4);
-        if(selectedIndexX >= options.length) {
-            selectedIndexX = 0;
-        }
     }
 
     public void moveLeft() {
@@ -399,13 +388,6 @@ public class MoveManager {
         }
     }
 
-    public void moveDown(List<Achievement> achievements) {
-        selectedIndexY++;
-        if(selectedIndexY >= achievements.size()) selectedIndexY = achievements.size() - 1;
-        int achievementPage = selectedIndexY / ITEMS_PER_PAGE + 1;
-        getFx().playFX(BooleanService.getRandom(1, 2));
-    }
-
     public void moveDown() {
         GameState state = GameService.getState();
         if(state == GameState.BOARD) {
@@ -416,12 +398,8 @@ public class MoveManager {
     }
 
     public void moveRight(String[] options) {
-        selectedIndexX++;
         service.getRender().getMenuRender().getMenuInput().nextPage(options);
         getFx().playFX(4);
-        if(selectedIndexX >= options.length) {
-            selectedIndexX = 0;
-        }
     }
 
     public void moveRight() {

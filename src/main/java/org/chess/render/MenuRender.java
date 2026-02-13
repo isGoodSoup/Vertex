@@ -56,7 +56,7 @@ public class MenuRender {
     private int scrollOffset = 0;
     private static int totalWidth;
     private static FontMetrics fm;
-    public int currentPage = 1;
+    private int currentPage = 1;
 
     private static RenderContext render;
     private GameService gameService;
@@ -296,7 +296,6 @@ public class MenuRender {
         g2.setColor(Colorblindness.filter(Colors.BACKGROUND));
         g2.fillRect(0, 0, getTotalWidth(), render.scale(RenderContext.BASE_HEIGHT));
 
-        menuInput.updatePage();
         g2.setFont(GUIService.getFontBold(GUIService.getMENU_FONT()));
         fm = g2.getFontMetrics();
 
@@ -396,9 +395,9 @@ public class MenuRender {
         int x = getCenterX(getTotalWidth(), width);
         boolean hasBackground = true;
 
-        int visibleItems = MoveManager.getITEMS_PER_PAGE();
-        int start = scrollOffset;
-        int end = Math.min(start + visibleItems, list.size());
+        int itemsPerPage = MoveManager.getITEMS_PER_PAGE();
+        int start = (currentPage - 1) * itemsPerPage;
+        int end = Math.min(start + itemsPerPage, list.size());
 
         BufferedImage img = null;
         for (int i = start; i < end; i++) {
@@ -407,8 +406,7 @@ public class MenuRender {
                     x, startY, width, height
             );
 
-            boolean isHovered = (i == moveManager.getSelectedIndexY()) ||
-                    hitbox.contains(mouse.getX(), mouse.getY());
+            boolean isHovered = hitbox.contains(mouse.getX(), mouse.getY());
 
             int textX = x + render.scale(110);
             int titleY = startY + render.scale(60);
