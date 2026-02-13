@@ -15,11 +15,11 @@ public class King extends Piece {
 		this.id = Type.KING;
 		this.pieceService = pieceService;
 		if(color == Tint.WHITE) {
-			sprite = PieceService.getImage("/pieces/king");
-			hovered = PieceService.getImage("/pieces/king-h");
+			sprite = PieceService.getImage("/pieces/king_white");
+			hovered = PieceService.getImage("/pieces/king_whiteh");
 		} else {
-			sprite = PieceService.getImage("/pieces/king-b");
-			hovered = PieceService.getImage("/pieces/king-bh");
+			sprite = PieceService.getImage("/pieces/king_black");
+			hovered = PieceService.getImage("/pieces/king_blackh");
 		}
 	}
 

@@ -12,11 +12,11 @@ public class Bishop extends Piece {
 		super(color, col, row);
 		this.id = Type.BISHOP;
 		if(color == Tint.WHITE) {
-			sprite = PieceService.getImage("/pieces/bishop");
-			hovered = PieceService.getImage("/pieces/bishop-h");
+			sprite = PieceService.getImage("/pieces/bishop_white");
+			hovered = PieceService.getImage("/pieces/bishop_whiteh");
 		} else {
-			sprite = PieceService.getImage("/pieces/bishop-b");
-			hovered = PieceService.getImage("/pieces/bishop-bh");
+			sprite = PieceService.getImage("/pieces/bishop_black");
+			hovered = PieceService.getImage("/pieces/bishop_blackh");
 		}
 	}
 

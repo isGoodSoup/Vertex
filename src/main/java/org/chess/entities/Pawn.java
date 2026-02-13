@@ -12,11 +12,11 @@ public class Pawn extends Piece {
 		super(color, col, row);
 		this.id = Type.PAWN;
 		if(color == Tint.WHITE) {
-			sprite = PieceService.getImage("/pieces/pawn");
-			hovered = PieceService.getImage("/pieces/pawn-h");
+			sprite = PieceService.getImage("/pieces/pawn_white");
+			hovered = PieceService.getImage("/pieces/pawn_whiteh");
 		} else {
-			sprite = PieceService.getImage("/pieces/pawn-b");
-			hovered = PieceService.getImage("/pieces/pawn-bh");
+			sprite = PieceService.getImage("/pieces/pawn_black");
+			hovered = PieceService.getImage("/pieces/pawn_blackh");
 		}
 	}
 
