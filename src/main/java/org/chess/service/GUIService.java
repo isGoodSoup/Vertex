@@ -4,7 +4,7 @@ import org.chess.entities.*;
 import org.chess.gui.Colors;
 import org.chess.input.Mouse;
 import org.chess.gui.Sound;
-import org.chess.input.MoveManager;
+import org.chess.manager.MovesManager;
 import org.chess.render.*;
 
 import javax.imageio.ImageIO;
@@ -28,8 +28,8 @@ public class GUIService {
 
     private static BufferedImage logo;
     private static BufferedImage logo_v2;
-    private final BufferedImage YES;
-    private final BufferedImage NO;
+    private final transient BufferedImage YES;
+    private final transient BufferedImage NO;
 
     private final PieceService pieceService;
     private final BoardService boardService;
@@ -44,7 +44,7 @@ public class GUIService {
                       GameService gameService,
                       PromotionService promotionService,
                       ModelService modelService,
-                      MoveManager moveManager, TimerService timerService,
+                      MovesManager movesManager, TimerService timerService,
                       Mouse mouse) {
         this.render = render;
         this.pieceService = pieceService;

@@ -71,6 +71,7 @@ public class Keyboard implements KeyListener {
     public boolean isControlDown() { return isKeyDown(KeyEvent.VK_CONTROL); }
     public boolean isZDown() { return isKeyDown(KeyEvent.VK_Z); }
     public boolean isBDown() { return isKeyDown(KeyEvent.VK_B); }
+    public boolean isDDown() { return isKeyDown(KeyEvent.VK_D); }
     public boolean isRDown() { return isKeyDown(KeyEvent.VK_R); }
     public boolean isQDown() { return isKeyDown(KeyEvent.VK_Q); }
     public boolean isOneDown() { return isKeyDown(KeyEvent.VK_1); }

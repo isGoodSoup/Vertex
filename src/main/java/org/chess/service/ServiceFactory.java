@@ -2,7 +2,8 @@ package org.chess.service;
 
 import org.chess.input.Keyboard;
 import org.chess.input.Mouse;
-import org.chess.input.MoveManager;
+import org.chess.manager.MovesManager;
+import org.chess.manager.SaveManager;
 import org.chess.render.RenderContext;
 
 public class ServiceFactory {
@@ -14,7 +15,8 @@ public class ServiceFactory {
     private final GUIService gui;
     private final GameService gs;
     private final PromotionService promotion;
-    private final MoveManager manager;
+    private final MovesManager movesManager;
+    private final SaveManager saveManager;
     private final ModelService model;
     private final AnimationService animation;
     private final TimerService timer;
@@ -28,17 +30,21 @@ public class ServiceFactory {
         this.piece = new PieceService(mouse);
         this.promotion = new PromotionService(piece, mouse);
         this.model = new ModelService(piece, animation, promotion);
-        this.manager = new MoveManager();
-        this.piece.setMoveManager(manager);
+        this.movesManager = new MovesManager();
+        this.piece.setMoveManager(movesManager);
+        this.render.setMovesManager(movesManager);
         this.board = new BoardService(piece, mouse, promotion,
-                model, manager);
+                model, movesManager);
+        this.piece.setBoardService(board);
         this.board.setServiceFactory(this);
         this.model.setBoardService(board);
         this.gs = new GameService(render, board, mouse);
+        this.saveManager = new SaveManager();
         this.gs.setServiceFactory(this);
+        this.gs.setSaveManager(saveManager);
         this.timer = new TimerService();
         this.gui = new GUIService(render, piece, board, gs, promotion,
-                model, manager, timer, mouse);
+                model, movesManager, timer, mouse);
         this.achievement = new AchievementService();
         this.render.getBoardRender().setBoardService(board);
         this.render.getBoardRender().setPieceService(piece);
@@ -47,11 +53,12 @@ public class ServiceFactory {
         this.render.getMenuRender().setBoardService(board);
         this.render.getMenuRender().setGuiService(gui);
         this.render.getMenuRender().setGameService(gs);
-        this.render.getMenuRender().setMoveManager(manager);
+        this.render.getMenuRender().setMoveManager(movesManager);
         this.render.getMenuRender().setMouse(mouse);
         this.render.getMovesRender().setBoardService(board);
         this.render.getMovesRender().setGuiService(gui);
-        this.manager.init(this);
+        this.render.getMovesRender().setMovesManager(movesManager);
+        this.movesManager.init(this);
         this.render.getMenuRender().init();
     }
 
@@ -83,8 +90,12 @@ public class ServiceFactory {
         return promotion;
     }
 
-    public MoveManager getManager() {
-        return manager;
+    public MovesManager getMovesManager() {
+        return movesManager;
+    }
+
+    public SaveManager getSaveManager() {
+        return saveManager;
     }
 
     public ModelService getModelService() {

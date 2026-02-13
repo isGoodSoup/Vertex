@@ -1,5 +1,5 @@
 package org.chess.enums;
 
 public enum GameState {
-    MENU, BOARD, MODE, RULES, ACHIEVEMENTS
+    MENU, SAVES, BOARD, RULES, ACHIEVEMENTS
 }

@@ -8,17 +8,17 @@ import org.chess.service.PieceService;
 import java.util.List;
 
 public class King extends Piece {
-	private final PieceService pieceService;
+	private transient PieceService pieceService;
 
 	public King(PieceService pieceService, Tint color, int col, int row) {
 		super(color, col, row);
 		this.id = Type.KING;
 		this.pieceService = pieceService;
 		if(color == Tint.WHITE) {
-			image = PieceService.getImage("/pieces/king");
+			sprite = PieceService.getImage("/pieces/king");
 			hovered = PieceService.getImage("/pieces/king-h");
 		} else {
-			image = PieceService.getImage("/pieces/king-b");
+			sprite = PieceService.getImage("/pieces/king-b");
 			hovered = PieceService.getImage("/pieces/king-bh");
 		}
 	}
@@ -61,5 +61,9 @@ public class King extends Piece {
 		King p = new King(pieceService, getColor(), getCol(), getRow());
 		p.setHasMoved(hasMoved());
 		return p;
+	}
+
+	public void setPieceService(PieceService pieceService) {
+		this.pieceService = pieceService;
 	}
 }

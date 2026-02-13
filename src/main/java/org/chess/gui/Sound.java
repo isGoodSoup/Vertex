@@ -7,9 +7,9 @@ import javax.sound.sampled.FloatControl;
 import java.net.URL;
 
 public class Sound {
-    private final Clip[] clips = new Clip[30];
-    private final URL[] soundURL = new URL[30];
-    private final FloatControl[] controls = new FloatControl[30];
+    private final transient Clip[] clips = new Clip[30];
+    private final transient URL[] soundURL = new URL[30];
+    private final transient FloatControl[] controls = new FloatControl[30];
     private int volumeScale = 3;
     private float volume;
 

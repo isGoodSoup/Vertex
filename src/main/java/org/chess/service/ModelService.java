@@ -114,7 +114,7 @@ public class ModelService {
             animationService.startMove(p, move.targetCol(), move.targetRow());
         }
 
-        BoardService.getManager()
+        BoardService.getMovesManager()
                 .attemptMove(p, move.targetCol(), move.targetRow());
 
         PieceService.nullThisPiece();

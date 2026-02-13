@@ -9,7 +9,6 @@ public class BooleanService {
     public static boolean canMove;
     public static boolean isValidSquare;
     public static boolean isLegal;
-    public static boolean isAIPlaying;
     public static boolean isGameOver;
     public static boolean isPromotionPending;
     public static boolean isTurn;
@@ -21,7 +20,8 @@ public class BooleanService {
     public static boolean canUndoMoves;
     public static boolean canDoAchievements;
     public static boolean canPromote;
-    public static boolean canContinue;
+    public static boolean canSave;
+    public static boolean canAIPlay;
     public static boolean canSandbox;
     public static boolean canDoChaos;
     public static boolean canDoCastling;
@@ -49,12 +49,13 @@ public class BooleanService {
     private static final Random random = new Random();
 
     public static void defaultToggles() {
+        canAIPlay = true;
         isFullscreen = true;
         isDarkMode = false;
         canDoCastling = true;
         canDoEnPassant = true;
         canPromote = true;
-        canContinue = true;
+        canSave = true;
         canResetTable = true;
         canStopwatch = true;
         isGameOver = false;

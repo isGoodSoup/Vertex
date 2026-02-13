@@ -4,8 +4,12 @@ import org.chess.enums.GameState;
 import org.chess.enums.PlayState;
 import org.chess.enums.Tint;
 import org.chess.input.Mouse;
-import org.chess.render.MenuRender;
+import org.chess.manager.SaveManager;
+import org.chess.records.Save;
 import org.chess.render.RenderContext;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class GameService {
     private static GameState state;
@@ -18,11 +22,21 @@ public class GameService {
 
     private static ServiceFactory service;
 
+    public static SaveManager saveManager;
+
     public GameService(RenderContext render, BoardService boardService,
                        Mouse mouse) {
         GameService.render = render;
         GameService.boardService = boardService;
         GameService.mouse = mouse;
+    }
+
+    public SaveManager getSaveManager() {
+        return saveManager;
+    }
+
+    public void setSaveManager(SaveManager saveManager) {
+        GameService.saveManager = saveManager;
     }
 
     public static ServiceFactory getServiceFactory() {
@@ -58,7 +72,39 @@ public class GameService {
     }
 
     public void startNewGame() {
-        setState(GameState.MODE);
+        Save currentSave = service.getSaveManager().getCurrentSave();
+        setCurrentTurn(Tint.WHITE);
+        service.getMovesManager().setMoves(new ArrayList<>());
+        BooleanService.isGameOver = false;
+        BooleanService.isPromotionPending = false;
+        service.getBoardService().startBoard();
+        setState(GameState.BOARD);
+
+        if(currentSave == null) {
+            Save newSave = new Save(
+                    LocalDate.now().toString(),
+                    getCurrentTurn(),
+                    service.getPieceService().getPieces()
+            );
+            service.getSaveManager().setCurrentSave(newSave);
+            service.getSaveManager().saveGame(newSave);
+        } else {
+            service.getSaveManager().saveGame(currentSave);
+        }
+    }
+
+    public void continueGame(String saveName) {
+        Save loaded = saveManager.loadGame(saveName);
+        if (loaded != null) {
+            boardService.restoreSprites(loaded, service.getGuiService());
+            service.getPieceService().getPieces().clear();
+            service.getPieceService().getPieces().addAll(loaded.pieces());
+            setCurrentTurn(loaded.player());
+            System.out.println("Loaded save: " + saveName);
+        } else {
+            System.err.println("Failed to load save: " + saveName);
+        }
+        GameService.setState(GameState.BOARD);
     }
 
     public void optionsMenu() {
@@ -66,6 +112,10 @@ public class GameService {
     }
 
     public void achievementsMenu() {
-        setState((GameState.ACHIEVEMENTS));
+        setState(GameState.ACHIEVEMENTS);
+    }
+
+    public void loadSaves() {
+        setState(GameState.SAVES);
     }
 }

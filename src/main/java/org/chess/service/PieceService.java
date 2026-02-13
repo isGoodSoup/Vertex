@@ -4,7 +4,7 @@ import org.chess.entities.*;
 import org.chess.enums.Tint;
 import org.chess.enums.Type;
 import org.chess.input.Mouse;
-import org.chess.input.MoveManager;
+import org.chess.manager.MovesManager;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -23,7 +23,8 @@ public class PieceService {
     private int hoveredSquareX = -1;
     private int hoveredSquareY = -1;
 
-    private MoveManager moveManager;
+    private MovesManager movesManager;
+    private static BoardService boardService;
     private final Mouse mouse;
 
     public PieceService(Mouse mouse) {
@@ -31,17 +32,25 @@ public class PieceService {
         pieces = new ArrayList<>();
     }
 
-    public MoveManager getMoveManager() {
-        return moveManager;
+    public BoardService getBoardService() {
+        return boardService;
     }
 
-    public void setMoveManager(MoveManager moveManager) {
-        this.moveManager = moveManager;
+    public void setBoardService(BoardService boardService) {
+        PieceService.boardService = boardService;
+    }
+
+    public MovesManager getMoveManager() {
+        return movesManager;
+    }
+
+    public void setMoveManager(MovesManager movesManager) {
+        this.movesManager = movesManager;
     }
 
     public Piece getHeldPiece() {
         return PieceService.getPiece() != null ? PieceService.getPiece()
-                : moveManager.getSelectedPiece();
+                : movesManager.getSelectedPiece();
     }
 
     public static Piece getPiece() {
@@ -167,9 +176,9 @@ public class PieceService {
     }
 
     public static void movePiece(Piece p, int newCol, int newRow) {
-        String oldPos = BoardService.getSquareName(p.getPreCol(),
+        String oldPos = boardService.getSquareNameAt(p.getPreCol(),
                 p.getPreRow());
-        String newPos = BoardService.getSquareName(newCol, newRow);
+        String newPos = boardService.getSquareNameAt(newCol, newRow);
 
         BoardService.getBoardState()[p.getCol()][p.getRow()] = null;
         p.setCol(newCol);
@@ -191,6 +200,9 @@ public class PieceService {
         piece.setX(piece.getCol() * square);
         piece.setY(piece.getRow() * square);
         piece.setHasMoved(true);
+
+        piece.setPreCol(piece.getCol());
+        piece.setPreRow(piece.getRow());
     }
 
     public void resetPos(Piece piece) {

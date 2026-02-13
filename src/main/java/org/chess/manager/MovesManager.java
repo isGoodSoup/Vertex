@@ -1,17 +1,20 @@
-package org.chess.input;
+package org.chess.manager;
 
 import org.chess.entities.*;
 import org.chess.enums.GameState;
 import org.chess.enums.Tint;
 import org.chess.gui.Sound;
+import org.chess.input.Mouse;
 import org.chess.records.Move;
+import org.chess.records.Save;
 import org.chess.render.MenuRender;
 import org.chess.service.*;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 
-public class MoveManager {
+public class MovesManager {
     private Piece selectedPiece;
     private int moveX = 4;
     private int moveY = 6;
@@ -24,15 +27,19 @@ public class MoveManager {
     private int currentPage = 1;
     private static final int ITEMS_PER_PAGE = 6;
 
-    public MoveManager() {}
+    public MovesManager() {}
 
     public void init(ServiceFactory service) {
         this.service = service;
         this.mouse = service.getMouseService();
         this.fx = service.getGuiService().getFx();
-        this.moves = service.getBoardService().getMoves();
+        this.moves = new ArrayList<>();
         this.selectedIndexY = 0;
         this.selectedIndexX = 0;
+    }
+
+    public List<Move> getMoves() {
+        return moves;
     }
 
     public ServiceFactory getService() {
@@ -106,8 +113,8 @@ public class MoveManager {
 
         moves.add(new Move(
                 piece,
-                piece.getCol(),
                 piece.getRow(),
+                piece.getCol(),
                 targetCol,
                 targetRow,
                 piece.getColor(),
@@ -135,7 +142,7 @@ public class MoveManager {
             service.getPieceService().switchTurns();
         }
 
-        if (BooleanService.isAIPlaying &&
+        if (BooleanService.canAIPlay &&
                 GameService.getCurrentTurn() == Tint.BLACK) {
 
             new Thread(() -> {
@@ -268,6 +275,23 @@ public class MoveManager {
                         selectedPiece, moveX, moveY);
     }
 
+    public void moveUp(List<Save> saves) {
+        if (saves.isEmpty()) return;
+
+        MenuRender menu = service.getRender().getMenuRender();
+        int itemsPerPage = ITEMS_PER_PAGE;
+        int currentPage = menu.getCurrentPage();
+        int startIndex = (currentPage - 1) * itemsPerPage;
+        int endIndex = Math.min(startIndex + itemsPerPage, saves.size());
+
+        selectedIndexY--;
+        if (selectedIndexY < startIndex) {
+            selectedIndexY = endIndex - 1;
+        }
+
+        getFx().playFX(BooleanService.getRandom(1, 2));
+    }
+
     public void moveUp(String[] options) {
         selectedIndexY--;
         getFx().playFX(BooleanService.getRandom(1, 2));
@@ -296,6 +320,23 @@ public class MoveManager {
             updateKeyboardHover();
             getFx().playFX(BooleanService.getRandom(1, 2));
         }
+    }
+
+    public void moveDown(List<Save> saves) {
+        if (saves.isEmpty()) return;
+
+        MenuRender menu = service.getRender().getMenuRender();
+        int itemsPerPage = ITEMS_PER_PAGE;
+        int currentPage = menu.getCurrentPage();
+        int startIndex = (currentPage - 1) * itemsPerPage;
+        int endIndex = Math.min(startIndex + itemsPerPage, saves.size());
+
+        selectedIndexY++;
+        if (selectedIndexY >= endIndex) {
+            selectedIndexY = startIndex;
+        }
+
+        getFx().playFX(BooleanService.getRandom(1, 2));
     }
 
     public void moveDown(String[] options) {
@@ -328,25 +369,27 @@ public class MoveManager {
         }
     }
 
+    public void activate(String saveName) {
+        getFx().playFX(3);
+        service.getGameService().continueGame(saveName);
+    }
+
     public void activate(GameState state) {
         switch (state) {
             case MENU -> {
                 getFx().playFX(3);
-                switch (selectedIndexY) {
+                switch(selectedIndexY) {
                     case 0 -> service.getGameService().startNewGame();
-                    case 1 -> service.getGameService().achievementsMenu();
-                    case 2 -> service.getGameService().optionsMenu();
-                    case 3 -> System.exit(0);
+                    case 1 -> service.getGameService().loadSaves();
+                    case 2 -> service.getGameService().achievementsMenu();
+                    case 3 -> service.getGameService().optionsMenu();
+                    case 4 -> System.exit(0);
                 }
             }
-            case MODE -> {
-                getFx().playFX(3);
-                switch (selectedIndexY) {
-                    case 0 -> service.getBoardService().startBoard();
-                    case 1 -> {
-                        BooleanService.isAIPlaying = true;
-                        service.getBoardService().startBoard();
-                    }
+            case SAVES -> {
+                List<Save> saves = service.getSaveManager().getSaves();
+                if(!saves.isEmpty() && selectedIndexY < saves.size()) {
+                    activate(saves.get(selectedIndexY).name());
                 }
             }
             case RULES -> {

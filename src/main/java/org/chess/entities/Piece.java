@@ -1,17 +1,20 @@
 package org.chess.entities;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
 
 import org.chess.enums.Tint;
 import org.chess.enums.Type;
 import org.chess.render.Colorblindness;
+import org.chess.service.GUIService;
+import org.chess.service.GameService;
 import org.chess.service.PieceService;
 
 public abstract class Piece {
 	protected Type id;
-	protected BufferedImage image;
-	protected BufferedImage hovered;
+	protected transient BufferedImage sprite;
+	protected transient BufferedImage hovered;
 	private int x, y;
 	private int col, row, preCol, preRow;
 	private static final double DEFAULT_SCALE = 1.0;
@@ -33,6 +36,14 @@ public abstract class Piece {
 		this.preRow = row;
 	}
 
+	public void loadSprite(GUIService guiService) {
+		try {
+			this.sprite =guiService.getImage("/pieces/" + getClass().getSimpleName().toLowerCase());
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
 	public Type getId() {
 		return id;
 	}
@@ -41,8 +52,8 @@ public abstract class Piece {
 		this.id = id;
 	}
 
-	public BufferedImage getImage() {
-		return image;
+	public BufferedImage getSprite() {
+		return sprite;
 	}
 
 	public BufferedImage getFilteredSprite(BufferedImage image) {
@@ -53,8 +64,8 @@ public abstract class Piece {
 		return hovered;
 	}
 
-	public void setImage(BufferedImage image) {
-		this.image = image;
+	public void setSprite(BufferedImage sprite) {
+		this.sprite = sprite;
 	}
 
 	public int getPreCol() {
@@ -196,5 +207,15 @@ public abstract class Piece {
 	public boolean isValidSquare(Piece piece, int targetCol, int targetRow,
 							   List<Piece> board) {
 		return PieceService.isValidSquare(piece, targetCol, targetRow, board);
+	}
+
+	public void restoreFromSave(int row, int col, GUIService guiService) {
+		this.row = row;
+		this.col = col;
+		this.preRow = row;
+		this.preCol = col;
+		this.x = getX(col);
+		this.y = getY(row);
+		loadSprite(guiService);
 	}
 }

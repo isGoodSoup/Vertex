@@ -1,43 +1,43 @@
 package org.chess.service;
 
 import org.chess.entities.*;
-import org.chess.enums.GameState;
 import org.chess.enums.Tint;
 import org.chess.input.Mouse;
-import org.chess.input.MoveManager;
+import org.chess.manager.MovesManager;
 import org.chess.gui.Sound;
-import org.chess.records.Move;
+import org.chess.manager.SaveManager;
+import org.chess.records.Save;
 
 import java.util.*;
 
 public class BoardService {
     private static Piece[][] boardState;
-    private final Board board;
-    private final Sound fx;
-    private final List<Move> moves;
+    private Board board;
+    private transient Sound fx;
+    private String[][] squares;
     private final Map<List<Integer>, List<Integer>> columns;
 
     private final PieceService pieceService;
     private final Mouse mouse;
     private final PromotionService promotionService;
     private final ModelService modelService;
-    private static MoveManager manager;
+    private static MovesManager movesManager;
+    private static SaveManager saveManager;
 
     private ServiceFactory serviceFactory;
 
     public BoardService(PieceService pieceService, Mouse mouse,
                         PromotionService promotionService,
                         ModelService modelService,
-                        MoveManager manager) {
+                        MovesManager movesManager) {
         this.board = new Board();
         this.fx = new Sound();
         this.pieceService = pieceService;
         this.mouse = mouse;
         this.promotionService = promotionService;
         this.modelService = modelService;
-        BoardService.manager = manager;
+        BoardService.movesManager = movesManager;
         boardState = new Piece[board.getROW()][board.getCOL()];
-        this.moves = new ArrayList<>();
         this.columns = new HashMap<>();
         precomputeSquares();
     }
@@ -54,16 +54,16 @@ public class BoardService {
         return board;
     }
 
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
     public static Piece[][] getBoardState() {
         return boardState;
     }
 
-    public static MoveManager getManager() {
-        return manager;
-    }
-
-    public List<Move> getMoves() {
-        return moves;
+    public static MovesManager getMovesManager() {
+        return movesManager;
     }
 
     public Map<List<Integer>, List<Integer>> getColumns() {
@@ -71,31 +71,52 @@ public class BoardService {
     }
 
     private void precomputeSquares() {
-        for(int row = 0; row < Objects.requireNonNull(board).getROW(); row++) {
-            for(int col = 0; col < board.getCOL(); col++) {
-                board.getSquares()[row][col] = getSquareName(col, row);
+        int rows = board.getROW();
+        int cols = board.getCOL();
+        squares = new String[rows][cols];
+
+        for(int r = 0; r < rows; r++) {
+            for(int c = 0; c < cols; c++) {
+                char file = (char) ('a' + c);
+                char rank = (char) ('8' - r);
+                squares[r][c] = "" + file + rank;
             }
         }
     }
 
-    public static String getSquareName(int col, int row) {
-        char file = (char) ('a' + col);
-        int rank = 8 - row;
-        return "" + file + rank;
+    public void restoreSprites(Save save, GUIService guiService) {
+        List<Piece> loadedPieces = save.pieces();
+        Piece[][] boardArray = new Piece[board.getROW()][board.getCOL()];
+        for (Piece p : loadedPieces) {
+            if (p == null) continue;
+            int col = p.getCol();
+            int row = p.getRow();
+            p.setPreCol(p.getPreCol());
+            p.setPreRow(p.getPreRow());
+            p.setX(col * Board.getSquare());
+            p.setY(row * Board.getSquare());
+            p.loadSprite(guiService);
+            boardArray[row][col] = p;
+        }
+        board.setPieces(boardArray);
+        pieceService.getPieces().clear();
+        pieceService.getPieces().addAll(loadedPieces);
     }
 
-    public String getSquareNameAt(int col, int row) {
-        return board.getSquares()[row][col];
+    private void clearBoardState() {
+        boardState = new Piece[board.getROW()][board.getCOL()];
+        pieceService.getPieces().clear();
+    }
+
+    public String getSquareNameAt(int row, int col) {
+        return squares[row][col];
     }
 
     public void startBoard() {
-        pieceService.getPieces().clear();
-        if(BooleanService.canSandbox) { setPiecesTest(); }
+        if(BooleanService.canSandbox) { setSandboxPieces(); }
         else if(BooleanService.canDoChaos) { setPiecesChaos(); }
         else { setPieces(); }
-        GameService.setCurrentTurn(Tint.WHITE);
         PieceService.nullThisPiece();
-        GameService.setState(GameState.BOARD);
 
         if(BooleanService.canStopwatch) {
             BooleanService.canTime = false;
@@ -110,10 +131,15 @@ public class BoardService {
         }
     }
 
+    private void getPiecesDebug() {
+        System.out.println("Initializing pieces...");
+        pieceService.getPieces().forEach(p -> System.out.println(p.getId()));
+    }
+
     public void resetBoard() {
         if(BooleanService.canResetTable
                 && getServiceFactory().getKeyboard().wasRPressed()) {
-            startBoard();
+            getServiceFactory().getGameService().startNewGame();
         }
     }
 
@@ -123,25 +149,49 @@ public class BoardService {
         clearBoardState();
 
         for(int col = 0; col < 8; col++) {
-            pieces.add(new Pawn(Tint.WHITE, col, 6));
-            pieces.add(new Pawn(Tint.BLACK, col, 1));
+            Pawn whitePawn = new Pawn(Tint.WHITE, col, 6);
+            Pawn blackPawn = new Pawn(Tint.BLACK, col, 1);
+            pieces.add(whitePawn);
+            pieces.add(blackPawn);
         }
-        pieces.add(new Rook(Tint.WHITE, 0, 7));
-        pieces.add(new Rook(Tint.WHITE, 7, 7));
-        pieces.add(new Rook(Tint.BLACK, 0, 0));
-        pieces.add(new Rook(Tint.BLACK, 7, 0));
-        pieces.add(new Knight(Tint.WHITE, 1, 7));
-        pieces.add(new Knight(Tint.WHITE, 6, 7));
-        pieces.add(new Knight(Tint.BLACK, 1, 0));
-        pieces.add(new Knight(Tint.BLACK, 6, 0));
-        pieces.add(new Bishop(Tint.WHITE, 2, 7));
-        pieces.add(new Bishop(Tint.WHITE, 5, 7));
-        pieces.add(new Bishop(Tint.BLACK, 2, 0));
-        pieces.add(new Bishop(Tint.BLACK, 5, 0));
-        pieces.add(new Queen(Tint.WHITE, 3, 7));
-        pieces.add(new Queen(Tint.BLACK, 3, 0));
-        pieces.add(new King(pieceService, Tint.WHITE, 4, 7));
-        pieces.add(new King(pieceService, Tint.BLACK, 4, 0));
+
+        Rook wR1 = new Rook(Tint.WHITE, 0, 7);
+        Rook wR2 = new Rook(Tint.WHITE, 7, 7);
+        Rook bR1 = new Rook(Tint.BLACK, 0, 0);
+        Rook bR2 = new Rook(Tint.BLACK, 7, 0);
+        pieces.addAll(List.of(wR1, wR2, bR1, bR2));
+
+        Knight wN1 = new Knight(Tint.WHITE, 1, 7);
+        Knight wN2 = new Knight(Tint.WHITE, 6, 7);
+        Knight bN1 = new Knight(Tint.BLACK, 1, 0);
+        Knight bN2 = new Knight(Tint.BLACK, 6, 0);
+        pieces.addAll(List.of(wN1, wN2, bN1, bN2));
+
+        Bishop wB1 = new Bishop(Tint.WHITE, 2, 7);
+        Bishop wB2 = new Bishop(Tint.WHITE, 5, 7);
+        Bishop bB1 = new Bishop(Tint.BLACK, 2, 0);
+        Bishop bB2 = new Bishop(Tint.BLACK, 5, 0);
+        pieces.addAll(List.of(wB1, wB2, bB1, bB2));
+
+        Queen wQ = new Queen(Tint.WHITE, 3, 7);
+        Queen bQ = new Queen(Tint.BLACK, 3, 0);
+        pieces.add(wQ);
+        pieces.add(bQ);
+
+        King wK = new King(pieceService, Tint.WHITE, 4, 7);
+        King bK = new King(pieceService, Tint.BLACK, 4, 0);
+        pieces.add(wK);
+        pieces.add(bK);
+
+        for (Piece p : pieces) {
+            boardState[p.getRow()][p.getCol()] = p;
+            int squareSize = Board.getSquare();
+            p.setX(p.getCol() * squareSize);
+            p.setY(p.getRow() * squareSize);
+        }
+
+        GameService.setCurrentTurn(Tint.WHITE);
+        PieceService.nullThisPiece();
     }
 
     public void setPiecesChaos() {
@@ -180,22 +230,11 @@ public class BoardService {
         pieces.add(new King(pieceService, Tint.BLACK, 4, 0));
     }
 
-    private void setPiecesTest() {
+    private void setSandboxPieces() {
         List<Piece> pieces = pieceService.getPieces();
         pieces.clear();
         clearBoardState();
 
-        pieces.add(new Pawn(Tint.WHITE, 0, 2));
-        pieces.add(new King(pieceService, Tint.WHITE, 4, 7));
-        pieces.add(new King(pieceService, Tint.BLACK, 4, 0));
-    }
-
-    private void clearBoardState() {
-        for(int c = 0; c < 8; c++) {
-            for(int r = 0; r < 8; r++) {
-                assert boardState[c] != null;
-                boardState[c][r] = null;
-            }
-        }
+        // TODO
     }
 }

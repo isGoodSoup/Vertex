@@ -6,7 +6,8 @@ import org.chess.enums.ColorblindType;
 import org.chess.gui.Colors;
 import org.chess.input.MenuInput;
 import org.chess.input.Mouse;
-import org.chess.input.MoveManager;
+import org.chess.manager.MovesManager;
+import org.chess.records.Save;
 import org.chess.service.*;
 
 import java.awt.*;
@@ -18,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class MenuRender {
-    public static final String[] optionsMenu = { "NEW GAME",
+    public static final String[] optionsMenu = { "NEW GAME", "LOAD SAVE",
             "ACHIEVEMENTS", "RULES", "EXIT" };
     public static final String[] optionsMode = { "PLAYER", "AI" };
     public static final String[] optionsTweaks = {
@@ -26,8 +27,8 @@ public class MenuRender {
             "Dark Mode",
             "Promotion",
             "Achievements",
-            "Training Mode",
-            "Continue",
+            "Saves",
+            "AI Opponent",
             "Castling",
             "En Passant",
             "Timer",
@@ -43,14 +44,14 @@ public class MenuRender {
     private static final int OPTION_X = 100;
     private static final int OPTION_Y = 160;
     private static final float SCALE = 1.5f;
-    private BufferedImage DARK_MODE_ON;
-    private BufferedImage DARK_MODE_OFF;
-    private BufferedImage DARK_MODE_ON_HIGHLIGHTED;
-    private BufferedImage DARK_MODE_OFF_HIGHLIGHTED;
-    private BufferedImage TOGGLE_ON;
-    private BufferedImage TOGGLE_OFF;
-    private BufferedImage TOGGLE_ON_HIGHLIGHTED;
-    private BufferedImage TOGGLE_OFF_HIGHLIGHTED;
+    private transient BufferedImage DARK_MODE_ON;
+    private transient BufferedImage DARK_MODE_OFF;
+    private transient BufferedImage DARK_MODE_ON_HIGHLIGHTED;
+    private transient BufferedImage DARK_MODE_OFF_HIGHLIGHTED;
+    private transient BufferedImage TOGGLE_ON;
+    private transient BufferedImage TOGGLE_OFF;
+    private transient BufferedImage TOGGLE_ON_HIGHLIGHTED;
+    private transient BufferedImage TOGGLE_OFF_HIGHLIGHTED;
     private static ColorblindType cb;
     private int lastHoveredIndex = -1;
     private int scrollOffset = 0;
@@ -61,7 +62,7 @@ public class MenuRender {
     private static RenderContext render;
     private GameService gameService;
     private BoardService boardService;
-    private MoveManager moveManager;
+    private MovesManager movesManager;
     private GUIService guiService;
     private Mouse mouse;
     private MenuInput menuInput;
@@ -75,7 +76,7 @@ public class MenuRender {
     public void init() {
         this.sprites = new AchievementSprites(guiService);
         this.menuInput = new MenuInput(render, this, guiService, gameService,
-                boardService, moveManager, mouse);
+                boardService, movesManager, mouse);
         try {
             DARK_MODE_ON = guiService.getImage("/ui/dark-mode_on");
             DARK_MODE_OFF = guiService.getImage("/ui/dark-mode_off");
@@ -117,12 +118,12 @@ public class MenuRender {
         this.boardService = boardService;
     }
 
-    public MoveManager getMoveManager() {
-        return moveManager;
+    public MovesManager getMoveManager() {
+        return movesManager;
     }
 
-    public void setMoveManager(MoveManager moveManager) {
-        this.moveManager = moveManager;
+    public void setMoveManager(MovesManager movesManager) {
+        this.movesManager = movesManager;
     }
 
     public GUIService getGuiService() {
@@ -187,8 +188,8 @@ public class MenuRender {
             case "Dark Mode" -> BooleanService.isDarkMode;
             case "Promotion" -> BooleanService.canPromote;
             case "Achievements" -> BooleanService.canDoAchievements;
-            case "Training Mode" -> BooleanService.canTrain;
-            case "Continue" -> BooleanService.canContinue;
+            case "Saves" -> BooleanService.canSave;
+            case "AI Opponent" -> BooleanService.canAIPlay;
             case "Castling" -> BooleanService.canDoCastling;
             case "En Passant" -> BooleanService.canDoEnPassant;
             case "Timer" -> BooleanService.canTime;
@@ -211,8 +212,8 @@ public class MenuRender {
             }
             case "Promotion" -> BooleanService.canPromote ^= true;
             case "Achievements" -> BooleanService.canDoAchievements ^= true;
-            case "Training Mode" -> BooleanService.canTrain ^= true;
-            case "Continue" -> BooleanService.canContinue ^= true;
+            case "Saves" -> BooleanService.canSave ^= true;
+            case "AI Opponent" -> BooleanService.canAIPlay ^= true;
             case "Castling" -> BooleanService.canDoCastling ^= true;
             case "En Passant" -> BooleanService.canDoEnPassant ^= true;
             case "Timer" -> {
@@ -277,7 +278,7 @@ public class MenuRender {
             );
 
             boolean isHovered = hitbox.contains(mouse.getX(), mouse.getY())
-                    || (i == moveManager.getSelectedIndexY());
+                    || (i == movesManager.getSelectedIndexY());
 
             Color foreground = Colorblindness.filter(Colors.FOREGROUND);
             Color textColor = isHovered ? Color.YELLOW : foreground;
@@ -346,7 +347,7 @@ public class MenuRender {
             );
 
             boolean isHovered = toggleHitbox.contains(mouse.getX(),
-                    mouse.getY()) || (i == moveManager.getSelectedIndexY());
+                    mouse.getY()) || (i == movesManager.getSelectedIndexY());
             boolean isEnabled = getOptionState(options[i]);
 
             g2.setColor(Colorblindness.filter(Colors.FOREGROUND));
@@ -395,7 +396,7 @@ public class MenuRender {
         int x = getCenterX(getTotalWidth(), width);
         boolean hasBackground = true;
 
-        int itemsPerPage = MoveManager.getITEMS_PER_PAGE();
+        int itemsPerPage = MovesManager.getITEMS_PER_PAGE();
         int start = (currentPage - 1) * itemsPerPage;
         int end = Math.min(start + itemsPerPage, list.size());
 
@@ -447,6 +448,66 @@ public class MenuRender {
         }
     }
 
+    public void drawSavesMenu(Graphics2D g2) {
+        List<Save> saves = gameService.getSaveManager().getSaves();
+        String text = "SAVE FILES";
+
+        g2.setFont(GUIService.getFontBold(GUIService.getMENU_FONT()));
+        FontMetrics fm = g2.getFontMetrics();
+
+        int headerY = render.getOffsetY() + render.scale(OPTION_Y);
+        int headerWidth = fm.stringWidth(text);
+        g2.setColor(BooleanService.canBeColorblind ?
+                Colorblindness.filter(Colors.FOREGROUND)
+                : Colors.FOREGROUND);
+        g2.drawString(text,
+                getCenterX(getTotalWidth(), headerWidth),
+                headerY);
+
+        if(saves.isEmpty()) {
+            return;
+        }
+
+        int stroke = 4;
+        int spacing = 25;
+        int startY = headerY + spacing * 2;
+        int width = RenderContext.BASE_WIDTH/2;
+        int height = 100, arcWidth = 32, arcHeight = 32;
+        int x = getCenterX(getTotalWidth(), width);
+        boolean hasBackground = true;
+
+        int itemsPerPage = MovesManager.getITEMS_PER_PAGE();
+        int start = (currentPage - 1) * itemsPerPage;
+        int end = Math.min(start + itemsPerPage, saves.size());
+
+        BufferedImage img = null;
+        for (int i = start; i < end; i++) {
+            Save s = saves.get(i);
+            Rectangle hitbox = new Rectangle(
+                    x, startY, width, height
+            );
+
+            boolean isHovered = hitbox.contains(mouse.getX(), mouse.getY());
+
+            int textX = x + render.scale(110);
+            int titleY = startY + render.scale(60);
+            int descY = titleY;
+            g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
+            g2.setColor(Colorblindness.filter(Color.WHITE));
+
+            if(isHovered) {
+                guiService.drawBox(g2, stroke, x, startY,
+                        width, height, arcWidth, arcHeight, hasBackground,
+                        true);
+            } else {
+                guiService.drawBox(g2, stroke, x, startY,
+                        width, height, arcWidth, arcHeight, hasBackground, false);
+            }
+
+            g2.drawString(s.name(), textX, descY);
+            startY += height + spacing;
+        }
+    }
 
     public BufferedImage getSprite(int i) {
         return switch (i) {

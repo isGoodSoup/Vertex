@@ -2,6 +2,7 @@ package org.chess.render;
 
 import org.chess.entities.Board;
 import org.chess.enums.Tint;
+import org.chess.manager.MovesManager;
 import org.chess.records.Move;
 import org.chess.service.BoardService;
 import org.chess.service.BooleanService;
@@ -11,12 +12,22 @@ import java.awt.*;
 import java.util.List;
 
 public class MovesRender {
+    private RenderContext render;
     private BoardService boardService;
     private GUIService guiService;
-    private RenderContext render;
+    private MovesManager movesManager;
 
-    public MovesRender(RenderContext render) {
+    public MovesRender(RenderContext render, MovesManager movesManager) {
         this.render = render;
+        this.movesManager = movesManager;
+    }
+
+    public MovesManager getMovesManager() {
+        return movesManager;
+    }
+
+    public void setMovesManager(MovesManager movesManager) {
+        this.movesManager = movesManager;
     }
 
     public BoardService getBoardService() {
@@ -79,16 +90,15 @@ public class MovesRender {
                 boardY, boxWidth, boxHeight, arcWidth, arcHeight,
                 hasBackground, true);
 
-        List<Move> moves = boardService.getMoves();
+        List<Move> moves = movesManager.getMoves();
         int startIndex = Math.max(0, moves.size() - GUIService.getMOVES_CAP());
 
         for (int i = startIndex; i < moves.size(); i++) {
             Move move = moves.get(i);
             boolean isLast = (i == moves.size() - 1);
 
-            String moveText = BoardService.getSquareName(move.fromCol(), move.fromRow()) +
-                    " > " +
-                    BoardService.getSquareName(move.targetCol(), move.targetRow());
+            String moveText = boardService.getSquareNameAt(move.fromRow(),
+                    move.fromCol()) + " > " + boardService.getSquareNameAt(move.targetRow(), move.targetCol());
 
             if (move.color() == Tint.WHITE) {
                 g2.setColor(isLast ? Color.YELLOW : Color.WHITE);

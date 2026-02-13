@@ -99,7 +99,7 @@ public class BoardRender {
 
         for (Piece p : pieceService.getPieces()) {
             if (p != currentPiece) {
-                BufferedImage img = (p == hoveredPiece) ? hoveredPiece.getHovered() : p.getImage();
+                BufferedImage img = (p == hoveredPiece) ? hoveredPiece.getHovered() : p.getSprite();
                 drawPiece(g2, p, Colorblindness.filter(img));
             }
         }
@@ -145,7 +145,7 @@ public class BoardRender {
                 g2.setColor(isEven ? Colorblindness.filter(Colors.getFOREGROUND())
                         : Colorblindness.filter(Colors.getBACKGROUND()));
                 g2.drawString(
-                        BoardService.getSquareName(col, row),
+                        boardService.getSquareNameAt(col, row),
                         getBoardOriginX() + col * SQUARE + PADDING,
                         getBoardOriginY() + row * SQUARE + SQUARE - PADDING
                 );
@@ -174,7 +174,7 @@ public class BoardRender {
         }
 
         g2.drawImage(
-                override != null ? override : piece.getImage(),
+                override != null ? override : piece.getSprite(),
                 getBoardOriginX() + piece.getX() + offset,
                 getBoardOriginY() + piece.getY() + offset,
                 size,

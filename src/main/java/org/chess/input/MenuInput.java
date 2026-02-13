@@ -1,16 +1,21 @@
 package org.chess.input;
 
+import org.chess.enums.GameState;
+import org.chess.manager.MovesManager;
+import org.chess.records.Save;
 import org.chess.render.MenuRender;
 import org.chess.render.RenderContext;
 import org.chess.service.*;
 
 import java.awt.*;
+import java.util.List;
+import java.util.Objects;
 
 public class MenuInput {
     private final RenderContext render;
     private final GameService gameService;
     private final BoardService boardService;
-    private final MoveManager moveManager;
+    private final MovesManager movesManager;
     private final GUIService guiService;
     private final Mouse mouse;
     private final MenuRender menuRender;
@@ -18,11 +23,11 @@ public class MenuInput {
     public MenuInput(RenderContext render, MenuRender menuRender,
                      GUIService guiService,
                      GameService gameService, BoardService boardService,
-                     MoveManager moveManager, Mouse mouse) {
+                     MovesManager movesManager, Mouse mouse) {
         this.render = render;
         this.gameService = gameService;
         this.boardService = boardService;
-        this.moveManager = moveManager;
+        this.movesManager = movesManager;
         this.guiService = guiService;
         this.mouse = mouse;
         this.menuRender = menuRender;
@@ -32,12 +37,12 @@ public class MenuInput {
         int currentPage = menuRender.getCurrentPage();
         if(currentPage > 1) {
             menuRender.setCurrentPage(currentPage - 1);
-            moveManager.setSelectedIndexY(0);
+            movesManager.setSelectedIndexY(0);
         }
     }
 
     public void nextPage() {
-        int itemsPerPage = MoveManager.getITEMS_PER_PAGE();
+        int itemsPerPage = MovesManager.getITEMS_PER_PAGE();
         int totalItems = AchievementService.getAllAchievements().size();
         int totalPages = (totalItems + itemsPerPage - 1) / itemsPerPage;
 
@@ -55,7 +60,44 @@ public class MenuInput {
         int currentPage = menuRender.getCurrentPage();
         if(currentPage < totalPages) {
             menuRender.setCurrentPage(currentPage + 1);
-            moveManager.setSelectedIndexY(0);
+            movesManager.setSelectedIndexY(0);
+        }
+    }
+
+    public void handleSavesInput() {
+        if(!mouse.wasPressed()) { return; }
+        List<Save> saves = gameService.getSaveManager().getSaves();
+
+        int itemsPerPage = MovesManager.getITEMS_PER_PAGE();
+        int startIndex = (menuRender.getCurrentPage() - 1) * itemsPerPage + 1;
+        int endIndex = Math.min(startIndex + itemsPerPage, saves.size());
+
+        FontMetrics fm = menuRender.getFontMetrics();
+        int lineHeight = fm.getHeight() + render.scale(10);
+
+        int headerY = render.getOffsetY() + render.scale(MenuRender.getOPTION_Y());
+
+        int stroke = 4;
+        int spacing = 25;
+        int startY = headerY + spacing * 2;
+        int width = RenderContext.BASE_WIDTH/2;
+        int height = 100, arcWidth = 32, arcHeight = 32;
+        int x = MenuRender.getCenterX(menuRender.getTotalWidth(), width);
+        boolean hasBackground = true;
+
+        int gap = render.scale(100);
+        int start = (menuRender.getCurrentPage() - 1) * itemsPerPage;
+        int end = Math.min(start + itemsPerPage, saves.size());
+
+        for (int i = start; i < end; i++) {
+            Save s = saves.get(i);
+            Rectangle hitbox = new Rectangle(x, startY, width, height);
+            if (hitbox.contains(mouse.getX(), mouse.getY())) {
+                guiService.getFx().playFX(0);
+                gameService.continueGame(s.name());
+                break;
+            }
+            startY += height + spacing;
         }
     }
 
@@ -134,26 +176,15 @@ public class MenuInput {
 
             if(hitbox.contains(mouse.getX(), mouse.getY())) {
                 guiService.getFx().play(0);
-                switch(GameService.getState()) {
-                    case MENU -> {
-                        switch(i) {
-                            case 0 -> gameService.startNewGame();
-                            case 1 -> gameService.achievementsMenu();
-                            case 2 -> gameService.optionsMenu();
-                            case 3 -> System.exit(0);
-                        }
-                    }
-                    case MODE -> {
-                        switch(i) {
-                            case 0 -> boardService.startBoard();
-                            case 1 -> {
-                                BooleanService.isAIPlaying = true;
-                                boardService.startBoard();
-                            }
-                        }
+                if (Objects.requireNonNull(GameService.getState()) == GameState.MENU) {
+                    switch (i) {
+                        case 0 -> gameService.startNewGame();
+                        case 1 -> gameService.loadSaves();
+                        case 2 -> gameService.achievementsMenu();
+                        case 3 -> gameService.optionsMenu();
+                        case 4 -> System.exit(0);
                     }
                 }
-                break;
             }
         }
     }

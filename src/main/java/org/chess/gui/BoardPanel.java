@@ -4,7 +4,8 @@ import org.chess.enums.ColorblindType;
 import org.chess.enums.GameState;
 import org.chess.enums.PlayState;
 import org.chess.input.Keyboard;
-import org.chess.input.MoveManager;
+import org.chess.manager.MovesManager;
+import org.chess.records.Save;
 import org.chess.render.Colorblindness;
 import org.chess.render.MenuRender;
 import org.chess.render.RenderContext;
@@ -13,7 +14,9 @@ import org.chess.service.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.io.Serial;
+import java.util.List;
 
 public class BoardPanel extends JPanel implements Runnable {
 	@Serial
@@ -65,7 +68,11 @@ public class BoardPanel extends JPanel implements Runnable {
             lastTime = currentTime;
 
             if(delta >= 1) {
-                update();
+                try {
+                    update();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 updateMouse();
                 service.getAnimationService().update();
                 repaint();
@@ -93,39 +100,44 @@ public class BoardPanel extends JPanel implements Runnable {
         switch(GameService.getState()) {
             case MENU -> service.getRender().getMenuRender().drawGraphics(g2,
                     MenuRender.optionsMenu);
-            case MODE -> service.getRender().getMenuRender().drawGraphics(g2,
-                    MenuRender.optionsMode);
-            case RULES -> service.getRender().getMenuRender()
-                    .drawOptionsMenu(g2, MenuRender.optionsTweaks);
+            case SAVES -> service.getRender().getMenuRender().drawSavesMenu(g2);
             case BOARD -> {
                 service.getRender().getBoardRender().drawBoard(g2);
                 service.getRender().getMovesRender().drawMoves(g2);
+                if(service.getTimerService().isActive()) {
+                    service.getGuiService().drawTimer(g2);
+                    service.getGuiService().drawTick(g2, BooleanService.isLegal);
+                }
             }
+            case RULES -> service.getRender().getMenuRender()
+                    .drawOptionsMenu(g2, MenuRender.optionsTweaks);
             case ACHIEVEMENTS -> service.getRender().getMenuRender().drawAchievementsMenu(g2);
-        }
-
-        if(service.getTimerService().isActive()) {
-            service.getGuiService().drawTimer(g2);
-            service.getGuiService().drawTick(g2, BooleanService.isLegal);
         }
     }
 
-    private void update() {
-        checkKeyboard();
+    private void update() throws IOException {
+        checkKeyboardInput();
+        checkMouseInput();
         service.getTimerService().update();
         service.getBoardService().resetBoard();
 
+        PlayState mode = GameService.getMode();
+        if(mode != null) {
+            switch(mode) {
+                case PLAYER -> BooleanService.canAIPlay = false;
+                case AI -> BooleanService.canAIPlay = true;
+            }
+        }
+    }
+
+    private void checkMouseInput() {
         switch(GameService.getState()) {
             case MENU -> {
                 service.getRender().getMenuRender()
                         .getMenuInput().handleMenuInput(MenuRender.optionsMenu);
                 return;
             }
-            case MODE -> {
-                service.getRender().getMenuRender()
-                        .getMenuInput().handleMenuInput(MenuRender.optionsMode);
-                return;
-            }
+            case SAVES -> service.getRender().getMenuRender().getMenuInput().handleSavesInput();
             case RULES -> {
                 service.getRender().getMenuRender()
                         .getMenuInput().handleOptionsInput();
@@ -134,25 +146,21 @@ public class BoardPanel extends JPanel implements Runnable {
             case ACHIEVEMENTS -> {}
             default -> {}
         }
-
-        PlayState mode = GameService.getMode();
-        if(mode != null) {
-            switch(mode) {
-                case PLAYER -> BooleanService.isAIPlaying = false;
-                case AI -> BooleanService.isAIPlaying = true;
-            }
-        }
     }
 
-    private void checkKeyboard() {
+    private void checkKeyboardInput() {
         long now = System.currentTimeMillis();
-        MoveManager move = BoardService.getManager();
+        MovesManager move = BoardService.getMovesManager();
         Keyboard keyboard = service.getKeyboard();
         GameState state = GameService.getState();
 
-        if(state != GameState.BOARD && keyboard.wasBPressed()) {
+        if(keyboard.wasBPressed()) {
+            if(GameService.getState() == GameState.BOARD) {
+                if(!BooleanService.canSave) { return; }
+                service.getSaveManager().autoSave();
+            }
             GameService.setState(GameState.MENU);
-            service.getGuiService().getFx().playFX(3);
+            service.getGuiService().getFx().playFX(0);
         }
 
         if(BooleanService.canBeColorblind) {
@@ -173,16 +181,54 @@ public class BoardPanel extends JPanel implements Runnable {
                     lastDownTime = now;
                 }
             }
-            case MODE -> {
-                if(keyboard.wasSelectPressed()) { move.activate(GameState.MODE); }
+            case SAVES -> {
+                List<Save> saves = service.getSaveManager().getSaves();
+                int itemsPerPage = MovesManager.getITEMS_PER_PAGE();
+                if(!saves.isEmpty()) {
+                    service.getMovesManager().setSelectedIndexY(0);
+                }
+                if(keyboard.wasSelectPressed()) { move.activate(GameState.SAVES); }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
-                    move.moveUp(MenuRender.optionsMode);
+                    move.moveUp(saves);
                     lastUpTime = now;
                 }
                 if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
-                    move.moveDown(MenuRender.optionsMode);
+                    move.moveDown(saves);
                     lastDownTime = now;
                 }
+                if(keyboard.isLeftDown() && now - lastUpTime >= repeatDelay) {
+                    if(service.getRender().getMenuRender().getCurrentPage() > 0) {
+                        service.getGuiService().getFx().playFX(4);
+                    }
+                    service.getRender().getMenuRender().getMenuInput().previousPage();
+                    service.getMovesManager().setSelectedIndexY(
+                            (service.getRender().getMenuRender().getCurrentPage() - 1) * itemsPerPage
+                    );
+                    lastUpTime = now;
+                }
+                if(keyboard.isRightDown() && now - lastDownTime >= repeatDelay) {
+                    service.getGuiService().getFx().playFX(4);
+                    service.getRender().getMenuRender().getMenuInput().nextPage();
+                    service.getMovesManager().setSelectedIndexY(
+                            (service.getRender().getMenuRender().getCurrentPage() - 1) * itemsPerPage
+                    );
+                    lastDownTime = now;
+                }
+                if(keyboard.isComboPressed(KeyEvent.VK_CONTROL,
+                        KeyEvent.VK_D) && now - lastDownTime >= repeatDelay) {
+                    int selected = service.getMovesManager().getSelectedIndexY();
+                    if(selected >= 0 && selected < saves.size()) {
+                        String saveName = saves.get(selected).name();
+                        service.getSaveManager().removeSave(saveName);
+                        service.getGuiService().getFx().playFX(2);
+
+                        if(selected >= saves.size()) {
+                            service.getMovesManager().setSelectedIndexY(saves.size() - 1);
+                        }
+                    }
+                    lastDownTime = now;
+                }
+
             }
             case RULES -> {
                 if(keyboard.wasSelectPressed()) { move.activate(GameState.RULES); }

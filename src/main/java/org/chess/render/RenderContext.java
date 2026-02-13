@@ -1,5 +1,7 @@
 package org.chess.render;
 
+import org.chess.manager.MovesManager;
+
 public class RenderContext {
     public static final int BASE_WIDTH = 1920;
     public static final int BASE_HEIGHT = 1080;
@@ -11,10 +13,12 @@ public class RenderContext {
     private MenuRender menuRender;
     private MovesRender movesRender;
 
+    private MovesManager movesManager;
+
     public RenderContext() {
         this.boardRender = new BoardRender(this);
         this.menuRender = new MenuRender(this);
-        this.movesRender = new MovesRender(this);
+        this.movesRender = new MovesRender(this, movesManager);
     }
 
     public BoardRender getBoardRender() {
@@ -39,6 +43,14 @@ public class RenderContext {
 
     public void setMovesRender(MovesRender movesRender) {
         this.movesRender = movesRender;
+    }
+
+    public MovesManager getMovesManager() {
+        return movesManager;
+    }
+
+    public void setMovesManager(MovesManager movesManager) {
+        this.movesManager = movesManager;
     }
 
     public void updateTransform(int windowWidth, int windowHeight) {
