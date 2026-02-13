@@ -24,7 +24,6 @@ public class BooleanService {
     public static boolean canContinue;
     public static boolean canSandbox;
     public static boolean canDoChaos;
-    public static boolean canTrain;
     public static boolean canDoCastling;
     public static boolean canDoEnPassant;
     public static boolean canTime;
@@ -33,6 +32,19 @@ public class BooleanService {
     public static boolean canBeColorblind;
     public static boolean canTheme;
     public static boolean canToggleMoves;
+
+    public static boolean doFirstMove;
+    public static boolean doRuleToggles;
+    public static boolean doCheckmate;
+    public static boolean doCastling;
+    public static boolean doKingPromoter;
+    public static boolean doQuickWin;
+    public static boolean doCheckOver;
+    public static boolean doHundred;
+    public static boolean doAllPieces;
+    public static boolean doHardGame;
+    public static boolean doUntouchable;
+    public static boolean doGrandmaster;
 
     private static final Random random = new Random();
 
