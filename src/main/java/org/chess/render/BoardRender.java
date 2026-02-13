@@ -105,9 +105,7 @@ public class BoardRender {
         }
 
         if (currentPiece != null) {
-            if (!BooleanService.isDragging) {
-                currentPiece.setScale(currentPiece.getDEFAULT_SCALE());
-            }
+            currentPiece.setScale(currentPiece.getDEFAULT_SCALE());
             drawPiece(g2, currentPiece);
         }
     }
@@ -177,8 +175,8 @@ public class BoardRender {
 
         g2.drawImage(
                 override != null ? override : piece.getImage(),
-                getBoardOriginX() + render.scale(piece.getX()) + offset,
-                getBoardOriginY() + render.scale(piece.getY()) + offset,
+                getBoardOriginX() + piece.getX() + offset,
+                getBoardOriginY() + piece.getY() + offset,
                 size,
                 size,
                 null

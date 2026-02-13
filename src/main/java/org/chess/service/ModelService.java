@@ -118,7 +118,6 @@ public class ModelService {
                 .attemptMove(p, move.targetCol(), move.targetRow());
 
         PieceService.nullThisPiece();
-        BooleanService.isDragging = false;
         BooleanService.isLegal = false;
     }
 }

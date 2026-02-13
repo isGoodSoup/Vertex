@@ -1,12 +1,10 @@
 package org.chess.input;
 
-import org.chess.entities.Achievement;
 import org.chess.render.MenuRender;
 import org.chess.render.RenderContext;
 import org.chess.service.*;
 
 import java.awt.*;
-import java.util.List;
 
 public class MenuInput {
     private final RenderContext render;

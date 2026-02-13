@@ -14,7 +14,6 @@ public abstract class Piece {
 	protected BufferedImage hovered;
 	private int x, y;
 	private int col, row, preCol, preRow;
-    private int dragOffsetX, dragOffsetY;
 	private static final double DEFAULT_SCALE = 1.0;
 	private static final float MORE_SCALE = 0.5f;
 	private double scale = DEFAULT_SCALE;
@@ -142,22 +141,6 @@ public abstract class Piece {
 
 	public void setRow(int row) {
 		this.row = row;
-	}
-
-	public int getDragOffsetX() {
-		return dragOffsetX;
-	}
-
-	public int getDragOffsetY() {
-		return dragOffsetY;
-	}
-
-	public void setDragOffsetX(int dragOffsetX) {
-		this.dragOffsetX = dragOffsetX;
-	}
-
-	public void setDragOffsetY(int dragOffsetY) {
-		this.dragOffsetY = dragOffsetY;
 	}
 
 	public Piece getOtherPiece() {

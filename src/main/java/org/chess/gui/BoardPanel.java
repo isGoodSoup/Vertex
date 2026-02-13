@@ -132,7 +132,7 @@ public class BoardPanel extends JPanel implements Runnable {
                 return;
             }
             case ACHIEVEMENTS -> {}
-            default -> service.getBoardService().getGame();
+            default -> {}
         }
 
         PlayState mode = GameService.getMode();

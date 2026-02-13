@@ -82,57 +82,6 @@ public class MoveManager {
         return fx;
     }
 
-    public Piece pickUpPiece(Piece currentPiece, int hoverCol, int hoverRow) {
-        if(mouse.wasPressed()
-                && !BooleanService.isDragging
-                && currentPiece == null) {
-            for(Piece p : service.getPieceService().getPieces()) {
-                if(p.getColor() == GameService.getCurrentTurn()
-                        && p.getCol() == hoverCol
-                        && p.getRow() == hoverRow) {
-
-                    p.setPreCol(p.getCol());
-                    p.setPreRow(p.getRow());
-                    p.setScale(p.getDEFAULT_SCALE() + p.getMORE_SCALE());
-
-                    BooleanService.isDragging = true;
-                    PieceService.setPiece(p);
-                    break;
-                }
-            }
-        }
-
-        dragPiece(PieceService.getPiece());
-        return PieceService.getPiece();
-    }
-
-    private void dragPiece(Piece currentPiece) {
-        if(!BooleanService.isDragging || currentPiece == null) { return; }
-
-        int originX = service.getRender().getBoardRender().getBoardOriginX();
-        int originY = service.getRender().getBoardRender().getBoardOriginY();
-
-        int mouseX = mouse.getX();
-        int mouseY = mouse.getY();
-
-        if(currentPiece.getDragOffsetX() == 0 && currentPiece.getDragOffsetY() == 0) {
-            currentPiece.setDragOffsetX(mouseX - originX - currentPiece.getX() * Board.getSquare());
-            currentPiece.setDragOffsetY(mouseY - originY - currentPiece.getY() * Board.getSquare());
-        }
-        currentPiece.setX((mouseX - originX - currentPiece.getDragOffsetX())/Board.getSquare());
-        currentPiece.setY((mouseY - originY - currentPiece.getDragOffsetY())/Board.getSquare());
-
-        int targetCol = (mouseX - originX) / Board.getSquare();
-        int targetRow = (mouseY - originY) / Board.getSquare();
-
-        BooleanService.isLegal = currentPiece.canMove(targetCol, targetRow,
-                service.getPieceService().getPieces())
-                && !service.getPieceService().wouldLeaveKingInCheck(
-                currentPiece, targetCol, targetRow);
-
-        dropPiece(currentPiece);
-    }
-
     public void attemptMove(Piece piece, int targetCol, int targetRow) {
         BooleanService.isLegal = piece.canMove(targetCol, targetRow,
                 service.getPieceService().getPieces())
@@ -202,37 +151,6 @@ public class MoveManager {
                 && service.getModelService().getAiTurn() == null) {
             BooleanService.isGameOver = true;
         }
-    }
-
-    private Piece dropPiece(Piece currentPiece) {
-        if(!BooleanService.isDragging || currentPiece == null) {
-            return currentPiece;
-        }
-
-        if(mouse.wasReleased()) {
-            BooleanService.isDragging = false;
-
-            int originX = service.getRender().getBoardRender().getBoardOriginX();
-            int originY = service.getRender().getBoardRender().getBoardOriginY();
-
-            int boardMouseX = mouse.getX() - originX;
-            int boardMouseY = mouse.getY() - originY;
-
-            if(boardMouseX < 0 || boardMouseX >= Board.getSquare() * 8
-                    || boardMouseY < 0 || boardMouseY >= Board.getSquare() * 8) {
-                PieceService.updatePos(currentPiece);
-                return currentPiece;
-            }
-
-            int targetCol = boardMouseX/Board.getSquare();
-            int targetRow = boardMouseY/Board.getSquare();
-
-            attemptMove(currentPiece, targetCol, targetRow);
-
-            currentPiece.setScale(currentPiece.getDEFAULT_SCALE());
-            PieceService.nullThisPiece();
-        }
-        return currentPiece;
     }
 
     public void keyboardMove() {

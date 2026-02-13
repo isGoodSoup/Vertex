@@ -8,7 +8,6 @@ import java.util.Random;
 public class BooleanService {
     public static boolean canMove;
     public static boolean isValidSquare;
-    public static boolean isDragging;
     public static boolean isLegal;
     public static boolean isAIPlaying;
     public static boolean isGameOver;

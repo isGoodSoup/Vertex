@@ -198,25 +198,4 @@ public class BoardService {
             }
         }
     }
-
-    public void getGame() {
-        if(BooleanService.isDragging && PieceService.getPiece() == null) {
-            BooleanService.isDragging = false;
-        }
-
-        Piece currentPiece = PieceService.getPiece();
-        int hoverCol = serviceFactory.getRender().unscaleX(mouse.getX()) / Board.getSquare();
-        int hoverRow = serviceFactory.getRender().unscaleY(mouse.getY()) / Board.getSquare();
-        checkPiece(currentPiece, hoverCol, hoverRow);
-    }
-
-    private void checkPiece(Piece currentPiece, int hoverCol, int hoverRow) {
-        if(GameService.getState() != GameState.BOARD) { return; }
-
-        if(BooleanService.isAIPlaying &&
-                GameService.getCurrentTurn() == Tint.BLACK) {
-            return;
-        }
-        manager.pickUpPiece(currentPiece, hoverCol, hoverRow);
-    }
 }
