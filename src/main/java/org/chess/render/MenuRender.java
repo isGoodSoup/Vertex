@@ -5,7 +5,7 @@ import org.chess.entities.Board;
 import org.chess.enums.ColorblindType;
 import org.chess.enums.GameSettings;
 import org.chess.gui.Colors;
-import org.chess.input.MenuInput;
+import org.chess.input.MouseInput;
 import org.chess.input.Mouse;
 import org.chess.manager.MovesManager;
 import org.chess.records.Save;
@@ -51,7 +51,7 @@ public class MenuRender {
     private MovesManager movesManager;
     private GUIService guiService;
     private Mouse mouse;
-    private MenuInput menuInput;
+    private MouseInput mouseInput;
     private AchievementSprites sprites;
 
     public MenuRender(RenderContext render) {
@@ -61,7 +61,7 @@ public class MenuRender {
 
     public void init() {
         this.sprites = new AchievementSprites(guiService);
-        this.menuInput = new MenuInput(render, this, guiService, gameService,
+        this.mouseInput = new MouseInput(render, this, guiService, gameService,
                 boardService, movesManager, mouse);
         try {
             DARK_MODE_ON = guiService.getImage("/ui/dark-mode_on");
@@ -127,8 +127,8 @@ public class MenuRender {
         this.mouse = mouse;
     }
 
-    public MenuInput getMenuInput() {
-        return menuInput;
+    public MouseInput getMenuInput() {
+        return mouseInput;
     }
 
     public static ColorblindType getCb() {

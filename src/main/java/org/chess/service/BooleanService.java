@@ -9,13 +9,14 @@ public class BooleanService {
     public static boolean canMove;
     public static boolean isValidSquare;
     public static boolean isLegal;
-    public static boolean isGameOver;
-    public static boolean isPromotionPending;
+    public static boolean isCheckmate;
+    public static boolean isPromotionActive;
     public static boolean isTurn;
     public static boolean isDarkMode;
     public static boolean isFullscreen;
     public static boolean isExitActive;
     public static boolean isAchievementLocked;
+    public static boolean isMovesActive;
 
     public static boolean canDoMoves;
     public static boolean canUndoMoves;
@@ -24,14 +25,14 @@ public class BooleanService {
     public static boolean canSave;
     public static boolean canAIPlay;
     public static boolean canDoTraining;
-    public static boolean canSandbox;
+    public static boolean canDoSandbox;
     public static boolean canDoChaos;
+    public static boolean canDoHard;
     public static boolean canTime;
     public static boolean canStopwatch;
     public static boolean canResetTable;
     public static boolean canBeColorblind;
     public static boolean canTheme;
-    public static boolean canToggleMoves;
     public static boolean canShowTick;
 
     public static boolean doFirstMove;
@@ -75,7 +76,7 @@ public class BooleanService {
         canTheme = false;
         isFullscreen = true;
         isDarkMode = false;
-        isGameOver = false;
+        isCheckmate = false;
         isExitActive = false;
     }
 

@@ -1,6 +1,7 @@
 package org.chess.service;
 
 import org.chess.entities.*;
+import org.chess.enums.Time;
 import org.chess.enums.Tint;
 import org.chess.input.Mouse;
 import org.chess.manager.MovesManager;
@@ -113,19 +114,21 @@ public class BoardService {
     }
 
     public void startBoard() {
-        if(BooleanService.canSandbox) { setSandboxPieces(); }
+        if(BooleanService.canDoSandbox) { setSandboxPieces(); }
         else if(BooleanService.canDoChaos) { setPiecesChaos(); }
         else if(BooleanService.canDoTraining) { setPiecesTraining(); }
         else { setPieces(); }
         PieceService.nullThisPiece();
 
         if(BooleanService.canStopwatch) {
+            TimerService.setTime(Time.STOPWATCH);
             BooleanService.canTime = false;
             getServiceFactory().getTimerService().reset();
             getServiceFactory().getTimerService().start();
         }
 
         if(BooleanService.canTime) {
+            TimerService.setTime(Time.TIMER);
             BooleanService.canStopwatch = false;
             getServiceFactory().getTimerService().reset();
             getServiceFactory().getTimerService().start();

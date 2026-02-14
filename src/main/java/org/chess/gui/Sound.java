@@ -20,6 +20,7 @@ public class Sound {
         setSound(3, "menu-select_2");
         setSound(4, "pages");
         setSound(5, "reveal");
+        setSound(6, "checkmate");
         preload();
     }
 

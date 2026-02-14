@@ -1,9 +1,6 @@
 package org.chess.gui;
 
-import org.chess.enums.Achievements;
-import org.chess.enums.ColorblindType;
-import org.chess.enums.GameState;
-import org.chess.enums.PlayState;
+import org.chess.enums.*;
 import org.chess.input.Keyboard;
 import org.chess.manager.MovesManager;
 import org.chess.records.Save;
@@ -106,7 +103,7 @@ public class BoardPanel extends JPanel implements Runnable {
                     service.getGuiService().drawTimer(g2);
                     service.getGuiService().drawTick(g2, BooleanService.isLegal);
                 }
-                if(BooleanService.canSandbox) {
+                if(BooleanService.canDoSandbox) {
                     service.getRender().getMenuRender().drawSandboxMenu(g2);
                 }
             }

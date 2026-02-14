@@ -75,8 +75,8 @@ public class GameService {
         Save currentSave = service.getSaveManager().getCurrentSave();
         setCurrentTurn(Tint.WHITE);
         service.getMovesManager().setMoves(new ArrayList<>());
-        BooleanService.isGameOver = false;
-        BooleanService.isPromotionPending = false;
+        BooleanService.isCheckmate = false;
+        BooleanService.isPromotionActive = false;
         service.getBoardService().startBoard();
         setState(GameState.BOARD);
 

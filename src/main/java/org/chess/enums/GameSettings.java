@@ -12,7 +12,6 @@ public enum GameSettings {
             BooleanService.canAIPlay ^= true;
         }
     },
-
     SAVES("Saves") {
         public boolean get() {
             return BooleanService.canSave;
@@ -21,7 +20,6 @@ public enum GameSettings {
             BooleanService.canSave ^= true;
         }
     },
-
     ACHIEVEMENTS("Achievements") {
         public boolean get() {
             return BooleanService.canDoAchievements;
@@ -30,16 +28,14 @@ public enum GameSettings {
             BooleanService.canDoAchievements ^= true;
         }
     },
-
     SANDBOX_MODE("Sandbox Mode") {
         public boolean get() {
-            return BooleanService.canSandbox;
+            return BooleanService.canDoSandbox;
         }
         public void toggle() {
-            BooleanService.canSandbox ^= true;
+            BooleanService.canDoSandbox ^= true;
         }
     },
-
     CHAOS_MODE("Chaos Mode") {
         public boolean get() {
             return BooleanService.canDoChaos;
@@ -48,7 +44,6 @@ public enum GameSettings {
             BooleanService.canDoChaos ^= true;
         }
     },
-
     TRAINING_MODE("Training Mode") {
         public boolean get() {
             return BooleanService.canDoTraining;
@@ -61,7 +56,6 @@ public enum GameSettings {
             BooleanService.canDoChaos = false;
         }
     },
-
     BASIC_MOVES("Basic Moves") {
         public boolean get() {
             return BooleanService.canDoMoves;
@@ -70,7 +64,6 @@ public enum GameSettings {
             BooleanService.canDoMoves ^= true;
         }
     },
-
     PROMOTION("Promotion") {
         public boolean get() {
             return BooleanService.canPromote;
@@ -79,7 +72,6 @@ public enum GameSettings {
             BooleanService.canPromote ^= true;
         }
     },
-
     TIMER("Timer") {
         public boolean get() {
             return BooleanService.canTime;
@@ -89,7 +81,6 @@ public enum GameSettings {
             BooleanService.canStopwatch = false;
         }
     },
-
     STOPWATCH("Stopwatch") {
         public boolean get() {
             return BooleanService.canStopwatch;
@@ -99,7 +90,6 @@ public enum GameSettings {
             BooleanService.canTime = false;
         }
     },
-
     UNDO_MOVES("Undo Moves") {
         public boolean get() {
             return BooleanService.canUndoMoves;
@@ -109,7 +99,6 @@ public enum GameSettings {
             BooleanService.canDoAchievements = false;
         }
     },
-
     RESET_TABLE("Reset Table") {
         public boolean get() {
             return BooleanService.canResetTable;
@@ -118,7 +107,17 @@ public enum GameSettings {
             BooleanService.canResetTable ^= true;
         }
     },
+    SHOW_TICK("Tick") {
+        @Override
+        public boolean get() {
+            return BooleanService.canShowTick;
+        }
 
+        @Override
+        public void toggle() {
+            BooleanService.canShowTick ^= true;
+        }
+    },
     DARK_MODE("Dark Mode") {
         public boolean get() {
             return BooleanService.isDarkMode;
@@ -128,7 +127,6 @@ public enum GameSettings {
             Colors.toggleDarkTheme();
         }
     },
-
     THEMES("Themes") {
         public boolean get() {
             return BooleanService.canTheme;
@@ -143,13 +141,27 @@ public enum GameSettings {
             }
         }
     },
-
     COLORBLIND_MODE("Colorblind Mode") {
         public boolean get() {
             return BooleanService.canBeColorblind;
         }
         public void toggle() {
             BooleanService.canBeColorblind ^= true;
+        }
+    },
+    HARD_MODE("Hard Mode") {
+        public boolean get() {
+            return BooleanService.canDoHard;
+        }
+        public void toggle() {
+            BooleanService.canDoHard ^= true;
+            BooleanService.canTime = true;
+            BooleanService.canStopwatch = false;
+            BooleanService.canDoAchievements = true;
+            BooleanService.canSave = false;
+            BooleanService.canShowTick = false;
+            BooleanService.canUndoMoves = false;
+            BooleanService.canResetTable = false;
         }
     };
 

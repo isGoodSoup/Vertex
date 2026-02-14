@@ -12,7 +12,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 
-public class MenuInput {
+public class MouseInput {
     private final RenderContext render;
     private final GameService gameService;
     private final BoardService boardService;
@@ -21,10 +21,10 @@ public class MenuInput {
     private final Mouse mouse;
     private final MenuRender menuRender;
 
-    public MenuInput(RenderContext render, MenuRender menuRender,
-                     GUIService guiService,
-                     GameService gameService, BoardService boardService,
-                     MovesManager movesManager, Mouse mouse) {
+    public MouseInput(RenderContext render, MenuRender menuRender,
+                      GUIService guiService,
+                      GameService gameService, BoardService boardService,
+                      MovesManager movesManager, Mouse mouse) {
         this.render = render;
         this.gameService = gameService;
         this.boardService = boardService;

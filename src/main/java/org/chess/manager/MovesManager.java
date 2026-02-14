@@ -139,7 +139,7 @@ public class MovesManager {
         }
 
         if(service.getPromotionService().checkPromotion(piece)) {
-            BooleanService.isPromotionPending = true;
+            BooleanService.isPromotionActive = true;
             service.getPromotionService().setPromotionColor(piece.getColor());
         } else {
             service.getPieceService().switchTurns();
@@ -176,7 +176,9 @@ public class MovesManager {
     private boolean isCheckmate() {
         if(service.getPieceService().isKingInCheck(GameService.getCurrentTurn())
                 && service.getModelService().getAiTurn() == null) {
-            BooleanService.isGameOver = true;
+            BooleanService.isCheckmate = true;
+            service.getTimerService().stop();
+            service.getGuiService().getFx().playFX(6);
             return true;
         }
         return false;

@@ -36,7 +36,7 @@ public class PromotionService {
         if(p instanceof Pawn) {
             if((p.getColor() == Tint.WHITE && p.getRow() == 0) ||
                     (p.getColor() == Tint.BLACK && p.getRow() == 7)) {
-                BooleanService.isPromotionPending = true;
+                BooleanService.isPromotionActive = true;
                 promotingPawn = p;
                 return true;
             }
@@ -64,7 +64,7 @@ public class PromotionService {
         }
 
         if(promotingPawn == pawn) { promotingPawn = null; }
-        BooleanService.isPromotionPending = false;
+        BooleanService.isPromotionActive = false;
         pieceService.switchTurns();
 
         if(!BooleanService.doKingPromoterUnlock) {

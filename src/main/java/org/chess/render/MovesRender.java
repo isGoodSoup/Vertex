@@ -55,7 +55,7 @@ public class MovesRender {
     }
 
     public void drawMoves(Graphics2D g2) {
-        if(!BooleanService.canToggleMoves) { return; }
+        if(!BooleanService.isMovesActive) { return; }
         int boardWidth = render.scale(RenderContext.BASE_WIDTH) - Board.getSquare() * 8;
         int totalHeight = render.scale(RenderContext.BASE_HEIGHT);
 
@@ -113,6 +113,6 @@ public class MovesRender {
     }
 
     public void hideMoves() {
-        BooleanService.canToggleMoves = !BooleanService.canToggleMoves;
+        BooleanService.isMovesActive = !BooleanService.isMovesActive;
     }
 }

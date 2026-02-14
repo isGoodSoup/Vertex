@@ -1,17 +1,27 @@
 package org.chess.service;
 
+import org.chess.enums.Time;
+
 public class TimerService {
     private boolean isActive;
-    private int frames;
-    private int seconds;
-    private int minutes;
+    private long lastTime;
+    private long timeNanos;
+    private static Time mode;
+    private static final long TWO_MINUTES = 120L * 1_000_000_000L;
 
     public TimerService() {
         reset();
     }
 
+    public static void setTime(Time time) {
+        mode = time;
+    }
+
     public void start() {
-        isActive = true;
+        if(!isActive) {
+            isActive = true;
+            lastTime = System.nanoTime();
+        }
     }
 
     public void stop() {
@@ -20,38 +30,41 @@ public class TimerService {
 
     public void reset() {
         isActive = false;
-        frames = 0;
-        seconds = 0;
-        minutes = 0;
+
+        if(mode == Time.TIMER) {
+            timeNanos = TWO_MINUTES;
+        } else {
+            timeNanos = 0;
+        }
     }
 
     public void update() {
         if(!isActive) { return; }
-        frames++;
-        if(frames >= 60) {
-            frames = 0;
-            seconds++;
-            if(seconds >= 60) {
-                seconds = 0;
-                minutes++;
+
+        long now = System.nanoTime();
+        long delta = now - lastTime;
+        lastTime = now;
+
+        if(mode == Time.TIMER) {
+            timeNanos -= delta;
+            if(timeNanos < 0) {
+                timeNanos = 0;
+                isActive = false;
             }
+        } else {
+            timeNanos += delta;
         }
     }
 
     public String getTimeString() {
-        return String.format("%02d:%02d", minutes, seconds);
+        long millis = (timeNanos / 1_000_000L) % 1000;
+        long totalSeconds = timeNanos/1_000_000_000L;
+        long seconds = totalSeconds % 60;
+        long minutes = totalSeconds/60;
+        return String.format("%02d:%02d:%03d", minutes, seconds, millis);
     }
 
     public boolean isActive() {
         return isActive;
     }
-
-    public int getSeconds() {
-        return seconds + minutes * 60;
-    }
-
-    public int getMinutes() {
-        return minutes;
-    }
 }
-
