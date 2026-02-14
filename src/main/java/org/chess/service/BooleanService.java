@@ -17,21 +17,22 @@ public class BooleanService {
     public static boolean isExitActive;
     public static boolean isAchievementLocked;
 
+    public static boolean canDoMoves;
     public static boolean canUndoMoves;
     public static boolean canDoAchievements;
     public static boolean canPromote;
     public static boolean canSave;
     public static boolean canAIPlay;
+    public static boolean canDoTraining;
     public static boolean canSandbox;
     public static boolean canDoChaos;
-    public static boolean canDoCastling;
-    public static boolean canDoEnPassant;
     public static boolean canTime;
     public static boolean canStopwatch;
     public static boolean canResetTable;
     public static boolean canBeColorblind;
     public static boolean canTheme;
     public static boolean canToggleMoves;
+    public static boolean canShowTick;
 
     public static boolean doFirstMove;
     public static boolean doFirstMoveUnlock;
@@ -61,20 +62,21 @@ public class BooleanService {
     private static final Random random = new Random();
 
     public static void defaultToggles() {
+        canDoMoves = true;
         canAIPlay = true;
-        canDoAchievements = true;
-        isFullscreen = true;
-        isDarkMode = false;
-        canDoCastling = true;
-        canDoEnPassant = true;
         canPromote = true;
+        canDoAchievements = true;
+        canShowTick = true;
         canSave = true;
         canResetTable = true;
         canStopwatch = true;
+        canDoChaos = false;
+        canDoTraining = false;
+        canTheme = false;
+        isFullscreen = true;
+        isDarkMode = false;
         isGameOver = false;
         isExitActive = false;
-        canDoChaos = false;
-        canTheme = false;
     }
 
     public static boolean getBoolean() {

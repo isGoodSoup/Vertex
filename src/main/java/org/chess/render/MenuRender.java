@@ -3,6 +3,7 @@ package org.chess.render;
 import org.chess.entities.Achievement;
 import org.chess.entities.Board;
 import org.chess.enums.ColorblindType;
+import org.chess.enums.GameSettings;
 import org.chess.gui.Colors;
 import org.chess.input.MenuInput;
 import org.chess.input.Mouse;
@@ -20,26 +21,11 @@ import java.util.List;
 
 public class MenuRender {
     public static final String[] optionsMenu = { "NEW GAME", "LOAD SAVE",
-            "ACHIEVEMENTS", "RULES", "EXIT" };
+            "ACHIEVEMENTS", "SETTINGS", "EXIT" };
     public static final String[] optionsMode = { "PLAYER", "AI" };
-    public static final String[] optionsTweaks = {
-            "RULES",
-            "Dark Mode",
-            "Promotion",
-            "Achievements",
-            "Saves",
-            "AI Opponent",
-            "Castling",
-            "En Passant",
-            "Timer",
-            "Stopwatch",
-            "Chaos Mode",
-            "Sandbox Mode",
-            "Undo Moves",
-            "Reset Table",
-            "Colorblind Mode",
-            "Themes"
-    };
+    public static final GameSettings[] optionsTweaks = GameSettings.values();
+    private static final String SETTINGS = "SETTINGS";
+    private static final String ACHIEVEMENTS = "ACHIEVEMENTS";
     public static String ENABLE = "Enable ";
     private static final int OPTION_X = 100;
     private static final int OPTION_Y = 160;
@@ -182,63 +168,6 @@ public class MenuRender {
         return OPTION_Y;
     }
 
-    private boolean getOptionState(String option) {
-        return switch(option) {
-            case "Dark Mode" -> BooleanService.isDarkMode;
-            case "Promotion" -> BooleanService.canPromote;
-            case "Achievements" -> BooleanService.canDoAchievements;
-            case "Saves" -> BooleanService.canSave;
-            case "AI Opponent" -> BooleanService.canAIPlay;
-            case "Castling" -> BooleanService.canDoCastling;
-            case "En Passant" -> BooleanService.canDoEnPassant;
-            case "Timer" -> BooleanService.canTime;
-            case "Stopwatch" -> BooleanService.canStopwatch;
-            case "Sandbox Mode" -> BooleanService.canSandbox;
-            case "Chaos Mode" -> BooleanService.canDoChaos;
-            case "Undo Moves" -> BooleanService.canUndoMoves;
-            case "Reset Table" -> BooleanService.canResetTable;
-            case "Colorblind Mode" -> BooleanService.canBeColorblind;
-            case "Themes" -> BooleanService.canTheme;
-            default -> false;
-        };
-    }
-
-    public void toggleOption(String option) {
-        switch(option) {
-            case "Dark Mode" -> {
-                BooleanService.isDarkMode ^= true;
-                Colors.toggleDarkTheme();
-            }
-            case "Promotion" -> BooleanService.canPromote ^= true;
-            case "Achievements" -> BooleanService.canDoAchievements ^= true;
-            case "Saves" -> BooleanService.canSave ^= true;
-            case "AI Opponent" -> BooleanService.canAIPlay ^= true;
-            case "Castling" -> BooleanService.canDoCastling ^= true;
-            case "En Passant" -> BooleanService.canDoEnPassant ^= true;
-            case "Timer" -> {
-                BooleanService.canTime ^= true;
-                BooleanService.canStopwatch = false;
-            }
-            case "Stopwatch" -> {
-                BooleanService.canStopwatch ^= true;
-                BooleanService.canTime = false;
-            }
-            case "Sandbox Mode" -> BooleanService.canSandbox ^= true;
-            case "Chaos Mode" -> BooleanService.canDoChaos ^= true;
-            case "Undo Moves" -> BooleanService.canUndoMoves ^= true;
-            case "Reset Table" -> BooleanService.canResetTable ^= true;
-            case "Colorblind Mode" -> BooleanService.canBeColorblind ^= true;
-            case "Themes" -> {
-                BooleanService.canTheme ^= true;
-                if(!BooleanService.doRuleTogglesUnlock) {
-                    if(!BooleanService.doRuleToggles) {
-                        BooleanService.doRuleToggles = true;
-                    }
-                }
-            }
-        }
-    }
-
     private void drawToggle(Graphics2D g2, BufferedImage image, int x, int y,
                             int width, int height) {
         g2.drawImage(image, x, y, width, height, null);
@@ -299,43 +228,43 @@ public class MenuRender {
         }
     }
 
-    public void drawOptionsMenu(Graphics2D g2, String[] options) {
+    public void drawOptionsMenu(Graphics2D g2, GameSettings[] options) {
         g2.setColor(Colorblindness.filter(Colors.BACKGROUND));
         g2.fillRect(0, 0, getTotalWidth(), render.scale(RenderContext.BASE_HEIGHT));
 
         g2.setFont(GUIService.getFontBold(GUIService.getMENU_FONT()));
         fm = g2.getFontMetrics();
 
+        String header = SETTINGS;
         int headerY = render.getOffsetY() + render.scale(OPTION_Y);
-        int headerWidth = fm.stringWidth(options[0]);
-        g2.setColor(BooleanService.canBeColorblind ?
-                Colorblindness.filter(Colors.FOREGROUND)
-                : Colors.FOREGROUND);
-        g2.drawString(options[0],
-                getCenterX(getTotalWidth(), headerWidth),
-                headerY);
+        int headerWidth = fm.stringWidth(header);
+        g2.setColor(Colorblindness.filter(Colors.FOREGROUND));
+        g2.drawString(header, getCenterX(getTotalWidth(), headerWidth),headerY);
 
         int startY = headerY + render.scale(90);
         int lineHeight = fm.getHeight() + render.scale(10);
         int itemsPerPage = 8;
 
-        int startIndex = (currentPage - 1) * itemsPerPage + 1;
-        int endIndex = Math.min(startIndex + itemsPerPage, optionsTweaks.length);
+        int startIndex = (currentPage - 1) * itemsPerPage;
+        int endIndex = Math.min(startIndex + itemsPerPage, options.length);
 
         int gap = render.scale(100);
         int maxRowWidth = 0;
         g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
 
         for(int i = startIndex; i < endIndex; i++) {
-            String enabledOption = ENABLE + options[i];
-            int textWidth = g2.getFontMetrics().stringWidth(enabledOption.toUpperCase());
+            GameSettings option = options[i];
+            String enabledOption = ENABLE + option.getLabel();
+            int textWidth =
+                    g2.getFontMetrics().stringWidth(enabledOption.toUpperCase());
             int toggleWidth = render.scale(TOGGLE_ON.getWidth()/2);
             int rowWidth = textWidth + gap + toggleWidth;
             if(rowWidth > maxRowWidth) maxRowWidth = rowWidth;
         }
 
         for(int i = startIndex; i < endIndex; i++) {
-            String enabledOption = ENABLE + options[i];
+            GameSettings option = options[i];
+            String enabledOption = ENABLE + option.getLabel();
             int textWidth = g2.getFontMetrics().stringWidth(enabledOption);
             int toggleWidth = render.scale(TOGGLE_ON.getWidth()/2);
             int toggleHeight = render.scale(TOGGLE_ON.getHeight()/2);
@@ -354,14 +283,14 @@ public class MenuRender {
 
             boolean isHovered = toggleHitbox.contains(mouse.getX(),
                     mouse.getY()) || (i == movesManager.getSelectedIndexY());
-            boolean isEnabled = getOptionState(options[i]);
+            boolean isEnabled = option.get();
 
             g2.setColor(Colorblindness.filter(Colors.FOREGROUND));
             g2.drawString(enabledOption.toUpperCase(), textX,
                     render.getOffsetY() + startY);
 
             BufferedImage toggleImage;
-            if(options[i].equals("Dark Mode")) {
+            if(options[i] == GameSettings.DARK_MODE) {
                 toggleImage = isEnabled
                         ? (isHovered ? DARK_MODE_ON_HIGHLIGHTED : DARK_MODE_ON)
                         : (isHovered ? DARK_MODE_OFF_HIGHLIGHTED : DARK_MODE_OFF);
@@ -383,7 +312,7 @@ public class MenuRender {
         List<Achievement> list = new ArrayList<>(achievements);
         list.sort(Comparator.comparingInt(a -> a.getId().ordinal()));
 
-        String text = "ACHIEVEMENTS";
+        String text = ACHIEVEMENTS;
         int headerY = render.getOffsetY() + render.scale(OPTION_Y);
         int headerWidth = fm.stringWidth(text);
         g2.setFont(GUIService.getFontBold(GUIService.getMENU_FONT()));
@@ -513,6 +442,10 @@ public class MenuRender {
             g2.drawString(s.name(), textX, descY);
             startY += height + spacing;
         }
+    }
+
+    public void drawSandboxMenu(Graphics2D g2) {
+
     }
 
     public BufferedImage getSprite(int i) {

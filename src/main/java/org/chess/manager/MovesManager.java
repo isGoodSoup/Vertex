@@ -1,6 +1,7 @@
 package org.chess.manager;
 
 import org.chess.entities.*;
+import org.chess.enums.GameSettings;
 import org.chess.enums.GameState;
 import org.chess.enums.Tint;
 import org.chess.gui.Sound;
@@ -204,7 +205,7 @@ public class MovesManager {
     }
 
     private void executeCastling(Piece currentPiece, int targetCol) {
-        if(!BooleanService.canDoCastling) { return; }
+        if(!BooleanService.canDoMoves) { return; }
         int colDiff = targetCol - currentPiece.getCol();
 
         if(Math.abs(colDiff) == 2 && !currentPiece.hasMoved()) {
@@ -257,7 +258,7 @@ public class MovesManager {
 
     private void executeEnPassant(Piece currentPiece, Piece captured,
                                   int targetCol, int targetRow) {
-        if(!BooleanService.canDoEnPassant) { return; }
+        if(!BooleanService.canDoMoves) { return; }
         int oldRow = currentPiece.getPreRow();
         int movedSquares = Math.abs(targetRow - oldRow);
 
@@ -329,6 +330,14 @@ public class MovesManager {
         }
     }
 
+    public void moveUp(GameSettings[] options) {
+        selectedIndexY--;
+        getFx().playFX(BooleanService.getRandom(1, 2));
+        if(selectedIndexY < 0) {
+            selectedIndexY = options.length - 1;
+        }
+    }
+
     public void moveUp() {
         GameState state = GameService.getState();
         if(state == GameState.BOARD) {
@@ -338,8 +347,14 @@ public class MovesManager {
         }
     }
 
-    public void moveLeft(String[] options) {
-        service.getRender().getMenuRender().getMenuInput().previousPage();
+    public void moveLeft(Object[] options) {
+        MenuRender menu = service.getRender().getMenuRender();
+        menu.getMenuInput().previousPage();
+
+        int itemsPerPage = 8;
+        int newPage = menu.getCurrentPage();
+        selectedIndexY = (newPage - 1) * itemsPerPage;
+
         getFx().playFX(4);
     }
 
@@ -376,6 +391,14 @@ public class MovesManager {
         }
     }
 
+    public void moveDown(GameSettings[] options) {
+        selectedIndexY++;
+        getFx().playFX(BooleanService.getRandom(1, 2));
+        if(selectedIndexY < 0) {
+            selectedIndexY = 0;
+        }
+    }
+
     public void moveDown() {
         GameState state = GameService.getState();
         if(state == GameState.BOARD) {
@@ -385,8 +408,14 @@ public class MovesManager {
         }
     }
 
-    public void moveRight(String[] options) {
-        service.getRender().getMenuRender().getMenuInput().nextPage(options);
+    public void moveRight(Object[] options) {
+        MenuRender menu = service.getRender().getMenuRender();
+        menu.getMenuInput().nextPage(options);
+
+        int itemsPerPage = 8;
+        int newPage = menu.getCurrentPage();
+        selectedIndexY = (newPage - 1) * itemsPerPage;
+
         getFx().playFX(4);
     }
 
@@ -422,15 +451,11 @@ public class MovesManager {
                 }
             }
             case RULES -> {
-                getFx().playFX(3);
-                if (selectedIndexY == 0) { return; }
-                String option = MenuRender.optionsTweaks[selectedIndexY];
-                service.getRender().getMenuRender().toggleOption(option);
+                getFx().playFX(0);
+                GameSettings option = MenuRender.optionsTweaks[selectedIndexY];
+                option.toggle();
             }
-            case ACHIEVEMENTS -> {
-                getFx().playFX(5);
-                if (selectedIndexY == 0) { return; }
-            }
+            case ACHIEVEMENTS -> {}
             case BOARD -> keyboardMove();
         }
     }

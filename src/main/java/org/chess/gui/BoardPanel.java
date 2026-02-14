@@ -106,6 +106,9 @@ public class BoardPanel extends JPanel implements Runnable {
                     service.getGuiService().drawTimer(g2);
                     service.getGuiService().drawTick(g2, BooleanService.isLegal);
                 }
+                if(BooleanService.canSandbox) {
+                    service.getRender().getMenuRender().drawSandboxMenu(g2);
+                }
             }
             case RULES -> service.getRender().getMenuRender()
                     .drawOptionsMenu(g2, MenuRender.optionsTweaks);

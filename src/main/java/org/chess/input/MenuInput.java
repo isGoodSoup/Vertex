@@ -1,5 +1,6 @@
 package org.chess.input;
 
+import org.chess.enums.GameSettings;
 import org.chess.enums.GameState;
 import org.chess.manager.MovesManager;
 import org.chess.records.Save;
@@ -37,7 +38,6 @@ public class MenuInput {
         int currentPage = menuRender.getCurrentPage();
         if(currentPage > 1) {
             menuRender.setCurrentPage(currentPage - 1);
-            movesManager.setSelectedIndexY(0);
         }
     }
 
@@ -53,14 +53,13 @@ public class MenuInput {
         }
     }
 
-    public void nextPage(String[] options) {
+    public void nextPage(Object[] options) {
         int itemsPerPage = 8;
         int totalPages = (options.length + itemsPerPage - 1) / itemsPerPage;
 
         int currentPage = menuRender.getCurrentPage();
         if(currentPage < totalPages) {
             menuRender.setCurrentPage(currentPage + 1);
-            movesManager.setSelectedIndexY(0);
         }
     }
 
@@ -105,7 +104,7 @@ public class MenuInput {
         if(!mouse.wasPressed()) { return; }
 
         int itemsPerPage = 8;
-        int startIndex = (menuRender.getCurrentPage() - 1) * itemsPerPage + 1;
+        int startIndex = (menuRender.getCurrentPage() - 1) * itemsPerPage;
         int endIndex = Math.min(startIndex + itemsPerPage, MenuRender.optionsTweaks.length);
 
         FontMetrics fm = menuRender.getFontMetrics();
@@ -126,7 +125,7 @@ public class MenuInput {
         }
 
         for(int i = startIndex; i < endIndex; i++) {
-            String option = MenuRender.optionsTweaks[i];
+            GameSettings option = MenuRender.optionsTweaks[i];
             String enabledOption = MenuRender.ENABLE + option;
 
             int textWidth = fm.stringWidth(enabledOption);
@@ -146,7 +145,7 @@ public class MenuInput {
 
             if(toggleHitbox.contains(mouse.getX(), mouse.getY())) {
                 guiService.getFx().play(0);
-                menuRender.toggleOption(option);
+                option.toggle();
                 break;
             }
             startY += lineHeight;

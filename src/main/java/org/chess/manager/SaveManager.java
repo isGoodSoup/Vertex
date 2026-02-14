@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.chess.entities.*;
 import org.chess.records.Save;
+import org.chess.service.BooleanService;
 import org.chess.util.RuntimeTypeAdapterFactory;
 
 import java.io.*;
@@ -53,6 +54,7 @@ public class SaveManager {
     }
 
     public void saveGame(Save save) {
+        if(!BooleanService.canSave) { return; }
         Path saveFile = saveFolder.resolve(save.name() + ".json");
         try (FileWriter fw = new FileWriter(saveFile.toFile())) {
             gson.toJson(save, fw);

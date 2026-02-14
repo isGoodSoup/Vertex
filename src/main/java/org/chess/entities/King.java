@@ -33,7 +33,7 @@ public class King extends Piece {
 			return isValidSquare(this, targetCol, targetRow, board);
 		}
 
-		if(BooleanService.canDoCastling) {
+		if(BooleanService.canDoMoves) {
 			if (rowDiff == 0 && colDiff == 2 && !hasMoved()) {
 				int rookCol = (targetCol > getCol()) ? 7 : 0;
 				Piece rook = PieceService.getPieceAt(rookCol, getRow(), board);

@@ -87,8 +87,8 @@ public class BoardService {
     public void restoreSprites(Save save, GUIService guiService) {
         List<Piece> loadedPieces = save.pieces();
         Piece[][] boardArray = new Piece[board.getROW()][board.getCOL()];
-        for (Piece p : loadedPieces) {
-            if (p == null) continue;
+        for(Piece p : loadedPieces) {
+            if(p == null) continue;
             int col = p.getCol();
             int row = p.getRow();
             p.setPreCol(p.getPreCol());
@@ -115,6 +115,7 @@ public class BoardService {
     public void startBoard() {
         if(BooleanService.canSandbox) { setSandboxPieces(); }
         else if(BooleanService.canDoChaos) { setPiecesChaos(); }
+        else if(BooleanService.canDoTraining) { setPiecesTraining(); }
         else { setPieces(); }
         PieceService.nullThisPiece();
 
@@ -183,7 +184,7 @@ public class BoardService {
         pieces.add(wK);
         pieces.add(bK);
 
-        for (Piece p : pieces) {
+        for(Piece p : pieces) {
             boardState[p.getRow()][p.getCol()] = p;
             int squareSize = Board.getSquare();
             p.setX(p.getCol() * squareSize);
@@ -235,6 +236,13 @@ public class BoardService {
         pieces.clear();
         clearBoardState();
 
+
+    }
+
+    private void setPiecesTraining() {
+        List<Piece> pieces = pieceService.getPieces();
+        pieces.clear();
+        clearBoardState();
 
     }
 }
