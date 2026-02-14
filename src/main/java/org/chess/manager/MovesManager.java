@@ -10,6 +10,8 @@ import org.chess.records.Move;
 import org.chess.records.Save;
 import org.chess.render.MenuRender;
 import org.chess.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -27,8 +29,12 @@ public class MovesManager {
     private int selectedIndexX;
     private int currentPage = 1;
     private int moveTracker = 0;
-    private int castlingTracker = 0;
+    private int castlingTracker;
+    private int victoryTracker;
     private static final int ITEMS_PER_PAGE = 6;
+
+    private static final Logger log =
+            LoggerFactory.getLogger(MovesManager.class);
 
     public MovesManager() {}
 
@@ -51,6 +57,10 @@ public class MovesManager {
 
     public Piece getSelectedPiece() {
         return selectedPiece;
+    }
+
+    public void setSelectedPiece(Piece selectedPiece) {
+        this.selectedPiece = selectedPiece;
     }
 
     public int getSelectedIndexX() {
@@ -93,6 +103,7 @@ public class MovesManager {
     }
 
     public void attemptMove(Piece piece, int targetCol, int targetRow) {
+        if(BooleanService.isCheckmate) { return; }
         BooleanService.isLegal = piece.canMove(targetCol, targetRow,
                 service.getPieceService().getPieces())
                 && !service.getPieceService().wouldLeaveKingInCheck(
@@ -157,9 +168,12 @@ public class MovesManager {
             }).start();
         }
 
-        if(!BooleanService.doFirstMoveUnlock) {
-            if(!BooleanService.doFirstMove) {
-                BooleanService.doFirstMove = true;
+        if(isCheckmate()) {
+            victoryTracker++;
+            if(!BooleanService.doFirstWinUnlock) {
+                if(!BooleanService.doFirstWin) {
+                    BooleanService.doFirstWin = true;
+                }
             }
         }
 
@@ -174,12 +188,54 @@ public class MovesManager {
     }
 
     private boolean isCheckmate() {
-        if(service.getPieceService().isKingInCheck(GameService.getCurrentTurn())
-                && service.getModelService().getAiTurn() == null) {
-            BooleanService.isCheckmate = true;
-            service.getTimerService().stop();
-            service.getGuiService().getFx().playFX(6);
-            return true;
+        if(service.getPieceService().isKingInCheck(GameService.getCurrentTurn())) {
+            boolean hasEscapeMoves = false;
+            for(Piece piece : service.getPieceService().getPieces()) {
+                if(piece.getColor() == GameService.getCurrentTurn()) {
+                    for(int col = 0; col < 8; col++) {
+                        for(int row = 0; row < 8; row++) {
+                            if(piece.canMove(col, row, service.getPieceService().getPieces()) &&
+                                    !service.getPieceService().wouldLeaveKingInCheck(piece, col, row)) {
+                                hasEscapeMoves = true;
+                                break;
+                            }
+                        }
+                        if(hasEscapeMoves) {
+                            break;
+                        }
+                    }
+                }
+                if(hasEscapeMoves) {
+                    break;
+                }
+            }
+
+            if(!hasEscapeMoves) {
+                BooleanService.isCheckmate = true;
+                service.getTimerService().stop();
+                service.getGuiService().getFx().playFX(6);
+                GameService.setState(GameState.CHECKMATE);
+                log.info("Checkmate to {}",
+                        selectedPiece.getOtherPiece().getColor());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isStalemate() {
+        int kingCounter = 0;
+        for(Piece p : service.getPieceService().getPieces()) {
+            if(p instanceof King) {
+                kingCounter++;
+                if(kingCounter == 2 && service.getPieceService().getPieces().size() == 2) {
+                    BooleanService.isStalemate = true;
+                    service.getTimerService().stop();
+                    service.getGuiService().getFx().playFX(6);
+                    GameService.setState(GameState.STALEMATE);
+                    log.info("Stalemate. Both sides hold just the King");
+                }
+            }
         }
         return false;
     }
@@ -243,12 +299,13 @@ public class MovesManager {
                         p.setCol(rookTargetCol);
                         PieceService.updatePos(p);
                         p.setHasMoved(true);
+                        castlingTracker++;
                         break;
                     }
                 }
             }
         }
-        castlingTracker++;
+
         if(castlingTracker == 10) {
             if(!BooleanService.doMasterCastlingUnlock) {
                 if(!BooleanService.doMasterCastling) {
@@ -274,12 +331,17 @@ public class MovesManager {
                             p.getCol() == targetCol &&
                             p.getRow() == oldRow &&
                             p.isTwoStepsAhead()) {
+                        captured = p;
                         service.getPieceService().removePiece(p);
+                        currentPiece.setRow(targetRow);
+                        currentPiece.setCol(targetCol);
+                        currentPiece.setTwoStepsAhead(false);
                         break;
                     }
                 }
             }
         }
+
         currentPiece.setTwoStepsAhead(movedSquares == 2);
     }
 
@@ -459,6 +521,15 @@ public class MovesManager {
             }
             case ACHIEVEMENTS -> {}
             case BOARD -> keyboardMove();
+        }
+    }
+
+    public void cancelMove() {
+        if (selectedPiece != null) {
+            selectedPiece.setCol(selectedPiece.getPreCol());
+            selectedPiece.setRow(selectedPiece.getPreRow());
+            PieceService.updatePos(selectedPiece);
+            PieceService.nullThisPiece();
         }
     }
 

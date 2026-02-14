@@ -42,6 +42,9 @@ public enum GameSettings {
         }
         public void toggle() {
             BooleanService.canDoChaos ^= true;
+            BooleanService.canUndoMoves = true;
+            BooleanService.canDoAchievements = false;
+            BooleanService.canDoTraining = false;
         }
     },
     TRAINING_MODE("Training Mode") {

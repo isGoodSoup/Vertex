@@ -75,7 +75,7 @@ public class BoardRender {
     }
 
     public void drawBoard(Graphics2D g2) {
-        Piece currentPiece = PieceService.getPiece();
+        Piece currentPiece = pieceService.getHeldPiece();
         Piece hoveredPiece = pieceService.getHoveredPieceKeyboard();
         int hoverX = pieceService.getHoveredSquareX();
         int hoverY = pieceService.getHoveredSquareY();

@@ -8,6 +8,8 @@ import org.chess.manager.MovesManager;
 import org.chess.gui.Sound;
 import org.chess.manager.SaveManager;
 import org.chess.records.Save;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -26,6 +28,7 @@ public class BoardService {
     private static SaveManager saveManager;
 
     private ServiceFactory serviceFactory;
+    private static final Logger log = LoggerFactory.getLogger(BoardService.class);
 
     public BoardService(PieceService pieceService, Mouse mouse,
                         PromotionService promotionService,
@@ -118,7 +121,6 @@ public class BoardService {
         else if(BooleanService.canDoChaos) { setPiecesChaos(); }
         else if(BooleanService.canDoTraining) { setPiecesTraining(); }
         else { setPieces(); }
-        PieceService.nullThisPiece();
 
         if(BooleanService.canStopwatch) {
             TimerService.setTime(Time.STOPWATCH);
@@ -136,8 +138,8 @@ public class BoardService {
     }
 
     private void getPiecesDebug() {
-        System.out.println("Initializing pieces...");
-        pieceService.getPieces().forEach(p -> System.out.println(p.getId()));
+        log.info("Initializing pieces...");
+        pieceService.getPieces().forEach(p -> log.info(p.getId().name()));
     }
 
     public void resetBoard() {
@@ -239,7 +241,6 @@ public class BoardService {
         pieces.clear();
         clearBoardState();
 
-
     }
 
     private void setPiecesTraining() {
@@ -247,5 +248,8 @@ public class BoardService {
         pieces.clear();
         clearBoardState();
 
+        pieces.add(pieceService.getRandomPiece(Tint.WHITE, 5, 6));
+        pieces.add(new King(pieceService, Tint.WHITE, 4, 7));
+        pieces.add(new King(pieceService, Tint.BLACK, 4, 0));
     }
 }

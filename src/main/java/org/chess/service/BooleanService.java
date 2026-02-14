@@ -10,6 +10,7 @@ public class BooleanService {
     public static boolean isValidSquare;
     public static boolean isLegal;
     public static boolean isCheckmate;
+    public static boolean isStalemate;
     public static boolean isPromotionActive;
     public static boolean isTurn;
     public static boolean isDarkMode;
@@ -35,8 +36,8 @@ public class BooleanService {
     public static boolean canTheme;
     public static boolean canShowTick;
 
-    public static boolean doFirstMove;
-    public static boolean doFirstMoveUnlock;
+    public static boolean doFirstWin;
+    public static boolean doFirstWinUnlock;
     public static boolean doRuleToggles;
     public static boolean doRuleTogglesUnlock;
     public static boolean doCheckmate;

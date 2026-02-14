@@ -7,6 +7,8 @@ import org.chess.input.Mouse;
 import org.chess.manager.SaveManager;
 import org.chess.records.Save;
 import org.chess.render.RenderContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,8 +23,10 @@ public class GameService {
     private static Mouse mouse;
 
     private static ServiceFactory service;
-
     public static SaveManager saveManager;
+
+    private static final Logger log =
+            LoggerFactory.getLogger(GameService.class);
 
     public GameService(RenderContext render, BoardService boardService,
                        Mouse mouse) {
@@ -89,6 +93,7 @@ public class GameService {
             );
             service.getSaveManager().setCurrentSave(newSave);
             service.getSaveManager().saveGame(newSave);
+            log.info("New save file created");
         } else {
             service.getSaveManager().saveGame(currentSave);
         }
@@ -102,9 +107,9 @@ public class GameService {
             service.getPieceService().getPieces().addAll(loaded.pieces());
             setCurrentTurn(loaded.player());
             service.getTimerService().start();
-            System.out.println("Loaded save: " + saveName);
+            log.info("Loaded save: {}", saveName);
         } else {
-            System.err.println("Failed to load save: " + saveName);
+            log.error("Failed to load save: {}", saveName);
         }
         GameService.setState(GameState.BOARD);
     }

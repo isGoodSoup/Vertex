@@ -1,7 +1,7 @@
 package org.chess.enums;
 
 public enum Achievements {
-    FIRST_MOVE("a01_first_move", "First Move", "Make your first move"),
+    FIRST_WIN("a01_first_win", "First Win", "Win your first game"),
     SECRET_TOGGLES("a02_toggles", "One Rule To Rule 'Em All", "Find the (secret) toggle"),
     CHECKMATE("a03_checkmate", "Checkmate!", "Win a game by checkmate"),
     CASTLING_MASTER("a04_castling_master", "Oh My King", "Castle at least 10 times"),

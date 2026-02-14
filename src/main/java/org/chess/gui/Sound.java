@@ -1,5 +1,8 @@
 package org.chess.gui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -13,6 +16,8 @@ public class Sound {
     private int volumeScale = 3;
     private float volume;
 
+    private static final Logger log = LoggerFactory.getLogger(Sound.class);
+
     public Sound() {
         setSound(0, "piece-fx");
         setSound(1, "menu");
@@ -21,6 +26,7 @@ public class Sound {
         setSound(4, "pages");
         setSound(5, "reveal");
         setSound(6, "checkmate");
+        log.info("Loading sound FX...");
         preload();
     }
 
@@ -50,9 +56,9 @@ public class Sound {
     }
 
     private void preload() {
-        for (int i = 0; i < soundURL.length; i++) {
+        for(int i = 0; i < soundURL.length; i++) {
             try {
-                if (soundURL[i] == null) continue;
+                if(soundURL[i] == null) { continue; }
                 AudioInputStream ais = AudioSystem.
                         getAudioInputStream(soundURL[i]);
                 Clip c = AudioSystem.getClip();
@@ -60,8 +66,9 @@ public class Sound {
                 clips[i] = c;
                 controls[i] = (FloatControl)c
                         .getControl(FloatControl.Type.MASTER_GAIN);
+                log.info("Loaded: {}", clips[i]);
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                log.error(e.getMessage());
             }
         }
     }

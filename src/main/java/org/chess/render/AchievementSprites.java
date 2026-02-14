@@ -3,6 +3,8 @@ package org.chess.render;
 import org.chess.entities.Achievement;
 import org.chess.enums.Achievements;
 import org.chess.service.GUIService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -15,16 +17,20 @@ public class AchievementSprites {
     private final GUIService guiService;
     private static BufferedImage defaultSprite;
 
+    private static final Logger log =
+            LoggerFactory.getLogger(AchievementSprites.class);
+
     public AchievementSprites(GUIService guiService) {
         this.guiService = guiService;
         loadSprites();
     }
 
     private void loadSprites() {
+        log.info("Loading achievement sprites...");
         try {
             defaultSprite = guiService.getImage("/achievements/a00_128x128");
         } catch (IOException e) {
-            System.err.println("Default achievement sprite missing!");
+            log.error("Default achievement sprite missing!");
             defaultSprite = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
         }
 
@@ -36,9 +42,10 @@ public class AchievementSprites {
 
     private void load(Achievements type, String path) {
         try {
+            log.info("Achievement sprite for: {}", type.getTitle());
             SPRITES.put(type, guiService.getImage(path));
         } catch (IOException e) {
-            System.out.println("Missing achievement sprite: " + path);
+            log.error("Missing achievement sprite: {}", path);
             SPRITES.put(type, defaultSprite);
         }
     }

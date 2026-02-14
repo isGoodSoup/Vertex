@@ -4,6 +4,7 @@ import org.chess.entities.Achievement;
 import org.chess.entities.Board;
 import org.chess.enums.ColorblindType;
 import org.chess.enums.GameSettings;
+import org.chess.enums.GameState;
 import org.chess.gui.Colors;
 import org.chess.input.MouseInput;
 import org.chess.input.Mouse;
@@ -27,6 +28,7 @@ public class MenuRender {
     private static final String SETTINGS = "SETTINGS";
     private static final String ACHIEVEMENTS = "ACHIEVEMENTS";
     public static String ENABLE = "Enable ";
+    private static final String CHECKMATE = "Checkmate!";
     private static final int OPTION_X = 100;
     private static final int OPTION_Y = 160;
     private static final float SCALE = 1.5f;
@@ -446,6 +448,19 @@ public class MenuRender {
 
     public void drawSandboxMenu(Graphics2D g2) {
 
+    }
+
+    public void drawCheckmate(Graphics2D g2) {
+        if(GameService.getState() != GameState.CHECKMATE) { return; }
+        g2.setFont(GUIService.getFontBold(GUIService.getMENU_FONT()));
+        FontMetrics fm = g2.getFontMetrics();
+
+        int headerY = render.getOffsetY() + render.scale(200);
+        int headerWidth = fm.stringWidth(CHECKMATE);
+        g2.setColor(BooleanService.canBeColorblind ?
+                Colorblindness.filter(Colors.FOREGROUND)
+                : Colors.FOREGROUND);
+        g2.drawString(CHECKMATE, getCenterX(getTotalWidth(), headerWidth),headerY);
     }
 
     public BufferedImage getSprite(int i) {

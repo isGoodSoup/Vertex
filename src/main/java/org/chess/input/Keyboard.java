@@ -41,6 +41,7 @@ public class Keyboard implements KeyListener {
         return false;
     }
 
+    public boolean wasCancelPressed() { return wasKeyPressed(KeyEvent.VK_C); }
     public boolean wasSelectPressed() { return wasEnterPressed() || wasSpacePressed(); }
     public boolean wasUpPressed() { return wasKeyPressed(KeyEvent.VK_UP); }
     public boolean wasLeftPressed() { return wasKeyPressed(KeyEvent.VK_LEFT); }

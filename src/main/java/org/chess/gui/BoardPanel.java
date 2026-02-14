@@ -8,6 +8,8 @@ import org.chess.render.Colorblindness;
 import org.chess.render.MenuRender;
 import org.chess.render.RenderContext;
 import org.chess.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,6 +32,7 @@ public class BoardPanel extends JPanel implements Runnable {
     private final long repeatDelay = 150;
 
     private static ServiceFactory service;
+    private static final Logger log = LoggerFactory.getLogger(BoardPanel.class);
 
 	public BoardPanel(ChessFrame frame) {
         super();
@@ -40,11 +43,14 @@ public class BoardPanel extends JPanel implements Runnable {
         BooleanService.defaultToggles();
         final int WIDTH = RenderContext.BASE_WIDTH;
         final int HEIGHT = RenderContext.BASE_HEIGHT;
+        log.debug("Set size(s): {}, {}", WIDTH, HEIGHT);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setBackground(Colorblindness.filter(Colors.BACKGROUND));
         addMouseListener(service.getMouseService());
         addMouseMotionListener(service.getMouseService());
+        log.debug("Mouse listener added");
         addKeyListener(service.getKeyboard());
+        log.debug("Keyboard listener added");
         setFocusable(true);
 	}
 
@@ -110,6 +116,7 @@ public class BoardPanel extends JPanel implements Runnable {
             case RULES -> service.getRender().getMenuRender()
                     .drawOptionsMenu(g2, MenuRender.optionsTweaks);
             case ACHIEVEMENTS -> service.getRender().getMenuRender().drawAchievementsMenu(g2);
+            case CHECKMATE -> service.getRender().getMenuRender().drawCheckmate(g2);
         }
         render(g2);
     }
@@ -268,6 +275,9 @@ public class BoardPanel extends JPanel implements Runnable {
                 }
             }
             case BOARD -> {
+                if(keyboard.wasCancelPressed()) {
+                    service.getMovesManager().cancelMove();
+                }
                 if(keyboard.wasSelectPressed()) { move.activate(GameState.BOARD); }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
                     move.moveUp();
@@ -321,10 +331,10 @@ public class BoardPanel extends JPanel implements Runnable {
 
     private void checkAchievements() {
         if(!BooleanService.canDoAchievements) { return; }
-        if(BooleanService.doFirstMove) {
-            service.getAchievementService().unlock(Achievements.FIRST_MOVE);
-            BooleanService.doFirstMove = false;
-            BooleanService.doFirstMoveUnlock = true;
+        if(BooleanService.doFirstWin) {
+            service.getAchievementService().unlock(Achievements.FIRST_WIN);
+            BooleanService.doFirstWin = false;
+            BooleanService.doFirstWinUnlock = true;
             playFX();
         }
         if(BooleanService.doRuleToggles) {

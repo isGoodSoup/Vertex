@@ -6,6 +6,8 @@ import org.chess.input.Mouse;
 import org.chess.gui.Sound;
 import org.chess.manager.MovesManager;
 import org.chess.render.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -38,6 +40,8 @@ public class GUIService {
     private final TimerService timerService;
     private final Mouse mouse;
     private static PromotionService promotionService;
+
+    private static final Logger log = LoggerFactory.getLogger(GUIService.class);
 
     public GUIService(RenderContext render, PieceService pieceService,
                       BoardService boardService,
@@ -75,7 +79,7 @@ public class GUIService {
                     GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(font);
         } catch(Exception e) {
-            System.err.println(e.getMessage());
+            log.error(e.getMessage());
             font = new Font("Helvetica", Font.BOLD, 30);
         }
     }
@@ -139,7 +143,7 @@ public class GUIService {
     public BufferedImage getImage(String path) throws IOException {
         InputStream stream = getClass().getResourceAsStream(path + ".png");
         if (stream == null) {
-            System.err.println("Resource not found: " + path + ".png");
+            log.error("Resource not found: {}.png", path);
             return null;
         }
         return ImageIO.read(stream);

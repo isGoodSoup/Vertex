@@ -42,19 +42,21 @@ public class Pawn extends Piece {
 			if(pieceAtTarget != null && pieceAtTarget.getColor() != this.getColor()) {
 				return true;
 			}
-
-			for(Piece p : board) {
-				if(p instanceof Pawn && p.getColor() != this.getColor()
-						&& p.getCol() == targetCol && p.getRow() == getRow()
-						&& p.isTwoStepsAhead()) {
-					setOtherPiece(p);
-					return true;
-				}
-			}
+			return canEnPassant(targetCol, targetRow, board);
 		}
 		return false;
 	}
 
+	private boolean canEnPassant(int targetCol, int targetRow, List<Piece> board) {
+		for(Piece p : board) {
+			if(p instanceof Pawn && p.getColor() != this.getColor() && p.getCol() == targetCol
+					&& p.getRow() == getRow() && p.isTwoStepsAhead()) {
+				setOtherPiece(p);
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public boolean isPathClear(Piece piece, int targetCol, int targetRow,

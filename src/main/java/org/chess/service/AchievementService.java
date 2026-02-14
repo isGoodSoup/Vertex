@@ -11,7 +11,6 @@ import java.util.*;
 public class AchievementService {
     private Map<Achievements, Achievement> achievements;
     private List<Achievement> achievementList;
-
     private AnimationService animationService;
 
     public AchievementService() {

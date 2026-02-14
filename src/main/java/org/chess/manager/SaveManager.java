@@ -6,6 +6,8 @@ import org.chess.entities.*;
 import org.chess.records.Save;
 import org.chess.service.BooleanService;
 import org.chess.util.RuntimeTypeAdapterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -17,6 +19,7 @@ public class SaveManager {
     private final Gson gson;
     private final Path saveFolder;
     private Save currentSave;
+    private static final Logger log = LoggerFactory.getLogger(SaveManager.class);
 
     public SaveManager() {
         this.saveFolder = Path.of(System.getProperty("user.home"), ".chess", "saves");
@@ -38,7 +41,7 @@ public class SaveManager {
                 Files.createDirectories(saveFolder);
             }
         } catch (IOException e) {
-            System.err.println("Failed to create saves folder: " + e.getMessage());
+            log.error("Failed to create saves folder: {}", e.getMessage());
         }
     }
 
@@ -58,23 +61,23 @@ public class SaveManager {
         Path saveFile = saveFolder.resolve(save.name() + ".json");
         try (FileWriter fw = new FileWriter(saveFile.toFile())) {
             gson.toJson(save, fw);
-            System.out.println("Game saved: " + saveFile);
+            log.info("Game saved: {}", saveFile);
         } catch (IOException e) {
-            System.err.println("Failed to save game: " + e.getMessage());
+            log.error("Failed to save game: {}", e.getMessage());
         }
     }
 
     public Save loadGame(String saveName) {
         Path saveFile = saveFolder.resolve(saveName + ".json");
         if (!Files.exists(saveFile)) {
-            System.err.println("Save file not found: " + saveFile);
+            log.error("Save file not found: {}", saveFile);
             return null;
         }
 
         try (FileReader fr = new FileReader(saveFile.toFile())) {
             return gson.fromJson(fr, Save.class);
         } catch (IOException e) {
-            System.err.println("Failed to load game: " + e.getMessage());
+            log.error("Failed to load game: {}", e.getMessage());
             return null;
         }
     }
@@ -92,7 +95,7 @@ public class SaveManager {
 
         File saveFile = new File(Path.of(System.getProperty("user.home")) + saveName +".json");
         if (saveFile.exists() && !saveFile.delete()) {
-            System.err.println("Failed to delete save file: " + saveFile.getAbsolutePath());
+            log.error("Failed to delete save file: {}", saveFile.getAbsolutePath());
         }
     }
 
@@ -103,7 +106,7 @@ public class SaveManager {
             stream.filter(f -> f.toString().endsWith(".json"))
                     .forEach(f -> saveNames.add(f.getFileName().toString().replace(".json", "")));
         } catch (IOException e) {
-            System.err.println("Failed to list saves: " + e.getMessage());
+            log.error("Failed to list saves: {}", e.getMessage());
         }
         return saveNames;
     }

@@ -9,6 +9,8 @@ import org.chess.enums.Type;
 import org.chess.render.Colorblindness;
 import org.chess.service.GUIService;
 import org.chess.service.PieceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Piece {
 	protected Type id;
@@ -23,6 +25,8 @@ public abstract class Piece {
 	private Piece otherPiece;
 	private boolean hasMoved;
 	private boolean isTwoStepsAhead;
+
+	private static final Logger log = LoggerFactory.getLogger(Piece.class);
 
 	public Piece(Tint color, int col, int row) {
 		super();
@@ -41,7 +45,7 @@ public abstract class Piece {
 					guiService.getImage("/pieces/" +
 							getClass().getSimpleName().toLowerCase() + "_" + color.name());
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			log.error(e.getMessage());
 		}
 	}
 

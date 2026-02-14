@@ -5,6 +5,8 @@ import org.chess.enums.Tint;
 import org.chess.enums.Type;
 import org.chess.input.Mouse;
 import org.chess.manager.MovesManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -23,9 +25,11 @@ public class PieceService {
     private int hoveredSquareX = -1;
     private int hoveredSquareY = -1;
 
-    private MovesManager movesManager;
+    private static MovesManager movesManager;
     private static BoardService boardService;
     private final Mouse mouse;
+
+    private static final Logger log = LoggerFactory.getLogger(PieceService.class);
 
     public PieceService(Mouse mouse) {
         this.mouse = mouse;
@@ -45,20 +49,11 @@ public class PieceService {
     }
 
     public void setMoveManager(MovesManager movesManager) {
-        this.movesManager = movesManager;
+        PieceService.movesManager = movesManager;
     }
 
     public Piece getHeldPiece() {
-        return PieceService.getPiece() != null ? PieceService.getPiece()
-                : movesManager.getSelectedPiece();
-    }
-
-    public static Piece getPiece() {
-        return currentPiece;
-    }
-
-    public static void setPiece(Piece p) {
-        currentPiece = p;
+        return movesManager.getSelectedPiece();
     }
 
     public Piece getHoveredPieceKeyboard() {
@@ -83,7 +78,7 @@ public class PieceService {
     }
 
     public static void nullThisPiece() {
-        currentPiece = null;
+        movesManager.setSelectedPiece(null);
     }
 
     public List<Piece> getPieces() {
@@ -96,7 +91,7 @@ public class PieceService {
             img = ImageIO.read(Objects.requireNonNull(
                     PieceService.class.getResourceAsStream(path + ".png")));
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            log.error(e.getMessage());
         }
         return img;
     }
@@ -185,8 +180,7 @@ public class PieceService {
         p.setRow(newRow);
         updatePos(p);
 
-        System.out.println(p.getColor().toString() + " "
-                + p.getId().toString() + ": " + oldPos + " -> " + newPos);
+        log.debug("{} {}: {} -> {}", p.getColor().toString(), p.getId().toString(), oldPos, newPos);
         BoardService.getBoardState()[newCol][newRow] = p;
     }
 

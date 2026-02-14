@@ -59,7 +59,7 @@ public class PromotionService {
                 [promotedPiece.getCol()][promotedPiece.getRow()] = promotedPiece;
         this.promotingPawn = null;
 
-        if (PieceService.getPiece() == pawn) {
+        if (pieceService.getHeldPiece() == pawn) {
             PieceService.nullThisPiece();
         }
 
