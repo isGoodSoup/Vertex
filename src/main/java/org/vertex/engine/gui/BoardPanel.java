@@ -54,9 +54,9 @@ public class BoardPanel extends JPanel implements Runnable {
         setBackground(Colorblindness.filter(Colors.BACKGROUND));
         addMouseListener(service.getMouseService());
         addMouseMotionListener(service.getMouseService());
-        log.debug("Mouse listener added");
+        log.debug("Mouse listener inserted");
         addKeyListener(service.getKeyboard());
-        log.debug("Keyboard listener added");
+        log.debug("Keyboard listener inserted");
         setFocusable(true);
 	}
 

@@ -186,7 +186,7 @@ public class MenuRender {
         int logoWidth = (int) (GUIService.getLogo().getWidth()/SCALE);
         int logoHeight = (int) (GUIService.getLogo().getHeight()/SCALE);
         int x = getCenterX(containerWidth, logoWidth);
-        int y = render.getOffsetY() + render.scale(RenderContext.BASE_HEIGHT)/10;
+        int y = render.getOffsetY() + render.scale(RenderContext.BASE_HEIGHT)/8;
         g2.drawImage(img, x, y, logoWidth, logoHeight, null);
     }
 
