@@ -9,11 +9,11 @@ public class Colors {
     public final static Color LOGO_BACKGROUND = new Color(111, 175, 77);
     public final static Color LOGO_FOREGROUND = new Color(71, 135, 37);
     public final static Color LOGO_EDGE = new Color(51, 115, 17);
-    public final static Color LOGO_HIGHLIGHT = new Color(91, 155, 57);
+    public final static Color LOGO_HIGHLIGHT = new Color(191, 255, 157);
     public final static Color DEFAULT_BACKGROUND = new Color(210, 165, 125);
     public final static Color DEFAULT_FOREGROUND = new Color(175, 115, 70);
     public final static Color DEFAULT_EDGE = new Color(120, 70, 40);
-    public final static Color DEFAULT_HIGHLIGHT = new Color(255, 225, 80);
+    public final static Color DEFAULT_HIGHLIGHT = new Color(255, 225, 0);
     public static final Color DARK_MODE = new Color(20, 20, 40);
     public static final Color BLACK_BACKGROUND = new Color(40, 40, 60);
     public static final Color WHITE_FOREGROUND = new Color(255, 255, 255);
@@ -26,7 +26,7 @@ public class Colors {
     public static final Color FOREST_BACKGROUND = new Color(100, 180, 100);
     public static final Color FOREST_FOREGROUND = new Color(30, 120, 60);
     public static final Color FOREST_EDGE = new Color(10, 100, 40);
-    public static final Color FOREST_HIGHLIGHT = new Color(50, 140, 80);
+    public static final Color FOREST_HIGHLIGHT = new Color(150, 240, 180);
     public static final Color FAIRY_BACKGROUND = new Color(180, 140, 200);
     public static final Color FAIRY_FOREGROUND = new Color(180, 70, 200);
     public static final Color FAIRY_EDGE = new Color(140, 40, 170);

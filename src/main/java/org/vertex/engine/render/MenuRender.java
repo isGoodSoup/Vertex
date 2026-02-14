@@ -178,7 +178,8 @@ public class MenuRender {
 
     private static void drawLogo(Graphics2D g2, int containerWidth) {
         if(GUIService.getLogo() == null) { return; }
-        BufferedImage img = BooleanService.isDarkMode ?
+        BufferedImage img =
+                BooleanService.isDarkMode || Colors.BACKGROUND == Colors.BLACK_BACKGROUND ?
                 GUIService.getLogo_v2() : Colorblindness.filter(GUIService.getLogo());
         int boardWidth = Board.getSquare() * 8;
         int boardCenterX = render.getOffsetX() + render.scale(
@@ -186,7 +187,7 @@ public class MenuRender {
         int logoWidth = (int) (GUIService.getLogo().getWidth()/SCALE);
         int logoHeight = (int) (GUIService.getLogo().getHeight()/SCALE);
         int x = getCenterX(containerWidth, logoWidth);
-        int y = render.getOffsetY() + render.scale(RenderContext.BASE_HEIGHT)/8;
+        int y = render.getOffsetY() + render.scale(RenderContext.BASE_HEIGHT)/6;
         g2.drawImage(img, x, y, logoWidth, logoHeight, null);
     }
 
