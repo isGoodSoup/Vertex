@@ -3,6 +3,7 @@ package org.vertex.engine.entities;
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.Type;
 import org.vertex.engine.service.BooleanService;
+import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.PieceService;
 
 import java.util.List;
@@ -18,31 +19,54 @@ public class King extends Piece {
 
 	@Override
 	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
-		if(!isWithinBoard(targetCol, targetRow)) { return false; }
-		int colDiff = Math.abs(targetCol - getCol());
-		int rowDiff = Math.abs(targetRow - getRow());
+		switch(GameService.getGame()) {
+			case CHESS -> {
+				if(!isWithinBoard(targetCol, targetRow)) { return false; }
+				int colDiff = Math.abs(targetCol - getCol());
+				int rowDiff = Math.abs(targetRow - getRow());
 
-		if((colDiff + rowDiff == 1) || (colDiff * rowDiff == 1)) {
-			return isValidSquare(this, targetCol, targetRow, board);
-		}
+				if((colDiff + rowDiff == 1) || (colDiff * rowDiff == 1)) {
+					return isValidSquare(this, targetCol, targetRow, board);
+				}
 
-		if(BooleanService.canDoMoves) {
-			if (rowDiff == 0 && colDiff == 2 && !hasMoved()) {
-				int rookCol = (targetCol > getCol()) ? 7 : 0;
-				Piece rook = PieceService.getPieceAt(rookCol, getRow(), board);
-				if (rook instanceof Rook && !rook.hasMoved()) {
-					int step = (targetCol > getCol()) ? 1 : -1;
-					for (int c = getCol() + step; c != rookCol; c += step) {
-						if (PieceService.getPieceAt(c, getRow(), board) != null) {
-							return false;
+				if(BooleanService.canDoMoves) {
+					if (rowDiff == 0 && colDiff == 2 && !hasMoved()) {
+						int rookCol = (targetCol > getCol()) ? 7 : 0;
+						Piece rook = PieceService.getPieceAt(rookCol, getRow(), board);
+						if (rook instanceof Rook && !rook.hasMoved()) {
+							int step = (targetCol > getCol()) ? 1 : -1;
+							for (int c = getCol() + step; c != rookCol; c += step) {
+								if (PieceService.getPieceAt(c, getRow(), board) != null) {
+									return false;
+								}
+							}
+							for (int c = getCol(); c != targetCol + step; c += step) {
+								if (pieceService.wouldLeaveKingInCheck(this, c, getRow())) {
+									return false;
+								}
+							}
+							return true;
 						}
 					}
-					for (int c = getCol(); c != targetCol + step; c += step) {
-						if (pieceService.wouldLeaveKingInCheck(this, c, getRow())) {
-							return false;
-						}
+				}
+			}
+			case CHECKERS -> {
+				if(!isWithinBoard(targetCol, targetRow)) { return false; }
+
+				int colDiff = Math.abs(targetCol - getCol());
+				int rowDiff = Math.abs(targetRow - getRow());
+
+				if(colDiff == 1 && rowDiff == 1) {
+					return isColliding(targetCol, targetRow, board) == null;
+				}
+
+				if(colDiff == 2 && rowDiff == 2) {
+					int midCol = (getCol() + targetCol) / 2;
+					int midRow = (getRow() + targetRow) / 2;
+					Piece middlePiece = isColliding(midCol, midRow, board);
+					if(middlePiece != null && middlePiece.getColor() != getColor()) {
+						return true;
 					}
-					return true;
 				}
 			}
 		}

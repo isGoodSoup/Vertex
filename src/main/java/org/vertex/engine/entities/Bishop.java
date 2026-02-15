@@ -14,7 +14,7 @@ public class Bishop extends Piece {
 
 	@Override
 	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
-		if (!isWithinBoard(targetCol, targetRow)
+		if(!isWithinBoard(targetCol, targetRow)
 				|| isSameSquare(this, targetCol, targetRow)) {
 			return false;
 		}
@@ -22,17 +22,17 @@ public class Bishop extends Piece {
 		int colDiff = targetCol - getCol();
 		int rowDiff = targetRow - getRow();
 
-		if (Math.abs(colDiff) != Math.abs(rowDiff)) {
+		if(Math.abs(colDiff) != Math.abs(rowDiff)) {
 			return false;
 		}
 
-		if (!isPathClear(this, targetCol, targetRow, board)) {
+		if(!isPathClear(this, targetCol, targetRow, board)) {
 			return false;
 		}
 
 		Piece target = null;
-		for (Piece p : board) {
-			if (p.getCol() == targetCol && p.getRow() == targetRow) {
+		for(Piece p : board) {
+			if(p.getCol() == targetCol && p.getRow() == targetRow) {
 				target = p;
 				break;
 			}

@@ -242,35 +242,40 @@ public class BoardService {
             return;
         }
 
-        List<Piece> pieces = pieceService.getPieces();
-        columns.clear();
-        pieces.clear();
-        clearBoardState();
+        switch(GameService.getGame()) {
+            case CHESS -> {
+                List<Piece> pieces = pieceService.getPieces();
+                columns.clear();
+                pieces.clear();
+                clearBoardState();
 
-        List<Integer> f = new ArrayList<>(List.of(0, 1, 2, 3, 4, 5, 6, 7));
-        List<Integer> b = new ArrayList<>(List.of(0, 1, 2, 3, 4, 5, 6, 7));
-        Collections.shuffle(f);
-        Collections.shuffle(b);
-        columns.put(f, b);
+                List<Integer> f = new ArrayList<>(List.of(0, 1, 2, 3, 4, 5, 6, 7));
+                List<Integer> b = new ArrayList<>(List.of(0, 1, 2, 3, 4, 5, 6, 7));
+                Collections.shuffle(f);
+                Collections.shuffle(b);
+                columns.put(f, b);
 
-        for(Map.Entry<List<Integer>, List<Integer>> entry :
-                columns.entrySet()) {
-            List<Integer> front = entry.getKey();
-            List<Integer> back = entry.getValue();
+                for(Map.Entry<List<Integer>, List<Integer>> entry :
+                        columns.entrySet()) {
+                    List<Integer> front = entry.getKey();
+                    List<Integer> back = entry.getValue();
 
-            for(int col : front) {
-                pieces.add(pieceService.getRandomPiece(Tint.LIGHT, col, 6));
-                pieces.add(pieceService.getRandomPiece(Tint.DARK, col, 1));
+                    for(int col : front) {
+                        pieces.add(pieceService.getRandomPiece(Tint.LIGHT, col, 6));
+                        pieces.add(pieceService.getRandomPiece(Tint.DARK, col, 1));
+                    }
+
+                    for(int col : back) {
+                        if(col == 4) { continue; }
+                        pieces.add(pieceService.getRandomPiece(Tint.LIGHT, col, 7));
+                        pieces.add(pieceService.getRandomPiece(Tint.DARK, col, 0));
+                    }
+                }
+                pieces.add(new King(pieceService, Tint.LIGHT, 4, 7));
+                pieces.add(new King(pieceService, Tint.DARK, 4, 0));
             }
-
-            for(int col : back) {
-                if(col == 4) { continue; }
-                pieces.add(pieceService.getRandomPiece(Tint.LIGHT, col, 7));
-                pieces.add(pieceService.getRandomPiece(Tint.DARK, col, 0));
-            }
+            case CHECKERS -> {}
         }
-        pieces.add(new King(pieceService, Tint.LIGHT, 4, 7));
-        pieces.add(new King(pieceService, Tint.DARK, 4, 0));
     }
 
     private void setSandboxPieces() {
