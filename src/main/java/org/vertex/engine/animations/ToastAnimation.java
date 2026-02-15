@@ -1,5 +1,6 @@
 package org.vertex.engine.animations;
 
+import org.vertex.engine.enums.Theme;
 import org.vertex.engine.gui.Colors;
 import org.vertex.engine.interfaces.Animation;
 import org.vertex.engine.render.Colorblindness;
@@ -67,7 +68,7 @@ public class ToastAnimation implements Animation {
         int textX = x + 20 + (icon != null ? iconSize + 32 : 0);
         int textY = y + (HEIGHT + fm.getAscent()) / 2 - 24;
         g2.drawString(title, textX, textY);
-        g2.setColor(Colorblindness.filter(Colors.getForeground()));
+        g2.setColor(Colorblindness.filter(Theme.BLACK.getForeground()));
         g2.drawString(description, textX, textY + 40);
     }
 

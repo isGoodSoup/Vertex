@@ -66,7 +66,7 @@ public class Sound {
                 clips[i] = c;
                 controls[i] = (FloatControl)c
                         .getControl(FloatControl.Type.MASTER_GAIN);
-                log.info("Loaded: {}", clips[i]);
+                log.info("Loaded: {}", clips[i].getClass().getSimpleName());
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
