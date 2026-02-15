@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.Serial;
 
-public class VertexFrame extends JFrame {
+public class VFrame extends JFrame {
 	@Serial
     private static final long serialVersionUID = -3130387824420425271L;
 	private final static String TITLE = "Vertex v0.8";
@@ -14,7 +14,7 @@ public class VertexFrame extends JFrame {
 	private final GraphicsDevice gd;
 	private Rectangle windowedBounds;
 
-    public VertexFrame() {
+    public VFrame() {
 		super(TITLE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setUndecorated(false);

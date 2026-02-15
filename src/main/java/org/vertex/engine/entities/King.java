@@ -1,8 +1,10 @@
 package org.vertex.engine.entities;
 
+import org.vertex.engine.enums.Games;
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.Type;
 import org.vertex.engine.service.BooleanService;
+import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.PieceService;
 
 import java.util.List;
@@ -15,11 +17,21 @@ public class King extends Piece {
 		this.id = Type.KING;
 		this.pieceService = pieceService;
 		if(color == Tint.WHITE) {
-			sprite = PieceService.getImage("/pieces/king_white");
-			hovered = PieceService.getImage("/pieces/king_whiteh");
+			if(GameService.getGame() == Games.CHESS) {
+				sprite = PieceService.getImage("/pieces/king_white");
+				hovered = PieceService.getImage("/pieces/king_whiteh");
+			} else if(GameService.getGame() == Games.CHECKERS) {
+				sprite = PieceService.getImage("/pieces/king_checkers_white");
+				hovered = PieceService.getImage("/pieces/king_checkers_whiteh");
+			}
 		} else {
-			sprite = PieceService.getImage("/pieces/king_black");
-			hovered = PieceService.getImage("/pieces/king_blackh");
+			if(GameService.getGame() == Games.CHESS) {
+				sprite = PieceService.getImage("/pieces/king_black");
+				hovered = PieceService.getImage("/pieces/king_blackh");
+			} else if(GameService.getGame() == Games.CHECKERS) {
+				sprite = PieceService.getImage("/pieces/king_checkers_black");
+				hovered = PieceService.getImage("/pieces/king_checkers_blackh");
+			}
 		}
 	}
 

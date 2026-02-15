@@ -2,9 +2,7 @@ package org.vertex.engine.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertex.engine.enums.GameState;
-import org.vertex.engine.enums.PlayState;
-import org.vertex.engine.enums.Tint;
+import org.vertex.engine.enums.*;
 import org.vertex.engine.input.Mouse;
 import org.vertex.engine.manager.SaveManager;
 import org.vertex.engine.records.Save;
@@ -14,8 +12,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class GameService {
+    private static GameMenu gameMenu;
     private static GameState state;
     private static PlayState mode;
+    private static Games game;
     private static Tint currentTurn;
 
     private static RenderContext render;
@@ -30,9 +30,26 @@ public class GameService {
 
     public GameService(RenderContext render, BoardService boardService,
                        Mouse mouse) {
+        GameService.game = Games.CHESS;
         GameService.render = render;
         GameService.boardService = boardService;
         GameService.mouse = mouse;
+    }
+
+    public static GameMenu getGameMenu() {
+        return gameMenu;
+    }
+
+    public static void setGameMenu(GameMenu gameMenu) {
+        GameService.gameMenu = gameMenu;
+    }
+
+    public static void setGame(Games game) {
+        GameService.game = game;
+    }
+
+    public static Games getGame() {
+        return game;
     }
 
     public SaveManager getSaveManager() {
@@ -82,10 +99,9 @@ public class GameService {
         BooleanService.isCheckmate = false;
         BooleanService.isPromotionActive = false;
         service.getBoardService().startBoard();
-        setState(GameState.BOARD);
-
         if(currentSave == null) {
             Save newSave = new Save(
+                    getGame(),
                     LocalDate.now().toString(),
                     getCurrentTurn(),
                     service.getPieceService().getPieces(),
@@ -105,6 +121,8 @@ public class GameService {
             boardService.restoreSprites(loaded, service.getGuiService());
             service.getPieceService().getPieces().clear();
             service.getPieceService().getPieces().addAll(loaded.pieces());
+            service.getAchievementService()
+                    .setUnlockedAchievements(loaded.achievements());
             setCurrentTurn(loaded.player());
             service.getTimerService().start();
             log.info("Loaded save: {}", saveName);
@@ -112,17 +130,5 @@ public class GameService {
             log.error("Failed to load save: {}", saveName);
         }
         GameService.setState(GameState.BOARD);
-    }
-
-    public void optionsMenu() {
-        setState(GameState.RULES);
-    }
-
-    public void achievementsMenu() {
-        setState(GameState.ACHIEVEMENTS);
-    }
-
-    public void loadSaves() {
-        setState(GameState.SAVES);
     }
 }

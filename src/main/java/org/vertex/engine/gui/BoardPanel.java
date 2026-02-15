@@ -2,10 +2,7 @@ package org.vertex.engine.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertex.engine.enums.Achievements;
-import org.vertex.engine.enums.ColorblindType;
-import org.vertex.engine.enums.GameState;
-import org.vertex.engine.enums.PlayState;
+import org.vertex.engine.enums.*;
 import org.vertex.engine.input.Keyboard;
 import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.records.Save;
@@ -27,7 +24,7 @@ import java.util.List;
 public class BoardPanel extends JPanel implements Runnable {
 	@Serial
     private static final long serialVersionUID = -5189356863277669172L;
-    private final VertexFrame frame;
+    private final VFrame frame;
     private final RenderContext render;
     private final int FPS = 60;
 	private Thread thread;
@@ -40,7 +37,7 @@ public class BoardPanel extends JPanel implements Runnable {
     private static ServiceFactory service;
     private static final Logger log = LoggerFactory.getLogger(BoardPanel.class);
 
-	public BoardPanel(VertexFrame frame) {
+	public BoardPanel(VFrame frame) {
         super();
         this.frame = frame;
         this.render = new RenderContext();
@@ -106,7 +103,8 @@ public class BoardPanel extends JPanel implements Runnable {
     public void drawGame(Graphics2D g2) throws InterruptedException {
         switch(GameService.getState()) {
             case MENU -> service.getRender().getMenuRender().drawGraphics(g2,
-                    MenuRender.optionsMenu);
+                    MenuRender.MENU);
+            case GAMES -> service.getRender().getMenuRender().drawGamesMenu(g2, MenuRender.GAMES);
             case SAVES -> service.getRender().getMenuRender().drawSavesMenu(g2);
             case BOARD -> {
                 service.getRender().getBoardRender().drawBoard(g2);
@@ -120,9 +118,10 @@ public class BoardPanel extends JPanel implements Runnable {
                 }
             }
             case RULES -> service.getRender().getMenuRender()
-                    .drawOptionsMenu(g2, MenuRender.optionsTweaks);
+                    .drawOptionsMenu(g2, MenuRender.SETTINGS_MENU);
             case ACHIEVEMENTS -> service.getRender().getMenuRender().drawAchievementsMenu(g2);
             case CHECKMATE -> service.getRender().getMenuRender().drawCheckmate(g2);
+            case STALEMATE -> service.getRender().getMenuRender().drawCheckmate(g2);
         }
         render(g2);
     }
@@ -150,13 +149,14 @@ public class BoardPanel extends JPanel implements Runnable {
         switch(GameService.getState()) {
             case MENU -> {
                 service.getRender().getMenuRender()
-                        .getMenuInput().handleMenuInput(MenuRender.optionsMenu);
+                        .getMouseInput().handleMenuInput(MenuRender.MENU);
                 return;
             }
-            case SAVES -> service.getRender().getMenuRender().getMenuInput().handleSavesInput();
+            case GAMES -> service.getRender().getMenuRender().getMouseInput().handleGamesMenu(MenuRender.GAMES);
+            case SAVES -> service.getRender().getMenuRender().getMouseInput().handleSavesInput();
             case RULES -> {
                 service.getRender().getMenuRender()
-                        .getMenuInput().handleOptionsInput();
+                        .getMouseInput().handleOptionsInput();
                 return;
             }
             case ACHIEVEMENTS -> {}
@@ -169,6 +169,7 @@ public class BoardPanel extends JPanel implements Runnable {
         MovesManager move = BoardService.getMovesManager();
         Keyboard keyboard = service.getKeyboard();
         GameState state = GameService.getState();
+        GameMenu menu = GameService.getGameMenu();
 
         if(keyboard.wasBPressed()) {
             if(GameService.getState() == GameState.BOARD) {
@@ -190,11 +191,22 @@ public class BoardPanel extends JPanel implements Runnable {
             case MENU -> {
                 if(keyboard.wasSelectPressed()) { move.activate(GameState.MENU); }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
-                    move.moveUp(MenuRender.optionsMenu);
+                    move.moveUp(MenuRender.MENU);
                     lastUpTime = now;
                 }
                 if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
-                    move.moveDown(MenuRender.optionsMenu);
+                    move.moveDown(MenuRender.MENU);
+                    lastDownTime = now;
+                }
+            }
+            case GAMES -> {
+                if(keyboard.wasSelectPressed()) { move.activate(GameState.GAMES); }
+                if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
+                    move.moveUp(MenuRender.MENU);
+                    lastUpTime = now;
+                }
+                if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
+                    move.moveDown(MenuRender.MENU);
                     lastDownTime = now;
                 }
             }
@@ -217,7 +229,7 @@ public class BoardPanel extends JPanel implements Runnable {
                     if(service.getRender().getMenuRender().getCurrentPage() > 0) {
                         service.getGuiService().getFx().playFX(4);
                     }
-                    service.getRender().getMenuRender().getMenuInput().previousPage();
+                    service.getRender().getMenuRender().getMouseInput().previousPage();
                     service.getMovesManager().setSelectedIndexY(
                             (service.getRender().getMenuRender().getCurrentPage() - 1) * itemsPerPage
                     );
@@ -225,7 +237,7 @@ public class BoardPanel extends JPanel implements Runnable {
                 }
                 if(keyboard.isRightDown() && now - lastDownTime >= repeatDelay) {
                     service.getGuiService().getFx().playFX(4);
-                    service.getRender().getMenuRender().getMenuInput().nextPage();
+                    service.getRender().getMenuRender().getMouseInput().nextPage();
                     service.getMovesManager().setSelectedIndexY(
                             (service.getRender().getMenuRender().getCurrentPage() - 1) * itemsPerPage
                     );
@@ -250,19 +262,19 @@ public class BoardPanel extends JPanel implements Runnable {
             case RULES -> {
                 if(keyboard.wasSelectPressed()) { move.activate(GameState.RULES); }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
-                    move.moveUp(MenuRender.optionsTweaks);
+                    move.moveUp(MenuRender.SETTINGS_MENU);
                     lastUpTime = now;
                 }
                 if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
-                    move.moveDown(MenuRender.optionsTweaks);
+                    move.moveDown(MenuRender.SETTINGS_MENU);
                     lastDownTime = now;
                 }
                 if(keyboard.isLeftDown() && now - lastDownTime >= repeatDelay) {
-                    move.moveLeft(MenuRender.optionsTweaks);
+                    move.moveLeft(MenuRender.SETTINGS_MENU);
                     lastDownTime = now;
                 }
                 if(keyboard.isRightDown() && now - lastDownTime >= repeatDelay) {
-                    move.moveRight(MenuRender.optionsTweaks);
+                    move.moveRight(MenuRender.SETTINGS_MENU);
                     lastDownTime = now;
                 }
             }
@@ -271,12 +283,12 @@ public class BoardPanel extends JPanel implements Runnable {
                     if(service.getRender().getMenuRender().getCurrentPage() > 0) {
                         service.getGuiService().getFx().playFX(4);
                     }
-                    service.getRender().getMenuRender().getMenuInput().previousPage();
+                    service.getRender().getMenuRender().getMouseInput().previousPage();
                     lastUpTime = now;
                 }
                 if(keyboard.isRightDown() && now - lastDownTime >= repeatDelay) {
                     service.getGuiService().getFx().playFX(4);
-                    service.getRender().getMenuRender().getMenuInput().nextPage();
+                    service.getRender().getMenuRender().getMouseInput().nextPage();
                     lastDownTime = now;
                 }
             }

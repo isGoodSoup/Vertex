@@ -2,9 +2,7 @@ package org.vertex.engine.render;
 
 import org.vertex.engine.entities.Achievement;
 import org.vertex.engine.entities.Board;
-import org.vertex.engine.enums.ColorblindType;
-import org.vertex.engine.enums.GameSettings;
-import org.vertex.engine.enums.GameState;
+import org.vertex.engine.enums.*;
 import org.vertex.engine.gui.Colors;
 import org.vertex.engine.input.Mouse;
 import org.vertex.engine.input.MouseInput;
@@ -21,9 +19,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class MenuRender {
-    public static final String[] optionsMenu = { "NEW GAME", "LOAD SAVE",
-            "ACHIEVEMENTS", "SETTINGS", "EXIT" };
-    public static final GameSettings[] optionsTweaks = GameSettings.values();
+    public static final GameMenu[] MENU = GameMenu.values();
+    public static final Games[] GAMES = Games.values();
+    public static final GameSettings[] SETTINGS_MENU = GameSettings.values();
     private static final String SETTINGS = "SETTINGS";
     private static final String ACHIEVEMENTS = "ACHIEVEMENTS";
     private static final String SAVES = "SAVE FILES";
@@ -130,7 +128,7 @@ public class MenuRender {
         this.mouse = mouse;
     }
 
-    public MouseInput getMenuInput() {
+    public MouseInput getMouseInput() {
         return mouseInput;
     }
 
@@ -191,7 +189,7 @@ public class MenuRender {
         g2.drawImage(img, x, y, logoWidth, logoHeight, null);
     }
 
-    public void drawGraphics(Graphics2D g2, String[] options) {
+    public void drawGraphics(Graphics2D g2, GameMenu[] options) {
         g2.setColor(Colorblindness.filter(Colors.BACKGROUND));
         g2.fillRect(0, 0, getTotalWidth(), render.scale(RenderContext.BASE_HEIGHT));
 
@@ -202,9 +200,10 @@ public class MenuRender {
         int spacing = render.scale(GUIService.getMENU_SPACING());
 
         for(int i = 0; i < options.length; i++) {
-            String optionText = options[i];
+            GameMenu op = options[i];
+            String option = op.getLabel();
             fm = g2.getFontMetrics();
-            int textWidth = fm.stringWidth(optionText);
+            int textWidth = fm.stringWidth(option);
 
             int x = getCenterX(getTotalWidth(), textWidth);
             int y = render.getOffsetY() + startY + i * spacing;
@@ -223,7 +222,49 @@ public class MenuRender {
             Color textColor = isHovered ? Colors.getHighlight() : foreground;
 
             g2.setColor(textColor);
-            g2.drawString(optionText, x, y);
+            g2.drawString(option, x, y);
+
+            if(isHovered && lastHoveredIndex != i) {
+                guiService.getFx().playFX(BooleanService.getRandom(1, 2));
+                lastHoveredIndex = i;
+            }
+        }
+    }
+
+    public void drawGamesMenu(Graphics2D g2, Games[] games) {
+        g2.setColor(Colorblindness.filter(Colors.BACKGROUND));
+        g2.fillRect(0, 0, getTotalWidth(), render.scale(RenderContext.BASE_HEIGHT));
+
+        g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
+        drawLogo(g2, getTotalWidth());
+
+        int startY = render.scale(RenderContext.BASE_HEIGHT)/2 + render.scale(GUIService.getMENU_START_Y());
+        int spacing = render.scale(GUIService.getMENU_SPACING());
+
+        for(int i = 0; i < games.length; i++) {
+            Games op = games[i];
+            String option = op.getLabel();
+            fm = g2.getFontMetrics();
+            int textWidth = fm.stringWidth(option);
+
+            int x = getCenterX(getTotalWidth(), textWidth);
+            int y = render.getOffsetY() + startY + i * spacing;
+
+            Rectangle hitbox = new Rectangle(
+                    x,
+                    y - fm.getAscent(),
+                    textWidth,
+                    fm.getHeight()
+            );
+
+            boolean isHovered = hitbox.contains(mouse.getX(), mouse.getY())
+                    || (i == movesManager.getSelectedIndexY());
+
+            Color foreground = Colorblindness.filter(Colors.FOREGROUND);
+            Color textColor = isHovered ? Colors.getHighlight() : foreground;
+
+            g2.setColor(textColor);
+            g2.drawString(option, x, y);
 
             if(isHovered && lastHoveredIndex != i) {
                 guiService.getFx().playFX(BooleanService.getRandom(1, 2));
@@ -243,7 +284,7 @@ public class MenuRender {
         GUIService.drawBox(g2, stroke, x, y,
                 render.scale(RenderContext.BASE_WIDTH - x * 2),
                 render.scale(RenderContext.BASE_HEIGHT - y * 2), arc, arc, true,
-                false, 180);
+                false, 255);
 
         g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
         fm = g2.getFontMetrics();
@@ -334,7 +375,7 @@ public class MenuRender {
         GUIService.drawBox(g2, stroke, x, y,
                 render.scale(RenderContext.BASE_WIDTH - x * 2),
                 render.scale(RenderContext.BASE_HEIGHT - y * 2), arc, arc, true,
-                false, 180);
+                false, 255);
 
         String text = ACHIEVEMENTS;
         int headerY = render.getOffsetY() + render.scale(OPTION_Y);
@@ -372,12 +413,12 @@ public class MenuRender {
             if(isHovered) {
                 GUIService.drawBox(g2, stroke, x, startY,
                         width, height, arcWidth, arcHeight, hasBackground,
-                        true, 0);
+                        true, 255);
                 g2.drawString(a.getId().getDescription(), textX, descY);
             } else {
                 GUIService.drawBox(g2, stroke, x, startY,
                         width, height, arcWidth, arcHeight, hasBackground,
-                        false, 0);
+                        false, 255);
                 g2.drawString(a.getId().getTitle(), textX, titleY);
             }
 
@@ -413,7 +454,7 @@ public class MenuRender {
         GUIService.drawBox(g2, stroke, x, y,
                 render.scale(RenderContext.BASE_WIDTH - x * 2),
                 render.scale(RenderContext.BASE_HEIGHT - y * 2), arc, arc, true,
-                false, 180);
+                false, 255);
 
         g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
         FontMetrics fm = g2.getFontMetrics();
@@ -456,11 +497,11 @@ public class MenuRender {
             if(isHovered) {
                 GUIService.drawBox(g2, stroke, x, startY,
                         width, height, arcWidth, arcHeight, hasBackground,
-                        true, 0);
+                        true, 255);
             } else {
                 GUIService.drawBox(g2, stroke, x, startY,
                         width, height, arcWidth, arcHeight, hasBackground,
-                        false, 0);
+                        false, 255);
             }
 
             g2.drawString(s.name(), textX, descY);

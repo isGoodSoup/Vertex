@@ -150,54 +150,91 @@ public class BoardService {
     }
 
     public void setPieces() {
-        List<Piece> pieces = pieceService.getPieces();
-        pieces.clear();
-        clearBoardState();
+        switch(GameService.getGame()) {
+            case CHESS -> {
+                List<Piece> pieces = pieceService.getPieces();
+                pieces.clear();
+                clearBoardState();
 
-        for(int col = 0; col < 8; col++) {
-            Pawn whitePawn = new Pawn(Tint.WHITE, col, 6);
-            Pawn blackPawn = new Pawn(Tint.BLACK, col, 1);
-            pieces.add(whitePawn);
-            pieces.add(blackPawn);
+                for(int col = 0; col < 8; col++) {
+                    Pawn whitePawn = new Pawn(Tint.WHITE, col, 6);
+                    Pawn blackPawn = new Pawn(Tint.BLACK, col, 1);
+                    pieces.add(whitePawn);
+                    pieces.add(blackPawn);
+                }
+
+                Rook wR1 = new Rook(Tint.WHITE, 0, 7);
+                Rook wR2 = new Rook(Tint.WHITE, 7, 7);
+                Rook bR1 = new Rook(Tint.BLACK, 0, 0);
+                Rook bR2 = new Rook(Tint.BLACK, 7, 0);
+                pieces.addAll(List.of(wR1, wR2, bR1, bR2));
+
+                Knight wN1 = new Knight(Tint.WHITE, 1, 7);
+                Knight wN2 = new Knight(Tint.WHITE, 6, 7);
+                Knight bN1 = new Knight(Tint.BLACK, 1, 0);
+                Knight bN2 = new Knight(Tint.BLACK, 6, 0);
+                pieces.addAll(List.of(wN1, wN2, bN1, bN2));
+
+                Bishop wB1 = new Bishop(Tint.WHITE, 2, 7);
+                Bishop wB2 = new Bishop(Tint.WHITE, 5, 7);
+                Bishop bB1 = new Bishop(Tint.BLACK, 2, 0);
+                Bishop bB2 = new Bishop(Tint.BLACK, 5, 0);
+                pieces.addAll(List.of(wB1, wB2, bB1, bB2));
+
+                Queen wQ = new Queen(Tint.WHITE, 3, 7);
+                Queen bQ = new Queen(Tint.BLACK, 3, 0);
+                pieces.add(wQ);
+                pieces.add(bQ);
+
+                King wK = new King(pieceService, Tint.WHITE, 4, 7);
+                King bK = new King(pieceService, Tint.BLACK, 4, 0);
+                pieces.add(wK);
+                pieces.add(bK);
+
+                for(Piece p : pieces) {
+                    boardState[p.getRow()][p.getCol()] = p;
+                    int squareSize = Board.getSquare();
+                    p.setX(p.getCol() * squareSize);
+                    p.setY(p.getRow() * squareSize);
+                }
+
+                GameService.setCurrentTurn(Tint.WHITE);
+                PieceService.nullThisPiece();
+            }
+            case CHECKERS -> {
+                List<Piece> pieces = pieceService.getPieces();
+                pieces.clear();
+                clearBoardState();
+
+                for (int row = 0; row <= 2; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if ((row + col) % 2 != 0) {
+                            Checkers black = new Checkers(Tint.BLACK, col, row);
+                            pieces.add(black);
+                            boardState[row][col] = black;
+                        }
+                    }
+                }
+
+                for (int row = 5; row <= 7; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if ((row + col) % 2 != 0) {
+                            Checkers white = new Checkers(Tint.WHITE, col, row);
+                            pieces.add(white);
+                            boardState[row][col] = white;
+                        }
+                    }
+                }
+
+                int squareSize = Board.getSquare();
+                for (Piece p : pieces) {
+                    p.setX(p.getCol() * squareSize);
+                    p.setY(p.getRow() * squareSize);
+                }
+                GameService.setCurrentTurn(Tint.WHITE);
+                PieceService.nullThisPiece();
+            }
         }
-
-        Rook wR1 = new Rook(Tint.WHITE, 0, 7);
-        Rook wR2 = new Rook(Tint.WHITE, 7, 7);
-        Rook bR1 = new Rook(Tint.BLACK, 0, 0);
-        Rook bR2 = new Rook(Tint.BLACK, 7, 0);
-        pieces.addAll(List.of(wR1, wR2, bR1, bR2));
-
-        Knight wN1 = new Knight(Tint.WHITE, 1, 7);
-        Knight wN2 = new Knight(Tint.WHITE, 6, 7);
-        Knight bN1 = new Knight(Tint.BLACK, 1, 0);
-        Knight bN2 = new Knight(Tint.BLACK, 6, 0);
-        pieces.addAll(List.of(wN1, wN2, bN1, bN2));
-
-        Bishop wB1 = new Bishop(Tint.WHITE, 2, 7);
-        Bishop wB2 = new Bishop(Tint.WHITE, 5, 7);
-        Bishop bB1 = new Bishop(Tint.BLACK, 2, 0);
-        Bishop bB2 = new Bishop(Tint.BLACK, 5, 0);
-        pieces.addAll(List.of(wB1, wB2, bB1, bB2));
-
-        Queen wQ = new Queen(Tint.WHITE, 3, 7);
-        Queen bQ = new Queen(Tint.BLACK, 3, 0);
-        pieces.add(wQ);
-        pieces.add(bQ);
-
-        King wK = new King(pieceService, Tint.WHITE, 4, 7);
-        King bK = new King(pieceService, Tint.BLACK, 4, 0);
-        pieces.add(wK);
-        pieces.add(bK);
-
-        for(Piece p : pieces) {
-            boardState[p.getRow()][p.getCol()] = p;
-            int squareSize = Board.getSquare();
-            p.setX(p.getCol() * squareSize);
-            p.setY(p.getRow() * squareSize);
-        }
-
-        GameService.setCurrentTurn(Tint.WHITE);
-        PieceService.nullThisPiece();
     }
 
     public void setPiecesChaos() {

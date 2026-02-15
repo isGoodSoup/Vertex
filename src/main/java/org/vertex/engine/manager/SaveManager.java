@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.vertex.engine.entities.*;
 import org.vertex.engine.records.Save;
 import org.vertex.engine.service.BooleanService;
+import org.vertex.engine.service.GameService;
+import org.vertex.engine.service.ServiceFactory;
 import org.vertex.engine.util.RuntimeTypeAdapterFactory;
 
 import java.io.File;
@@ -23,6 +25,7 @@ public class SaveManager {
     private final Path saveFolder;
     private Save currentSave;
     private static final Logger log = LoggerFactory.getLogger(SaveManager.class);
+    private ServiceFactory service;
 
     public SaveManager() {
         this.saveFolder = Path.of(System.getProperty("user.home"), ".vertex", "chess", "saves");
@@ -46,6 +49,22 @@ public class SaveManager {
         } catch (IOException e) {
             log.error("Failed to create saves folder: {}", e.getMessage());
         }
+    }
+
+    public ServiceFactory getServiceFactory() {
+        return service;
+    }
+
+    public void setServiceFactory(ServiceFactory service) {
+        this.service = service;
+    }
+
+    public Save getCurrentSave() {
+        return currentSave;
+    }
+
+    public void setCurrentSave(Save currentSave) {
+        this.currentSave = currentSave;
     }
 
     public List<Save> getSaves() {
@@ -119,17 +138,17 @@ public class SaveManager {
         return f.exists();
     }
 
-    public Save getCurrentSave() {
-        return currentSave;
-    }
-
-    public void setCurrentSave(Save currentSave) {
-        this.currentSave = currentSave;
-    }
-
     public void autoSave() {
         if(currentSave != null) {
-            saveGame(currentSave);
+            Save updated = new Save(
+                    GameService.getGame(),
+                    currentSave.name(),
+                    GameService.getCurrentTurn(),
+                    service.getPieceService().getPieces(),
+                    service.getAchievementService().getUnlockedAchievements()
+            );
+            currentSave = updated;
+            saveGame(updated);
         }
     }
 }

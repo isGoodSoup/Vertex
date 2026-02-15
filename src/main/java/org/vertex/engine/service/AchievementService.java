@@ -3,6 +3,7 @@ package org.vertex.engine.service;
 import org.vertex.engine.animations.ToastAnimation;
 import org.vertex.engine.entities.Achievement;
 import org.vertex.engine.enums.Achievements;
+import org.vertex.engine.manager.SaveManager;
 import org.vertex.engine.render.AchievementSprites;
 import org.vertex.engine.render.RenderContext;
 
@@ -12,7 +13,9 @@ public class AchievementService {
     private Map<Achievements, Achievement> achievements;
     private List<Achievement> achievementList;
     private List<Achievement> sortedList;
+
     private AnimationService animationService;
+    private SaveManager saveManager;
 
     public AchievementService() {
         achievements = new HashMap<>();
@@ -21,6 +24,14 @@ public class AchievementService {
         }
         achievementList = new ArrayList<>(achievements.values());
         getSortedAchievements();
+    }
+
+    public SaveManager getSaveManager() {
+        return saveManager;
+    }
+
+    public void setSaveManager(SaveManager saveManager) {
+        this.saveManager = saveManager;
     }
 
     public AnimationService getAnimationService() {
@@ -32,6 +43,7 @@ public class AchievementService {
     }
 
     public void unlock(Achievements type) {
+        saveManager.autoSave();
         Achievement achievement = achievements.get(type);
         if(achievement != null && !achievement.isUnlocked()) {
             achievement.setUnlocked(true);
@@ -78,6 +90,11 @@ public class AchievementService {
                 .stream()
                 .filter(Achievement::isUnlocked)
                 .toList();
+    }
+
+    public void setUnlockedAchievements(List<Achievement> achievements) {
+        List<Achievement> a = getAchievementList();
+        a = achievements;
     }
 
     public List<Achievement> getSortedAchievements() {

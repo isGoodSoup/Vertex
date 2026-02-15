@@ -1,7 +1,9 @@
 package org.vertex.engine.input;
 
+import org.vertex.engine.enums.GameMenu;
 import org.vertex.engine.enums.GameSettings;
 import org.vertex.engine.enums.GameState;
+import org.vertex.engine.enums.Games;
 import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.records.Save;
 import org.vertex.engine.render.MenuRender;
@@ -107,7 +109,7 @@ public class MouseInput {
 
         int itemsPerPage = 8;
         int startIndex = (menuRender.getCurrentPage() - 1) * itemsPerPage;
-        int endIndex = Math.min(startIndex + itemsPerPage, MenuRender.optionsTweaks.length);
+        int endIndex = Math.min(startIndex + itemsPerPage, MenuRender.SETTINGS_MENU.length);
 
         FontMetrics fm = menuRender.getFontMetrics();
         int lineHeight = fm.getHeight() + render.scale(10);
@@ -119,7 +121,7 @@ public class MouseInput {
         int maxRowWidth = 0;
 
         for(int i = startIndex; i < endIndex; i++) {
-            String enabledOption = MenuRender.ENABLE + MenuRender.optionsTweaks[i];
+            String enabledOption = MenuRender.ENABLE + MenuRender.SETTINGS_MENU[i];
             int textWidth = fm.stringWidth(enabledOption.toUpperCase());
             int toggleWidth = render.scale(menuRender.getSprite(0).getWidth() / 2);
             int rowWidth = textWidth + gap + toggleWidth;
@@ -127,7 +129,7 @@ public class MouseInput {
         }
 
         for(int i = startIndex; i < endIndex; i++) {
-            GameSettings option = MenuRender.optionsTweaks[i];
+            GameSettings option = MenuRender.SETTINGS_MENU[i];
             String enabledOption = MenuRender.ENABLE + option;
 
             int textWidth = fm.stringWidth(enabledOption);
@@ -154,16 +156,17 @@ public class MouseInput {
         }
     }
 
-    public void handleMenuInput(String[] options) {
+    public void handleMenuInput(GameMenu[] options) {
         if(!mouse.wasPressed()) { return; }
 
         int startY = render.scale(RenderContext.BASE_HEIGHT)/2 + render.scale(GUIService.getMENU_START_Y());
         int spacing = render.scale(GUIService.getMENU_SPACING());
 
         for(int i = 0; i < options.length; i++) {
-            String optionText = options[i];
+            GameMenu op = options[i];
+            String option = op.getLabel();
             FontMetrics fm = menuRender.getFontMetrics();
-            int textWidth = fm.stringWidth(optionText);
+            int textWidth = fm.stringWidth(option);
 
             int x = MenuRender.getCenterX(menuRender.getTotalWidth(), textWidth);
             int y = render.getOffsetY() + startY + i * spacing;
@@ -179,11 +182,43 @@ public class MouseInput {
                 guiService.getFx().play(0);
                 if (Objects.requireNonNull(GameService.getState()) == GameState.MENU) {
                     switch (i) {
-                        case 0 -> gameService.startNewGame();
-                        case 1 -> gameService.loadSaves();
-                        case 2 -> gameService.achievementsMenu();
-                        case 3 -> gameService.optionsMenu();
-                        case 4 -> System.exit(0);
+                        case 0 -> GameService.setState(GameState.GAMES);
+                        case 1 -> GameService.setState(GameState.SAVES);
+                        case 2 -> System.exit(0);
+                    }
+                }
+            }
+        }
+    }
+
+    public void handleGamesMenu(Games[] games) {
+        if(!mouse.wasPressed()) { return; }
+
+        int startY = render.scale(RenderContext.BASE_HEIGHT)/2 + render.scale(GUIService.getMENU_START_Y());
+        int spacing = render.scale(GUIService.getMENU_SPACING());
+
+        for(int i = 0; i < games.length; i++) {
+            Games op = games[i];
+            String option = op.getLabel();
+            FontMetrics fm = menuRender.getFontMetrics();
+            int textWidth = fm.stringWidth(option);
+
+            int x = MenuRender.getCenterX(menuRender.getTotalWidth(), textWidth);
+            int y = render.getOffsetY() + startY + i * spacing;
+
+            Rectangle hitbox = new Rectangle(
+                    x,
+                    y - fm.getAscent(),
+                    textWidth,
+                    fm.getHeight()
+            );
+
+            if(hitbox.contains(mouse.getX(), mouse.getY())) {
+                guiService.getFx().play(0);
+                if (Objects.requireNonNull(GameService.getState()) == GameState.MENU) {
+                    switch (i) {
+                        case 0 -> GameService.setGame(games[0]);
+                        case 1 -> GameService.setGame(games[1]);
                     }
                 }
             }

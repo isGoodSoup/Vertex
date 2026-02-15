@@ -6,9 +6,7 @@ import org.vertex.engine.entities.King;
 import org.vertex.engine.entities.Pawn;
 import org.vertex.engine.entities.Piece;
 import org.vertex.engine.entities.Rook;
-import org.vertex.engine.enums.GameSettings;
-import org.vertex.engine.enums.GameState;
-import org.vertex.engine.enums.Tint;
+import org.vertex.engine.enums.*;
 import org.vertex.engine.gui.Sound;
 import org.vertex.engine.input.Mouse;
 import org.vertex.engine.records.Move;
@@ -416,7 +414,7 @@ public class MovesManager {
         getFx().playFX(BooleanService.getRandom(1, 2));
     }
 
-    public void moveUp(String[] options) {
+    public void moveUp(GameMenu[] options) {
         selectedIndexY--;
         getFx().playFX(BooleanService.getRandom(1, 2));
         if(selectedIndexY < 0) {
@@ -443,7 +441,7 @@ public class MovesManager {
 
     public void moveLeft(Object[] options) {
         MenuRender menu = service.getRender().getMenuRender();
-        menu.getMenuInput().previousPage();
+        menu.getMouseInput().previousPage();
 
         int itemsPerPage = 8;
         int newPage = menu.getCurrentPage();
@@ -477,7 +475,7 @@ public class MovesManager {
         getFx().playFX(BooleanService.getRandom(1, 2));
     }
 
-    public void moveDown(String[] options) {
+    public void moveDown(GameMenu[] options) {
         selectedIndexY++;
         getFx().playFX(BooleanService.getRandom(1, 2));
         if(selectedIndexY < 0) {
@@ -504,7 +502,7 @@ public class MovesManager {
 
     public void moveRight(Object[] options) {
         MenuRender menu = service.getRender().getMenuRender();
-        menu.getMenuInput().nextPage(options);
+        menu.getMouseInput().nextPage(options);
 
         int itemsPerPage = 8;
         int newPage = menu.getCurrentPage();
@@ -529,13 +527,23 @@ public class MovesManager {
     public void activate(GameState state) {
         switch (state) {
             case MENU -> {
-                getFx().playFX(3);
-                switch(selectedIndexY) {
-                    case 0 -> service.getGameService().startNewGame();
-                    case 1 -> service.getGameService().loadSaves();
-                    case 2 -> service.getGameService().achievementsMenu();
-                    case 3 -> service.getGameService().optionsMenu();
-                    case 4 -> System.exit(0);
+                GameMenu[] options = MenuRender.MENU;
+                if(selectedIndexY >= 0 && selectedIndexY < options.length) {
+                    GameMenu selected = options[selectedIndexY];
+                    if (selected.isEnabled(service.getGameService())) {
+                        getFx().playFX(3);
+                        selected.run(service.getGameService());
+                    }
+                }
+            }
+            case GAMES -> {
+                Games[] options = MenuRender.GAMES;
+                if(selectedIndexY >= 0 && selectedIndexY < options.length) {
+                    Games selected = options[selectedIndexY];
+                    if (selected.isEnabled()) {
+                        getFx().playFX(3);
+                        selected.setup(service.getGameService());
+                    }
                 }
             }
             case SAVES -> {
@@ -546,7 +554,7 @@ public class MovesManager {
             }
             case RULES -> {
                 getFx().playFX(0);
-                GameSettings option = MenuRender.optionsTweaks[selectedIndexY];
+                GameSettings option = MenuRender.SETTINGS_MENU[selectedIndexY];
                 option.toggle();
             }
             case ACHIEVEMENTS -> {}
