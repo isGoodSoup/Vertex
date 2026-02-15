@@ -398,7 +398,7 @@ public class MovesManager {
     }
 
     public void moveUp(List<Save> saves) {
-        if (saves.isEmpty()) return;
+        if(saves.isEmpty()) { return; }
 
         MenuRender menu = service.getRender().getMenuRender();
         int itemsPerPage = ITEMS_PER_PAGE;
@@ -407,7 +407,7 @@ public class MovesManager {
         int endIndex = Math.min(startIndex + itemsPerPage, saves.size());
 
         selectedIndexY--;
-        if (selectedIndexY < startIndex) {
+        if(selectedIndexY < startIndex) {
             selectedIndexY = endIndex - 1;
         }
 
@@ -459,7 +459,7 @@ public class MovesManager {
     }
 
     public void moveDown(List<Save> saves) {
-        if (saves.isEmpty()) return;
+        if(saves.isEmpty()) { return; }
 
         MenuRender menu = service.getRender().getMenuRender();
         int itemsPerPage = ITEMS_PER_PAGE;
@@ -468,7 +468,7 @@ public class MovesManager {
         int endIndex = Math.min(startIndex + itemsPerPage, saves.size());
 
         selectedIndexY++;
-        if (selectedIndexY >= endIndex) {
+        if(selectedIndexY >= endIndex) {
             selectedIndexY = startIndex;
         }
 

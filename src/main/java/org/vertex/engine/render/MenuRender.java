@@ -396,7 +396,7 @@ public class MenuRender {
         int end = Math.min(start + itemsPerPage, list.size());
 
         BufferedImage img = null;
-        for (int i = start; i < end; i++) {
+        for(int i = start; i < end; i++) {
             Achievement a = list.get(i);
             Rectangle hitbox = new Rectangle(
                     x, startY, width, height
@@ -407,8 +407,6 @@ public class MenuRender {
             int textX = x + render.scale(110);
             int titleY = startY + render.scale(60);
             int descY = titleY;
-            g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
-            g2.setColor(Colorblindness.filter(Color.WHITE));
 
             if(isHovered) {
                 GUIService.drawBox(g2, stroke, x, startY,
@@ -421,6 +419,9 @@ public class MenuRender {
                         false, 255);
                 g2.drawString(a.getId().getTitle(), textX, titleY);
             }
+
+            g2.setColor(Colorblindness.filter(Color.WHITE));
+            g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
 
             BooleanService.isAchievementLocked = true;
             img = AchievementSprites.getSprite(a);

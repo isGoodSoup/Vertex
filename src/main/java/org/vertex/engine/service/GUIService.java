@@ -151,15 +151,13 @@ public class GUIService {
     }
 
     public void drawTimer(Graphics2D g2) {
-        g2.setFont(getFont(MENU_FONT));
-        Color filtered = BooleanService.canBeColorblind || BooleanService.isDarkMode
-                ? Colorblindness.filter(Colors.FOREGROUND) : Colors.FOREGROUND;
-        g2.setColor(filtered);
+        Color filtered = Colorblindness.filter(Colors.WHITE_FOREGROUND);
 
         int boardX = render.getBoardRender().getBoardOriginX();
         int boardY = render.getBoardRender().getBoardOriginY();
         int boardWidth = Board.getSquare() * boardService.getBoard().getCOL();
 
+        g2.setFont(getFont(MENU_FONT));
         FontMetrics fm = g2.getFontMetrics();
         String time = timerService.getTimeString();
         int textWidth = fm.stringWidth(time);
@@ -178,6 +176,7 @@ public class GUIService {
 
         drawBox(g2, 4, boxX, boxY, boxWidth,
                 boxHeight, 32, 32, true, false, 255);
+        g2.setColor(filtered);
         g2.drawString(time, textX, textY);
     }
 
@@ -205,14 +204,14 @@ public class GUIService {
                                boolean hasBackground, boolean isHighlighted,
                                int alpha) {
         if(hasBackground) {
-            g2.setColor(new Color(0, 0, 0, alpha));
+            g2.setColor(Colorblindness.filter(Colors.SETTINGS));
             g2.fillRoundRect(x, y, width, height, arcWidth, arcHeight);
         }
 
         if(isHighlighted) {
-            g2.setColor(new Color(220, 200, 20));
+            g2.setColor(Colorblindness.filter(Colors.YELLOW_HIGHLIGHT));
         } else {
-            g2.setColor(new Color(255, 255, 255));
+            g2.setColor(Colorblindness.filter(Colors.FOREGROUND));
         }
 
         g2.setStroke(new BasicStroke(stroke));
