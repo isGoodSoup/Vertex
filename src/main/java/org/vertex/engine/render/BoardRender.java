@@ -11,7 +11,6 @@ import org.vertex.engine.service.PromotionService;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 public class BoardRender {
     private RenderContext render;
@@ -78,7 +77,7 @@ public class BoardRender {
         return render.getOffsetY() + centerOffset;
     }
 
-    public void drawBoard(Graphics2D g2) throws IOException {
+    public void drawBoard(Graphics2D g2) {
         Piece currentPiece = pieceService.getHeldPiece();
         Piece hoveredPiece = pieceService.getHoveredPieceKeyboard();
         int hoverX = pieceService.getHoveredSquareX();
@@ -157,11 +156,11 @@ public class BoardRender {
         }
     }
 
-    public void drawPiece(Graphics2D g2, Piece piece) throws IOException {
+    public void drawPiece(Graphics2D g2, Piece piece) {
         drawPiece(g2, piece, null);
     }
 
-    public void drawPiece(Graphics2D g2, Piece piece, BufferedImage override) throws IOException {
+    public void drawPiece(Graphics2D g2, Piece piece, BufferedImage override) {
         int square = render.scale(Board.getSquare());
         int size = (int) (square * piece.getScale());
         Mouse mouse = guiService.getMouse();

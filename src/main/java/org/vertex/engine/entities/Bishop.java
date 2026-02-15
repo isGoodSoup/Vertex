@@ -2,7 +2,6 @@ package org.vertex.engine.entities;
 
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.Type;
-import org.vertex.engine.service.PieceService;
 
 import java.util.List;
 

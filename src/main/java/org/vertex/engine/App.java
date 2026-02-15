@@ -2,14 +2,12 @@ package org.vertex.engine;
 
 import org.vertex.engine.gui.VFrame;
 
-import java.io.IOException;
-
 public class App {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         new App().init();
     }
-    void init() throws IOException {
+    void init() {
         VFrame app = new VFrame();
     }
 }

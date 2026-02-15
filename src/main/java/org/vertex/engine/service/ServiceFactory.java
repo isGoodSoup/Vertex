@@ -6,8 +6,6 @@ import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.manager.SaveManager;
 import org.vertex.engine.render.RenderContext;
 
-import java.io.IOException;
-
 public class ServiceFactory {
     private final RenderContext render;
     private final PieceService piece;
