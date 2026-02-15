@@ -99,7 +99,7 @@ public class BoardService {
             p.setPreRow(p.getPreRow());
             p.setX(col * Board.getSquare());
             p.setY(row * Board.getSquare());
-            p.loadSprite(guiService);
+            p.loadSprite(p);
             boardArray[row][col] = p;
         }
         board.setPieces(boardArray);

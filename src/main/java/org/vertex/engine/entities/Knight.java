@@ -11,13 +11,7 @@ public class Knight extends Piece {
 	public Knight(Tint color, int col, int row) {
 		super(color, col, row);
 		this.id = Type.KNIGHT;
-		if(color == Tint.WHITE) {
-			sprite = PieceService.getImage("/pieces/knight_white");
-			hovered = PieceService.getImage("/pieces/knight_whiteh");
-		} else {
-			sprite = PieceService.getImage("/pieces/knight_black");
-			hovered = PieceService.getImage("/pieces/knight_blackh");
-		}
+		loadSprite(this);
 	}
 
 	@Override

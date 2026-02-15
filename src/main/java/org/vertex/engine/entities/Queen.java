@@ -12,13 +12,7 @@ public class Queen extends Piece {
 	public Queen(Tint color, int col, int row) {
 		super(color, col, row);
 		this.id = Type.QUEEN;
-		if(color == Tint.WHITE) {
-			sprite = PieceService.getImage("/pieces/queen_white");
-			hovered = PieceService.getImage("/pieces/queen_whiteh");
-		} else {
-			sprite = PieceService.getImage("/pieces/queen_black");
-			hovered = PieceService.getImage("/pieces/queen_blackh");
-		}
+		loadSprite(this);
 	}
 
 	@Override

@@ -102,7 +102,7 @@ public class BoardRender {
 
         for (Piece p : pieceService.getPieces()) {
             if (p != currentPiece) {
-                BufferedImage img = (p == hoveredPiece) ? hoveredPiece.getHovered() : p.getSprite();
+                BufferedImage img = p.getSprite();
                 drawPiece(g2, p, Colorblindness.filter(img));
             }
         }
@@ -165,16 +165,6 @@ public class BoardRender {
         int size = (int) (square * piece.getScale());
         Mouse mouse = guiService.getMouse();
         int offset = (square - size)/2;
-
-        Rectangle hitbox =
-                new Rectangle(getBoardOriginX() + render.scale(piece.getX())
-                        + offset,getBoardOriginY() + render.scale(piece.getY()) +
-                        offset, size, size);
-
-        boolean isHovered = hitbox.contains(mouse.getX(), mouse.getY());
-        if(isHovered) {
-            override = piece.getHovered();
-        }
 
         g2.drawImage(
                 override != null ? override : piece.getSprite(),

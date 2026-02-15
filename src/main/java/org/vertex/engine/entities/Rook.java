@@ -11,13 +11,7 @@ public class Rook extends Piece {
 	public Rook(Tint color, int col, int row) {
 		super(color, col, row);
 		this.id = Type.ROOK;
-		if(color == Tint.WHITE) {
-			sprite = PieceService.getImage("/pieces/rook_white");
-			hovered = PieceService.getImage("/pieces/rook_whiteh");
-		} else {
-			sprite = PieceService.getImage("/pieces/rook_black");
-			hovered = PieceService.getImage("/pieces/rook_blackh");
-		}
+		loadSprite(this);
 	}
 
 	@Override

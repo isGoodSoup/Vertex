@@ -8,14 +8,15 @@ import org.vertex.engine.render.Colorblindness;
 import org.vertex.engine.service.GUIService;
 import org.vertex.engine.service.PieceService;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public abstract class Piece {
 	protected Type id;
 	protected transient BufferedImage sprite;
-	protected transient BufferedImage hovered;
 	private int x, y;
 	private int col, row, preCol, preRow;
 	private static final double DEFAULT_SCALE = 1.0;
@@ -37,16 +38,21 @@ public abstract class Piece {
 		this.y = getY(row);
 		this.preCol = col;
 		this.preRow = row;
+		this.sprite = loadSprite(this);
 	}
 
-	public void loadSprite(GUIService guiService) {
-		try {
-			this.sprite =
-					guiService.getImage("/pieces/" +
-							getClass().getSimpleName().toLowerCase() + "_" + color.name());
-		} catch (IOException e) {
-			log.error(e.getMessage());
+	public BufferedImage loadSprite(Piece piece) {
+		String name = piece.getClass().getSimpleName().toLowerCase();
+        return getImage("/pieces/" + name + "_" + themeColor);
+    }
+
+	public BufferedImage getImage(String path) {
+		InputStream stream = getClass().getResourceAsStream(path + ".png");
+		if (stream == null) {
+			log.error("Resource not found: {}.png", path);
+			return null;
 		}
+		return ImageIO.read(stream);
 	}
 
 	public Type getId() {
@@ -63,10 +69,6 @@ public abstract class Piece {
 
 	public BufferedImage getFilteredSprite(BufferedImage image) {
 		return Colorblindness.filter(image);
-	}
-
-	public BufferedImage getHovered() {
-		return hovered;
 	}
 
 	public void setSprite(BufferedImage sprite) {

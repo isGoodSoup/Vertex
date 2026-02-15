@@ -13,10 +13,8 @@ public class Checkers extends Piece {
         this.id = Type.PAWN;
         if(color == Tint.WHITE) {
             sprite = PieceService.getImage("/pieces/checker_white");
-            hovered = PieceService.getImage("/pieces/checker_whiteh");
         } else {
             sprite = PieceService.getImage("/pieces/checker_black");
-            hovered = PieceService.getImage("/pieces/checker_blackh");
         }
     }
 

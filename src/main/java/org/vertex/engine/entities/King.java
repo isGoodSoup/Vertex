@@ -16,21 +16,20 @@ public class King extends Piece {
 		super(color, col, row);
 		this.id = Type.KING;
 		this.pieceService = pieceService;
+		String name = getClass().getSimpleName().toLowerCase();
 		if(color == Tint.WHITE) {
 			if(GameService.getGame() == Games.CHESS) {
-				sprite = PieceService.getImage("/pieces/king_white");
-				hovered = PieceService.getImage("/pieces/king_whiteh");
+				sprite = PieceService.getImage("/pieces/" + name +"_white");
 			} else if(GameService.getGame() == Games.CHECKERS) {
-				sprite = PieceService.getImage("/pieces/king_checkers_white");
-				hovered = PieceService.getImage("/pieces/king_checkers_whiteh");
+				sprite = PieceService.getImage("/pieces/" + name +
+						"checkers_white");
 			}
 		} else {
 			if(GameService.getGame() == Games.CHESS) {
-				sprite = PieceService.getImage("/pieces/king_black");
-				hovered = PieceService.getImage("/pieces/king_blackh");
+				sprite = PieceService.getImage("/pieces/" + name +"_black");
 			} else if(GameService.getGame() == Games.CHECKERS) {
-				sprite = PieceService.getImage("/pieces/king_checkers_black");
-				hovered = PieceService.getImage("/pieces/king_checkers_blackh");
+				sprite = PieceService.getImage("/pieces/" + name +
+						"checkers_black");
 			}
 		}
 	}
