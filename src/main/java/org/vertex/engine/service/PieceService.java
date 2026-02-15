@@ -171,13 +171,13 @@ public class PieceService {
 
     public void addPiece(Piece p) {
         pieces.add(p);
-        BoardService.getBoardState()[p.getCol()][p.getRow()] = p;
+        BoardService.getBoardState()[p.getRow()][p.getCol()] = p;
     }
 
     public void removePiece(Piece p) {
         synchronized(pieces) {
             pieces.remove(p);
-            BoardService.getBoardState()[p.getCol()][p.getRow()] = null;
+            BoardService.getBoardState()[p.getRow()][p.getCol()] = null;
         }
     }
 
@@ -192,17 +192,16 @@ public class PieceService {
     }
 
     public static void movePiece(Piece p, int newCol, int newRow) {
-        String oldPos = boardService.getSquareNameAt(p.getPreCol(),
-                p.getPreRow());
-        String newPos = boardService.getSquareNameAt(newCol, newRow);
+        String oldPos = boardService.getSquareNameAt(p.getPreRow(), p.getPreCol());
+        String newPos = boardService.getSquareNameAt(newRow, newCol);
 
-        BoardService.getBoardState()[p.getCol()][p.getRow()] = null;
+        BoardService.getBoardState()[p.getRow()][p.getCol()] = null;
         p.setCol(newCol);
         p.setRow(newRow);
         updatePos(p);
 
         log.debug("{} {}: {} -> {}", p.getColor().toString(), p.getId().toString(), oldPos, newPos);
-        BoardService.getBoardState()[newCol][newRow] = p;
+        BoardService.getBoardState()[newRow][newCol] = p;
     }
 
     public static void updatePos(Piece piece) {
