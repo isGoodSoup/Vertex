@@ -299,7 +299,8 @@ public class MenuRender {
         String header = SETTINGS;
         int headerY = render.getOffsetY() + render.scale(OPTION_Y);
         int headerWidth = fm.stringWidth(header);
-        g2.setColor(Colorblindness.filter(Color.WHITE));
+        g2.setColor(Colorblindness.filter(Colors.getTheme() == Theme.DEFAULT
+                ? Color.WHITE : Colors.getForeground()));
         g2.drawString(header, getCenterX(getTotalWidth(), headerWidth),headerY);
 
         int startY = headerY + render.scale(90);
@@ -371,6 +372,9 @@ public class MenuRender {
     }
 
     public void drawAchievementsMenu(Graphics2D g2) {
+        g2.setColor(Colorblindness.filter(Colors.getBackground()));
+        g2.fillRect(0, 0, getTotalWidth(), render.scale(RenderContext.BASE_HEIGHT));
+
         List<Achievement> list =
                 boardService.getServiceFactory()
                         .getAchievementService()
@@ -388,7 +392,8 @@ public class MenuRender {
         int headerY = render.getOffsetY() + render.scale(OPTION_Y);
         int headerWidth = fm.stringWidth(text);
         g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
-        g2.setColor(Colorblindness.filter(Color.WHITE));
+        g2.setColor(Colorblindness.filter(Colors.getTheme() == Theme.DEFAULT
+                ? Color.WHITE : Colors.getForeground()));
         g2.drawString(text, getCenterX(getTotalWidth(), headerWidth), headerY);
 
         int spacing = 25;
@@ -415,6 +420,11 @@ public class MenuRender {
             int titleY = startY + render.scale(60);
             int descY = titleY;
 
+            Theme currentTheme = Colors.getTheme();
+            g2.setColor(Colorblindness.filter(Colors.getTheme() == Theme.DEFAULT
+                    ? Color.WHITE : Colors.getForeground()));
+            g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
+
             if(isHovered) {
                 GUIService.drawBox(g2, stroke, x, startY,
                         width, height, arcWidth, arcHeight, hasBackground,
@@ -426,9 +436,6 @@ public class MenuRender {
                         false, 255);
                 g2.drawString(a.getId().getTitle(), textX, titleY);
             }
-
-            g2.setColor(Colorblindness.filter(Color.WHITE));
-            g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
 
             BooleanService.isAchievementLocked = true;
             img = AchievementSprites.getSprite(a);

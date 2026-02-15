@@ -24,7 +24,7 @@ import java.util.List;
 public class BoardPanel extends JPanel implements Runnable {
 	@Serial
     private static final long serialVersionUID = -5189356863277669172L;
-    private final VFrame frame;
+    private final Frame frame;
     private final RenderContext render;
     private final int FPS = 60;
 	private Thread thread;
@@ -37,7 +37,7 @@ public class BoardPanel extends JPanel implements Runnable {
     private static ServiceFactory service;
     private static final Logger log = LoggerFactory.getLogger(BoardPanel.class);
 
-	public BoardPanel(VFrame frame) {
+	public BoardPanel(Frame frame) {
         super();
         this.frame = frame;
         this.render = new RenderContext();

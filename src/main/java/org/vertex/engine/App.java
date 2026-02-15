@@ -1,6 +1,6 @@
 package org.vertex.engine;
 
-import org.vertex.engine.gui.VFrame;
+import org.vertex.engine.gui.Frame;
 
 public class App {
 
@@ -8,6 +8,6 @@ public class App {
         new App().init();
     }
     void init() {
-        VFrame app = new VFrame();
+        Frame app = new Frame();
     }
 }

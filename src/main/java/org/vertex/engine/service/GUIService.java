@@ -218,7 +218,7 @@ public class GUIService {
         if(isHighlighted) {
             g2.setColor(Colorblindness.filter(Colors.getHighlight()));
         } else {
-            g2.setColor(Colorblindness.filter(Colors.getForeground()));
+            g2.setColor(Colorblindness.filter(Colors.getEdge()));
         }
 
         g2.setStroke(new BasicStroke(stroke));
