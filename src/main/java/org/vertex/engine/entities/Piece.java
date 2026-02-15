@@ -46,7 +46,7 @@ public abstract class Piece {
 		String prefix = game.getSpritePrefix();
 		Theme theme = Colors.getTheme();
 		String colorName = theme.getColor(color);
-		String path = "/pieces/" + prefix + pieceName + "_" + colorName;
+		String path ="/pieces/" + pieceName + "/" + prefix + pieceName + "_" + colorName;
 		return PieceService.getImage(path);
 	}
 
