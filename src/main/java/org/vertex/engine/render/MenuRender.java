@@ -8,10 +8,7 @@ import org.vertex.engine.input.Keyboard;
 import org.vertex.engine.input.KeyboardUI;
 import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.records.Save;
-import org.vertex.engine.service.BoardService;
-import org.vertex.engine.service.BooleanService;
-import org.vertex.engine.service.GUIService;
-import org.vertex.engine.service.GameService;
+import org.vertex.engine.service.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -52,6 +49,7 @@ public class MenuRender {
     private MovesManager movesManager;
     private GUIService guiService;
     private KeyboardUI keyUI;
+    private AnimationService animationService;
     private AchievementSprites sprites;
 
     public MenuRender(RenderContext render) {
@@ -125,6 +123,14 @@ public class MenuRender {
         this.guiService = guiService;
     }
 
+    public AnimationService getAnimationService() {
+        return animationService;
+    }
+
+    public void setAnimationService(AnimationService animationService) {
+        this.animationService = animationService;
+    }
+
     public static ColorblindType getCb() {
         return cb;
     }
@@ -193,7 +199,9 @@ public class MenuRender {
         g2.setColor(Colorblindness.filter(Colors.getBackground()));
         g2.fillRect(0, 0, getTotalWidth(), render.scale(RenderContext.BASE_HEIGHT));
 
-        g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
+        Font baseFont = GUIService.getFont(GUIService.getMENU_FONT());
+        Font selectedFont = baseFont.deriveFont(baseFont.getSize() + 8f);
+
         drawLogo(g2, getTotalWidth());
 
         int startY = render.scale(RenderContext.BASE_HEIGHT)/2 + render.scale(GUIService.getMENU_START_Y());
@@ -202,28 +210,18 @@ public class MenuRender {
         for(int i = 0; i < options.length; i++) {
             GameMenu op = options[i];
             String option = op.getLabel();
+
+            boolean isSelected = i == keyUI.getSelectedIndexY();
+            g2.setFont(isSelected ? selectedFont : baseFont);
+
             fm = g2.getFontMetrics();
             int textWidth = fm.stringWidth(option);
 
             int x = getCenterX(getTotalWidth(), textWidth);
             int y = render.getOffsetY() + startY + i * spacing;
 
-            Rectangle hitbox = new Rectangle(
-                    x,
-                    y - fm.getAscent(),
-                    textWidth,
-                    fm.getHeight()
-            );
-
-            boolean isSelected = i == keyUI.getSelectedIndexY();
-
             Color foreground = Colorblindness.filter(Colors.getForeground());
             Color textColor = isSelected ? Colors.getHighlight() : foreground;
-
-            if(isSelected && lastHoveredIndex != i) {
-                lastHoveredIndex = i;
-            }
-
             g2.setColor(textColor);
             g2.drawString(option, x, y);
         }
@@ -351,10 +349,6 @@ public class MenuRender {
         BufferedImage img = null;
         for(int i = start; i < end; i++) {
             Achievement a = list.get(i);
-            Rectangle hitbox = new Rectangle(
-                    x, startY, width, height
-            );
-
             boolean isSelected = i == keyUI.getSelectedIndexY();
 
             int textX = x + render.scale(110);

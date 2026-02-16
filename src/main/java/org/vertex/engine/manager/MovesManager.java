@@ -85,7 +85,9 @@ public class MovesManager {
 
         if(captured != null) {
             service.getPieceService().removePiece(captured);
-            eventBus.fire(new CaptureEvent(captured));
+            if(piece.getColor() != captured.getColor()) {
+                eventBus.fire(new CaptureEvent(captured));
+            }
         }
 
         if(piece instanceof King) {

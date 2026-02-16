@@ -41,7 +41,7 @@ public class ToastAnimation implements Animation {
     @Override
     public void render(Graphics2D g2) {
         double totalTime = SLIDE_TIME + STAY_TIME + SLIDE_TIME;
-        if(time > totalTime) return;
+        if(time > totalTime) { return; }
 
         int panelWidth = RenderContext.BASE_WIDTH;
         int x = (panelWidth - WIDTH)/2;

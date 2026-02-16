@@ -66,6 +66,7 @@ public class ServiceFactory {
         this.render.getMenuRender().setGameService(gs);
         this.render.getMenuRender().setMoveManager(movesManager);
         this.render.getMenuRender().setKeyUI(keyUI);
+        this.render.getMenuRender().setAnimationService(animation);
         this.render.getMovesRender().setBoardService(board);
         this.render.getMovesRender().setGuiService(gui);
         this.render.getMovesRender().setMovesManager(movesManager);

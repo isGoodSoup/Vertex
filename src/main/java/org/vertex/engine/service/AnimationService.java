@@ -25,7 +25,7 @@ public class AnimationService {
     public void add(Animation animation) {
         if (animation instanceof ToastAnimation) {
             long currentToasts = animations.stream().filter(a -> a instanceof ToastAnimation).count();
-            if (currentToasts >= MAX_TOASTS) return;
+            if(currentToasts >= MAX_TOASTS) { return; }
         }
         animations.add(animation);
     }
@@ -35,7 +35,7 @@ public class AnimationService {
         while(it.hasNext()) {
             Animation anim = it.next();
             anim.update(delta);
-            if(anim.isFinished()) it.remove();
+            if(anim.isFinished()) { it.remove(); }
         }
     }
 
