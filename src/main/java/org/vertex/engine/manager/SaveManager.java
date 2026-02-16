@@ -143,6 +143,7 @@ public class SaveManager {
     }
 
     public void autoSave() {
+        if(!BooleanService.canSave) { return; }
         if(currentSave != null) {
             Tint turn = GameService.getCurrentTurn();
             if(turn.ordinal() != lastTurn) {

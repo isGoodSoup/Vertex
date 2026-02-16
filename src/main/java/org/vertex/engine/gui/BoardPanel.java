@@ -98,9 +98,11 @@ public class BoardPanel extends JPanel implements Runnable {
             case BOARD -> {
                 service.getRender().getBoardRender().drawBoard(g2);
                 service.getRender().getMovesRender().drawMoves(g2);
-                if(service.getTimerService().isActive()) {
-                    service.getGuiService().drawTimer(g2);
-                    service.getGuiService().drawTick(g2, BooleanService.isLegal);
+                if(!BooleanService.canDoSandbox) {
+                    if(service.getTimerService().isActive()) {
+                        service.getGuiService().drawTimer(g2);
+                        service.getGuiService().drawTick(g2, BooleanService.isLegal);
+                    }
                 }
                 if(BooleanService.canDoSandbox) {
                     service.getRender().getMenuRender().drawSandboxMenu(g2);
@@ -121,7 +123,9 @@ public class BoardPanel extends JPanel implements Runnable {
 
     private void update() {
         checkKeyboardInput();
-        service.getTimerService().update();
+        if(!BooleanService.canDoSandbox) {
+            service.getTimerService().update();
+        }
         PlayState mode = GameService.getMode();
         if(mode != null) {
             switch(mode) {

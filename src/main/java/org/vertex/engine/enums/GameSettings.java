@@ -10,6 +10,7 @@ public enum GameSettings {
         }
         public void toggle() {
             BooleanService.canAIPlay ^= true;
+            BooleanService.canDoSandbox = false;
         }
     },
     SAVES("Saves") {
@@ -34,6 +35,7 @@ public enum GameSettings {
         }
         public void toggle() {
             BooleanService.canDoSandbox ^= true;
+            BooleanService.canAIPlay = false;
         }
     },
     CHAOS_MODE("Chaos Mode") {

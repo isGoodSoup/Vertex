@@ -126,6 +126,7 @@ public class BoardService {
         if(BooleanService.canDoSandbox) {
             BooleanService.canType = true;
             BooleanService.isSandboxEnabled ^= true;
+            clearBoard();
         }
         else if(BooleanService.canDoChaos) { setPiecesChaos(); }
         else { setPieces(); }
@@ -144,6 +145,13 @@ public class BoardService {
                 getServiceFactory().getTimerService().reset();
                 getServiceFactory().getTimerService().start();
             }
+        }
+    }
+
+    public void clearBoard() {
+        List<Piece> pieces = pieceService.getPieces();
+        for (int i = pieces.size() - 1; i >= 0; i--) {
+            pieceService.removePiece(pieces.get(i));
         }
     }
 

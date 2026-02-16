@@ -23,7 +23,7 @@ public class AchievementService {
     private Map<Long, Integer> promotionCount;
     private Map<Long, Integer> checkCount;
 
-    private Set<Tint> kingsChecked = new HashSet<>();
+    private Set<Tint> kingsChecked;
 
     private int castlingCount = 0;
 
@@ -45,6 +45,8 @@ public class AchievementService {
         this.winCount = new HashMap<>();
         this.promotionCount = new HashMap<>();
         this.checkCount = new HashMap<>();
+
+        this.kingsChecked = new HashSet<>();
 
         this.isFirstCapture = true;
         this.isFirstToggle = true;
@@ -94,6 +96,7 @@ public class AchievementService {
     }
 
     public void unlock(Achievements type) {
+        if(!BooleanService.canDoAchievements) { return; }
         saveManager.autoSave();
         Achievement achievement = achievements.get(type);
         if(achievement != null && !achievement.isUnlocked()) {
