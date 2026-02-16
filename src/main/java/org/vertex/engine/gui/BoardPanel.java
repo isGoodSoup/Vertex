@@ -255,6 +255,14 @@ public class BoardPanel extends JPanel implements Runnable {
                 }
             }
             case ACHIEVEMENTS -> {
+                if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
+                    move.moveUp(service.getAchievementService().getAchievementList());
+                    lastUpTime = now;
+                }
+                if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
+                    move.moveDown(service.getAchievementService().getAchievementList());
+                    lastDownTime = now;
+                }
                 if(keyboard.isLeftDown() && now - lastUpTime >= repeatDelay) {
                     if(service.getRender().getMenuRender().getCurrentPage() > 0) {
                         service.getGuiService().getFx().playFX(4);

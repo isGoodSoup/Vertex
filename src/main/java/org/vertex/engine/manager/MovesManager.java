@@ -2,10 +2,7 @@ package org.vertex.engine.manager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertex.engine.entities.King;
-import org.vertex.engine.entities.Pawn;
-import org.vertex.engine.entities.Piece;
-import org.vertex.engine.entities.Rook;
+import org.vertex.engine.entities.*;
 import org.vertex.engine.enums.*;
 import org.vertex.engine.events.*;
 import org.vertex.engine.gui.Sound;
@@ -443,14 +440,14 @@ public class MovesManager {
         }
     }
 
-    public void moveUp(List<Save> saves) {
-        if(saves.isEmpty()) { return; }
+    public void moveUp(List<?> list) {
+        if(list.isEmpty()) { return; }
 
         MenuRender menu = service.getRender().getMenuRender();
         int itemsPerPage = ITEMS_PER_PAGE;
         int currentPage = menu.getCurrentPage();
         int startIndex = (currentPage - 1) * itemsPerPage;
-        int endIndex = Math.min(startIndex + itemsPerPage, saves.size());
+        int endIndex = Math.min(startIndex + itemsPerPage, list.size());
 
         selectedIndexY--;
         if(selectedIndexY < startIndex) {
@@ -479,14 +476,14 @@ public class MovesManager {
         getFx().playFX(4);
     }
 
-    public void moveDown(List<Save> saves) {
-        if(saves.isEmpty()) { return; }
+    public void moveDown(List<?> list) {
+        if(list.isEmpty()) { return; }
 
         MenuRender menu = service.getRender().getMenuRender();
         int itemsPerPage = ITEMS_PER_PAGE;
         int currentPage = menu.getCurrentPage();
         int startIndex = (currentPage - 1) * itemsPerPage;
-        int endIndex = Math.min(startIndex + itemsPerPage, saves.size());
+        int endIndex = Math.min(startIndex + itemsPerPage, list.size());
 
         selectedIndexY++;
         if(selectedIndexY >= endIndex) {
