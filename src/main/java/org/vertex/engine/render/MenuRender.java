@@ -490,6 +490,9 @@ public class MenuRender {
         GUIService.drawBox(g2, stroke, boxX, boxY, boxWidth,
                 boxHeight, arc, arc, true, false, 255);
 
+        GUIService.drawBox(g2, stroke, boardX - 100, boardY, boxWidth,
+                boxHeight + 100, arc, arc, true, false, 255);
+
         g2.setColor(Colorblindness.filter(Colors.getForeground()));
         g2.drawString(input, textX, textY);
     }

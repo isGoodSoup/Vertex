@@ -27,7 +27,6 @@ public class BooleanService {
     public static boolean canPromote;
     public static boolean canSave;
     public static boolean canAIPlay;
-    public static boolean canDoTraining;
     public static boolean canDoSandbox;
     public static boolean canDoChaos;
     public static boolean canDoHard;
@@ -74,8 +73,8 @@ public class BooleanService {
         canSave = false;
         canResetTable = true;
         canStopwatch = true;
+        canDoSandbox = false;
         canDoChaos = false;
-        canDoTraining = false;
         canTheme = false;
         isFullscreen = true;
         isDarkMode = false;

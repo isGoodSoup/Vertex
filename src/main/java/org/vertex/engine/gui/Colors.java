@@ -38,6 +38,13 @@ public class Colors {
         PieceService.clearCache();
     }
 
+    public static void previousTheme() {
+        Theme[] themes = Theme.values();
+        int beforeIndex = (currentTheme.ordinal() - 1) % themes.length;
+        setTheme(themes[beforeIndex]);
+        PieceService.clearCache();
+    }
+
     public static Color getBackground() {
         return BooleanService.isDarkMode ? DARK_MODE_BACKGROUND : currentTheme.getBackground();
     }

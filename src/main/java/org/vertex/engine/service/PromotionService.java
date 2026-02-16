@@ -45,6 +45,13 @@ public class PromotionService {
                 return true;
             }
         }
+
+        if (p instanceof Checker) {
+            if ((p.getColor() == Tint.LIGHT && p.getRow() == 0) ||
+                    (p.getColor() == Tint.DARK && p.getRow() == 7)) {
+                return true;
+            }
+        }
         return false;
     }
 

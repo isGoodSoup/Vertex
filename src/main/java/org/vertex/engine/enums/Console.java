@@ -3,6 +3,7 @@ package org.vertex.engine.enums;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertex.engine.entities.*;
+import org.vertex.engine.gui.Colors;
 import org.vertex.engine.service.BoardService;
 import org.vertex.engine.service.ServiceFactory;
 
@@ -102,6 +103,48 @@ public enum Console {
 
             if (!removed) {
                 log.info("No piece found at ({}, {}) to remove.", col, row);
+            }
+        }
+    },
+    THEME("THEME") {
+        @Override
+        public void run(ServiceFactory service, String[] args) {
+            if(args.length < 1) {
+                log.info("Usage: THEME <GET|NEXT|PREV|LIST> [pos]");
+                return;
+            }
+
+            String action = args[0].toUpperCase();
+
+            switch(action) {
+                case "GET" -> {
+                    if (args.length < 2) {
+                        log.info("Usage: THEME GET <pos>");
+                        return;
+                    }
+                    try {
+                        int pos = Integer.parseInt(args[1]);
+                        Theme[] themes = Theme.values();
+                        if (pos < 0 || pos >= themes.length) {
+                            log.info("Invalid theme index. Must be between 0 and {}", themes.length - 1);
+                            return;
+                        }
+                        Colors.setTheme(themes[pos]);
+                        log.info("Theme set to: {}", themes[pos].name());
+                    } catch (NumberFormatException e) {
+                        log.info("Position must be a number.");
+                    }
+                }
+                case "NEXT" -> {
+                    Colors.nextTheme();
+                    log.info("Switched to next theme: {}", Colors.getTheme().name());
+                }
+                case "PREV" -> {
+                    Colors.previousTheme();
+                    log.info("Switched to previous theme: {}", Colors.getTheme().name());
+                }
+                default -> log.error("Unknown action: {}. Use GET, NEXT, PREV",
+                        action);
             }
         }
     };

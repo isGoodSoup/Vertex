@@ -130,7 +130,6 @@ public class BoardService {
             }
         }
         else if(BooleanService.canDoChaos) { setPiecesChaos(); }
-        else if(BooleanService.canDoTraining) { setPiecesTraining(); }
         else { setPieces(); }
 
         if(!BooleanService.canDoSandbox) {
@@ -306,15 +305,5 @@ public class BoardService {
         pieces.clear();
         clearBoardState();
 
-    }
-
-    private void setPiecesTraining() {
-        List<Piece> pieces = pieceService.getPieces();
-        pieces.clear();
-        clearBoardState();
-
-        pieces.add(pieceService.getRandomPiece(Tint.LIGHT, 5, 6));
-        pieces.add(new King(pieceService, Tint.LIGHT, 4, 7));
-        pieces.add(new King(pieceService, Tint.DARK, 4, 0));
     }
 }

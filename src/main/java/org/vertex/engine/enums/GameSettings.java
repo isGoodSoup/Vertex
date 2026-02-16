@@ -45,19 +45,6 @@ public enum GameSettings {
             BooleanService.canDoChaos ^= true;
             BooleanService.canUndoMoves = true;
             BooleanService.canDoAchievements = false;
-            BooleanService.canDoTraining = false;
-        }
-    },
-    TRAINING_MODE("Training Mode") {
-        public boolean get() {
-            return BooleanService.canDoTraining;
-        }
-        public void toggle() {
-            BooleanService.canDoTraining ^= true;
-            BooleanService.canUndoMoves = true;
-            BooleanService.canShowTick = true;
-            BooleanService.canDoAchievements = false;
-            BooleanService.canDoChaos = false;
         }
     },
     BASIC_MOVES("Basic Moves") {

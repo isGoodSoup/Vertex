@@ -262,7 +262,7 @@ public class MovesManager {
 
     private void executeCastling(Piece currentPiece, int targetCol) {
         if(!BooleanService.canDoMoves) { return; }
-        log.debug("Executing castling");
+        if(!(currentPiece instanceof King)) { return; }
         int colDiff = targetCol - currentPiece.getCol();
 
         if(Math.abs(colDiff) == 2 && !currentPiece.hasMoved()) {
@@ -317,7 +317,6 @@ public class MovesManager {
     private void executeEnPassant(Piece currentPiece, Piece captured,
                                   int targetCol, int targetRow) {
         if(!BooleanService.canDoMoves) { return; }
-        log.debug("Executing En Passant");
         int oldRow = currentPiece.getPreRow();
         int movedSquares = Math.abs(targetRow - oldRow);
 
