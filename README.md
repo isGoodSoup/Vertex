@@ -1,4 +1,8 @@
-# Vertex
+<p align="center">
+  <img src="src/main/resources/ui/logo_v4-1.png" alt="Vertex Logo" width="406"/>
+</p>
+
+# About
 Vertex is a modular board game engine currently supporting **Chess** and **Checkers**, designed to expand with additional board games over time.
 The project focuses on building a flexible, scalable foundation for turn-based board games while maintaining clean architecture and custom visual design.
 
