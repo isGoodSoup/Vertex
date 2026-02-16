@@ -10,6 +10,7 @@ public class BooleanService {
     public static boolean canMove;
     public static boolean isValidSquare;
     public static boolean isLegal;
+    public static boolean isDragging;
     public static boolean isCheckmate;
     public static boolean isStalemate;
     public static boolean isPromotionActive;
@@ -62,6 +63,7 @@ public class BooleanService {
         isCheckmate = false;
         isExitActive = false;
         canType = false;
+        isDragging = false;
     }
 
     public static boolean getBoolean() {

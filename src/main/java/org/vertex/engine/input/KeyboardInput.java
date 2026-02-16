@@ -13,7 +13,7 @@ import org.vertex.engine.service.ServiceFactory;
 
 import java.util.List;
 
-public class KeyboardUI {
+public class KeyboardInput {
     private int moveX = 4;
     private int moveY = 6;
     private int selectedIndexY;
@@ -23,7 +23,7 @@ public class KeyboardUI {
 
     private ServiceFactory service;
 
-    public KeyboardUI() {
+    public KeyboardInput() {
         this.selectedIndexY = 0;
         this.selectedIndexX = 0;
     }

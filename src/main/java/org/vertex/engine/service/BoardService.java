@@ -6,7 +6,6 @@ import org.vertex.engine.entities.*;
 import org.vertex.engine.enums.Games;
 import org.vertex.engine.enums.Time;
 import org.vertex.engine.enums.Tint;
-import org.vertex.engine.sound.Sound;
 import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.manager.SaveManager;
 import org.vertex.engine.records.Save;
@@ -16,7 +15,6 @@ import java.util.*;
 public class BoardService {
     private static Piece[][] boardState;
     private Board board;
-    private transient Sound fx;
     private String[][] squares;
     private final Map<List<Integer>, List<Integer>> columns;
 
@@ -36,7 +34,6 @@ public class BoardService {
                         ModelService modelService,
                         MovesManager movesManager) {
         this.board = new Board();
-        this.fx = new Sound();
         this.pieceService = pieceService;
         this.promotionService = promotionService;
         this.modelService = modelService;

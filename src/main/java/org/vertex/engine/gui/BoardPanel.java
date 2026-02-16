@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.vertex.engine.enums.*;
 import org.vertex.engine.events.ToggleEvent;
 import org.vertex.engine.input.Keyboard;
-import org.vertex.engine.input.KeyboardUI;
+import org.vertex.engine.input.KeyboardInput;
 import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.records.Save;
 import org.vertex.engine.render.Colorblindness;
@@ -52,8 +52,8 @@ public class BoardPanel extends JPanel implements Runnable {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setBackground(Colorblindness.filter(Colors.getBackground()));
         addKeyListener(service.getKeyboard());
-        setCursor(new Cursor(0));
-        log.debug("Keyboard listener inserted");
+        addMouseListener(service.getMouse());
+        addMouseMotionListener(service.getMouse());
         setFocusable(true);
 	}
 
@@ -124,6 +124,7 @@ public class BoardPanel extends JPanel implements Runnable {
 
     private void update() {
         checkKeyboardInput();
+        service.getMouseInput().update();
         if(!BooleanService.canDoSandbox) {
             service.getTimerService().update();
         }
@@ -138,7 +139,7 @@ public class BoardPanel extends JPanel implements Runnable {
 
     private void checkKeyboardInput() {
         long now = System.currentTimeMillis();
-        KeyboardUI keyboardUI = service.getKeyUI();
+        KeyboardInput keyboardInput = service.getKeyboardInput();
         Keyboard keyboard = service.getKeyboard();
         MovesManager move = service.getMovesManager();
         GameState state = GameService.getState();
@@ -146,7 +147,7 @@ public class BoardPanel extends JPanel implements Runnable {
 
         if(keyboard.isComboPressed(KeyEvent.VK_CONTROL, KeyEvent.VK_B)) {
             GameService.setState(GameState.MENU);
-            service.getKeyUI().setSelectedIndexY(3);
+            service.getKeyboardInput().setSelectedIndexY(3);
             service.getSound().playFX(2);
         }
 
@@ -184,16 +185,16 @@ public class BoardPanel extends JPanel implements Runnable {
         switch(state) {
             case MENU -> {
                 if(keyboard.wasSelectPressed()) {
-                    keyboardUI.activate(GameState.MENU);
+                    keyboardInput.activate(GameState.MENU);
                     service.getSound().playFX(3);
                 }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
-                    keyboardUI.moveUp(MenuRender.MENU);
+                    keyboardInput.moveUp(MenuRender.MENU);
                     service.getSound().playFX(1);
                     lastUpTime = now;
                 }
                 if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
-                    keyboardUI.moveDown(MenuRender.MENU);
+                    keyboardInput.moveDown(MenuRender.MENU);
                     service.getSound().playFX(1);
                     lastDownTime = now;
                 }
@@ -205,49 +206,49 @@ public class BoardPanel extends JPanel implements Runnable {
             }
             case SAVES -> {
                 List<Save> saves = service.getSaveManager().getSaves();
-                int itemsPerPage = KeyboardUI.getITEMS_PER_PAGE();
+                int itemsPerPage = KeyboardInput.getITEMS_PER_PAGE();
                 if(!saves.isEmpty()) {
-                    service.getKeyUI().setSelectedIndexY(0);
+                    service.getKeyboardInput().setSelectedIndexY(0);
                 }
                 if(keyboard.wasSelectPressed()) {
-                    keyboardUI.activate(GameState.SAVES);
+                    keyboardInput.activate(GameState.SAVES);
                     service.getSound().playFX(3);
                 }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
-                    keyboardUI.moveUp(saves);
+                    keyboardInput.moveUp(saves);
                     service.getSound().playFX(1);
                     lastUpTime = now;
                 }
                 if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
-                    keyboardUI.moveDown(saves);
+                    keyboardInput.moveDown(saves);
                     service.getSound().playFX(1);
                     lastDownTime = now;
                 }
                 if(keyboard.isLeftDown() && now - lastUpTime >= repeatDelay) {
-                    service.getKeyUI().previousPage();
+                    service.getKeyboardInput().previousPage();
                     service.getSound().playFX(2);
-                    service.getKeyUI().setSelectedIndexY(
-                            (service.getKeyUI().getCurrentPage() - 1) * itemsPerPage
+                    service.getKeyboardInput().setSelectedIndexY(
+                            (service.getKeyboardInput().getCurrentPage() - 1) * itemsPerPage
                     );
                     lastUpTime = now;
                 }
                 if(keyboard.isRightDown() && now - lastDownTime >= repeatDelay) {
-                    service.getKeyUI().nextPage();
+                    service.getKeyboardInput().nextPage();
                     service.getSound().playFX(2);
-                    service.getKeyUI().setSelectedIndexY(
-                            (service.getKeyUI().getCurrentPage() - 1) * itemsPerPage
+                    service.getKeyboardInput().setSelectedIndexY(
+                            (service.getKeyboardInput().getCurrentPage() - 1) * itemsPerPage
                     );
                     lastDownTime = now;
                 }
                 if(keyboard.isComboPressed(KeyEvent.VK_CONTROL,
                         KeyEvent.VK_D) && now - lastDownTime >= repeatDelay) {
-                    int selected = service.getKeyUI().getSelectedIndexY();
+                    int selected = service.getKeyboardInput().getSelectedIndexY();
                     if(selected >= 0 && selected < saves.size()) {
                         String saveName = saves.get(selected).name();
                         service.getSaveManager().removeSave(saveName);
 
                         if(selected >= saves.size()) {
-                            service.getKeyUI().setSelectedIndexY(saves.size() - 1);
+                            service.getKeyboardInput().setSelectedIndexY(saves.size() - 1);
                         }
                     }
                     lastDownTime = now;
@@ -256,54 +257,54 @@ public class BoardPanel extends JPanel implements Runnable {
             }
             case RULES -> {
                 if(keyboard.wasSelectPressed()) {
-                    keyboardUI.activate(GameState.RULES);
+                    keyboardInput.activate(GameState.RULES);
                     service.getSound().playFX(0);
                 }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
-                    keyboardUI.moveUp(MenuRender.SETTINGS_MENU);
+                    keyboardInput.moveUp(MenuRender.SETTINGS_MENU);
                     service.getSound().playFX(1);
                     lastUpTime = now;
                 }
                 if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
-                    keyboardUI.moveDown(MenuRender.SETTINGS_MENU);
+                    keyboardInput.moveDown(MenuRender.SETTINGS_MENU);
                     service.getSound().playFX(1);
                     lastDownTime = now;
                 }
                 if(keyboard.isLeftDown() && now - lastDownTime >= repeatDelay) {
-                    keyboardUI.moveLeft(MenuRender.SETTINGS_MENU);
+                    keyboardInput.moveLeft(MenuRender.SETTINGS_MENU);
                     service.getSound().playFX(2);
                     lastDownTime = now;
                 }
                 if(keyboard.isRightDown() && now - lastDownTime >= repeatDelay) {
-                    keyboardUI.moveRight(MenuRender.SETTINGS_MENU);
+                    keyboardInput.moveRight(MenuRender.SETTINGS_MENU);
                     service.getSound().playFX(2);
                     lastDownTime = now;
                 }
             }
             case ACHIEVEMENTS -> {
                 if(keyboard.wasSelectPressed()) {
-                    keyboardUI.activate(GameState.ACHIEVEMENTS);
+                    keyboardInput.activate(GameState.ACHIEVEMENTS);
                     service.getSound().playFX(3);
                 }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
-                    keyboardUI.moveUp(service.getAchievementService().getAchievementList());
+                    keyboardInput.moveUp(service.getAchievementService().getAchievementList());
                     service.getSound().playFX(1);
                     lastUpTime = now;
                 }
                 if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
-                    keyboardUI.moveDown(service.getAchievementService().getAchievementList());
+                    keyboardInput.moveDown(service.getAchievementService().getAchievementList());
                     service.getSound().playFX(1);
                     lastDownTime = now;
                 }
                 if(keyboard.isLeftDown() && now - lastUpTime >= repeatDelay) {
-                    service.getKeyUI().previousPage();
-                    service.getKeyUI().setSelectedIndexY(0);
+                    service.getKeyboardInput().previousPage();
+                    service.getKeyboardInput().setSelectedIndexY(0);
                     service.getSound().playFX(2);
                     lastUpTime = now;
                 }
                 if(keyboard.isRightDown() && now - lastDownTime >= repeatDelay) {
-                    service.getKeyUI().nextPage();
-                    service.getKeyUI().setSelectedIndexY(0);
+                    service.getKeyboardInput().nextPage();
+                    service.getKeyboardInput().setSelectedIndexY(0);
                     service.getSound().playFX(2);
                     lastDownTime = now;
                 }
@@ -321,26 +322,26 @@ public class BoardPanel extends JPanel implements Runnable {
                     service.getSound().playFX(1);
                 }
                 if(keyboard.wasSelectPressed()) {
-                    keyboardUI.activate(GameState.BOARD);
+                    keyboardInput.activate(GameState.BOARD);
                     service.getSound().playFX(0);
                 }
                 if(keyboard.isUpDown() && now - lastUpTime >= repeatDelay) {
-                    keyboardUI.moveUp();
+                    keyboardInput.moveUp();
                     service.getSound().playFX(1);
                     lastUpTime = now;
                 }
                 if(keyboard.isDownDown() && now - lastDownTime >= repeatDelay) {
-                    keyboardUI.moveDown();
+                    keyboardInput.moveDown();
                     service.getSound().playFX(1);
                     lastDownTime = now;
                 }
                 if(keyboard.isLeftDown() && now - lastLeftTime >= repeatDelay) {
-                    keyboardUI.moveLeft();
+                    keyboardInput.moveLeft();
                     service.getSound().playFX(1);
                     lastLeftTime = now;
                 }
                 if(keyboard.isRightDown() && now - lastRightTime >= repeatDelay) {
-                    keyboardUI.moveRight();
+                    keyboardInput.moveRight();
                     service.getSound().playFX(1);
                     lastRightTime = now;
                 }

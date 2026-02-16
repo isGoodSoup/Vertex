@@ -113,8 +113,8 @@ public class MovesManager {
             Piece promoted = service.getPromotionService().autoPromote(piece);
             service.getPieceService().replacePiece(piece, promoted);
             log.info("Promoted piece");
-            service.getKeyUI().setMoveX(promoted.getCol());
-            service.getKeyUI().setMoveY(promoted.getRow());
+            service.getKeyboardInput().setMoveX(promoted.getCol());
+            service.getKeyboardInput().setMoveY(promoted.getRow());
             selectedPiece = null;
             service.getPieceService().setHoveredPieceKeyboard(promoted);
         } else {

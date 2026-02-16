@@ -5,7 +5,7 @@ import org.vertex.engine.entities.Board;
 import org.vertex.engine.enums.*;
 import org.vertex.engine.gui.Colors;
 import org.vertex.engine.input.Keyboard;
-import org.vertex.engine.input.KeyboardUI;
+import org.vertex.engine.input.KeyboardInput;
 import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.records.Save;
 import org.vertex.engine.service.*;
@@ -47,7 +47,7 @@ public class MenuRender {
     private BoardService boardService;
     private MovesManager movesManager;
     private GUIService guiService;
-    private KeyboardUI keyUI;
+    private KeyboardInput keyUI;
     private AnimationService animationService;
     private AchievementSprites sprites;
 
@@ -82,11 +82,11 @@ public class MenuRender {
                 Colorblindness.filter(HARD_MODE_ON_HIGHLIGHTED);
     }
 
-    public KeyboardUI getKeyUI() {
+    public KeyboardInput getKeyUI() {
         return keyUI;
     }
 
-    public void setKeyUI(KeyboardUI keyUI) {
+    public void setKeyUI(KeyboardInput keyUI) {
         this.keyUI = keyUI;
     }
 
@@ -339,7 +339,7 @@ public class MenuRender {
         x = getCenterX(getTotalWidth(), width);
         boolean hasBackground = true;
 
-        int itemsPerPage = KeyboardUI.getITEMS_PER_PAGE();
+        int itemsPerPage = KeyboardInput.getITEMS_PER_PAGE();
         int start = keyUI.getCurrentPage() * itemsPerPage;
         int end = Math.min(start + itemsPerPage, list.size());
 
@@ -464,7 +464,7 @@ public class MenuRender {
         x = getCenterX(getTotalWidth(), width);
         boolean hasBackground = true;
 
-        int itemsPerPage = KeyboardUI.getITEMS_PER_PAGE();
+        int itemsPerPage = KeyboardInput.getITEMS_PER_PAGE();
         int start = (keyUI.getCurrentPage() - 1) * itemsPerPage;
         int end = Math.min(start + itemsPerPage, saves.size());
 
