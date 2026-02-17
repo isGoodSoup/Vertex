@@ -50,7 +50,7 @@ public enum Theme {
             new Color(180,140,200),
             new Color(180,70,200),
             new Color(140,40,170),
-            new Color(200,90,220)
+            new Color(250,140,255)
     );
 
     private final String lightName;

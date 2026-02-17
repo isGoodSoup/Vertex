@@ -18,6 +18,8 @@ import java.util.Objects;
 
 public class GUIService {
     private static Font font;
+    private static Font font_bold;
+    private static BufferedImage logo;
     private static final int MENU_SPACING = 40;
     private static final int MENU_START_X = 100;
     private static final int MENU_START_Y = 160;
@@ -28,9 +30,6 @@ public class GUIService {
 
     private final RenderContext render;
 
-    private static BufferedImage oldLogo;
-    private static BufferedImage logo;
-    private static BufferedImage logo_v2;
     private final transient BufferedImage YES;
     private final transient BufferedImage NO;
 
@@ -57,11 +56,7 @@ public class GUIService {
         this.timerService = timerService;
         GUIService.promotionService = promotionService;
         logo = null;
-        oldLogo = null;
         try {
-            oldLogo = getImage("/ui/logo");
-            logo = getImage("/ui/logo_v4-1");
-            logo_v2 = getImage("/ui/logo_v4-2");
             YES = getImage("/ticks/tick_yes");
             NO = getImage("/ticks/tick_no");
         } catch (IOException e) {
@@ -71,9 +66,13 @@ public class GUIService {
         try {
             font = Font.createFont(Font.TRUETYPE_FONT,
                     Objects.requireNonNull(Board.class.getResourceAsStream(
-                            "/ui/Monocraft.ttf")));
+                            "/fonts/Monocraft.ttf")));
+            font_bold = Font.createFont(Font.TRUETYPE_FONT,
+                    Objects.requireNonNull(Board.class.getResourceAsStream(
+                            "/fonts/Monocraft-Semibold.ttf")));
             GraphicsEnvironment ge =
                     GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(font_bold);
             ge.registerFont(font);
         } catch(Exception e) {
             log.error(e.getMessage());
@@ -86,7 +85,7 @@ public class GUIService {
     }
 
     public static Font getFontBold(int size) {
-        return font.deriveFont(Font.BOLD, (float) size);
+        return font_bold.deriveFont(Font.PLAIN, (float) size);
     }
 
     public static int getMENU_SPACING() {
@@ -118,15 +117,19 @@ public class GUIService {
     }
 
     public static BufferedImage getLogo() {
-        return logo;
-    }
-
-    public static BufferedImage getLogoV2() {
-        return logo_v2;
-    }
-
-    public static BufferedImage getOldLogo() {
-        return oldLogo;
+        try {
+            return switch(Colors.getTheme()) {
+                case DEFAULT -> logo = getImage("/ui/logo/logo_final_v2");
+                case BLACK -> logo = getImage("/ui/logo/logo_final_v3");
+                case LEGACY -> logo = getImage("/ui/logo/logo_final_v3_creme");
+                case OCEAN -> logo = getImage("/ui/logo/logo_final_v3_ocean");
+                case FOREST -> logo = getImage("/ui/logo/logo_final_v3_forest");
+                case LOGO -> logo = getImage("/ui/logo/logo_final_v3_legacy-logo");
+                case FAIRY -> logo = getImage("/ui/logo/logo_final_v3_fairy");
+            };
+        } catch (RuntimeException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static int getMOVES_CAP() {
@@ -137,8 +140,8 @@ public class GUIService {
         return PADDING;
     }
 
-    public BufferedImage getImage(String path) throws IOException {
-        InputStream stream = getClass().getResourceAsStream(path + ".png");
+    public static BufferedImage getImage(String path) throws IOException {
+        InputStream stream = GUIService.class.getResourceAsStream(path + ".png");
         if (stream == null) {
             log.error("Resource not found: {}.png", path);
             return null;

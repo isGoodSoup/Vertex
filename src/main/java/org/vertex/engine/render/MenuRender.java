@@ -55,16 +55,16 @@ public class MenuRender {
     }
 
     public void init() {
-        this.sprites = new AchievementSprites(guiService);
+        this.sprites = new AchievementSprites();
         try {
-            TOGGLE_ON = guiService.getImage("/ui/toggle_on");
-            TOGGLE_OFF = guiService.getImage("/ui/toggle_off");
-            TOGGLE_ON_HIGHLIGHTED = guiService.getImage("/ui/toggle_onh");
-            TOGGLE_OFF_HIGHLIGHTED = guiService.getImage("/ui/toggle_offh");
-            DARK_MODE_ON = guiService.getImage("/ui/dark-mode_on");
-            DARK_MODE_ON_HIGHLIGHTED = guiService.getImage("/ui/dark-mode_onh");
-            HARD_MODE_ON = guiService.getImage("/ui/hardmode_on");
-            HARD_MODE_ON_HIGHLIGHTED = guiService.getImage("/ui/hardmode_onh");
+            TOGGLE_ON = GUIService.getImage("/ui/toggle_on");
+            TOGGLE_OFF = GUIService.getImage("/ui/toggle_off");
+            TOGGLE_ON_HIGHLIGHTED = GUIService.getImage("/ui/toggle_onh");
+            TOGGLE_OFF_HIGHLIGHTED = GUIService.getImage("/ui/toggle_offh");
+            DARK_MODE_ON = GUIService.getImage("/ui/dark-mode_on");
+            DARK_MODE_ON_HIGHLIGHTED = GUIService.getImage("/ui/dark-mode_onh");
+            HARD_MODE_ON = GUIService.getImage("/ui/hardmode_on");
+            HARD_MODE_ON_HIGHLIGHTED = GUIService.getImage("/ui/hardmode_onh");
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -172,21 +172,15 @@ public class MenuRender {
 
     private static void drawLogo(Graphics2D g2, int containerWidth) {
         if(GUIService.getLogo() == null) { return; }
-        BufferedImage img;
-        if(Colors.getBackground() == Theme.LEGACY.getBackground()) {
-            img = GUIService.getOldLogo();
-        } else if(BooleanService.isDarkMode || Colors.getBackground() == Theme.BLACK.getBackground()) {
-            img = GUIService.getLogoV2();
-        } else {
-            img = GUIService.getLogo();
-        }
-
+        BufferedImage img = GUIService.getLogo();
+        int logoWidth = 0;
+        int logoHeight = 0;
         img = Colorblindness.filter(img);
         int boardWidth = Board.getSquare() * 8;
+        logoWidth = (int) (GUIService.getLogo().getWidth()/SCALE);
+        logoHeight = (int) (GUIService.getLogo().getHeight()/SCALE);
         int boardCenterX = render.getOffsetX() + render.scale(
                 RenderContext.BASE_WIDTH) * 2 + boardWidth/2;
-        int logoWidth = (int) (GUIService.getLogo().getWidth()/SCALE);
-        int logoHeight = (int) (GUIService.getLogo().getHeight()/SCALE);
         int x = getCenterX(containerWidth, logoWidth);
         int y =
                 render.getOffsetY() + render.scale(RenderContext.BASE_HEIGHT)/4;
@@ -198,11 +192,11 @@ public class MenuRender {
         g2.fillRect(0, 0, getTotalWidth(), render.scale(RenderContext.BASE_HEIGHT));
 
         Font baseFont = GUIService.getFont(GUIService.getMENU_FONT());
-        Font selectedFont = baseFont.deriveFont(baseFont.getSize() + 8f);
+        Font selectedFont = GUIService.getFontBold(GUIService.getMENU_FONT());
 
         drawLogo(g2, getTotalWidth());
 
-        int centerY = 900;
+        int centerY = 800;
         int spacing = render.scale(GUIService.getMENU_SPACING());
         int centerX = render.getOffsetX() + getTotalWidth() / 2;
         int totalWidth = 0;
