@@ -11,11 +11,9 @@ import org.vertex.engine.enums.Tint;
 import org.vertex.engine.events.*;
 import org.vertex.engine.records.Move;
 import org.vertex.engine.service.BooleanService;
-import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.PieceService;
 import org.vertex.engine.service.ServiceFactory;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,14 +62,14 @@ public class MovesManager {
 
     public void attemptMove(Piece piece, int targetCol, int targetRow) {
         if(BooleanService.isCheckmate) { return; }
-        boolean isHumanMove = isHumanTurn(GameService.getCurrentTurn());
+        boolean isHumanMove = isHumanTurn(service.getGameService().getCurrentTurn());
 
         if(isHumanMove) {
             service.getTimerService().pause();
         }
 
         for(Piece p : service.getPieceService().getPieces()) {
-            if(p instanceof Pawn && p.getColor() == GameService.getCurrentTurn()) {
+            if(p instanceof Pawn && p.getColor() == service.getGameService().getCurrentTurn()) {
                 p.resetEnPassant();
             }
         }
@@ -153,10 +151,10 @@ public class MovesManager {
     }
 
     private boolean isCheckmate() {
-        if(service.getPieceService().isKingInCheck(GameService.getCurrentTurn())) {
+        if(service.getPieceService().isKingInCheck(service.getGameService().getCurrentTurn())) {
             boolean hasEscapeMoves = false;
             for(Piece piece : service.getPieceService().getPieces()) {
-                if(piece.getColor() == GameService.getCurrentTurn()) {
+                if(piece.getColor() == service.getGameService().getCurrentTurn()) {
                     for(int col = 0; col < 8; col++) {
                         for(int row = 0; row < 8; row++) {
                             if(piece.canMove(col, row, service.getPieceService().getPieces()) &&
@@ -178,7 +176,7 @@ public class MovesManager {
             if(!hasEscapeMoves) {
                 BooleanService.isCheckmate = true;
                 service.getTimerService().stop();
-                GameService.setState(GameState.CHECKMATE);
+                service.getGameService().setState(GameState.CHECKMATE);
                 if(selectedPiece != null) {
                     log.info("Checkmate to {}",
                             selectedPiece.getOtherPiece().getColor());
@@ -197,7 +195,7 @@ public class MovesManager {
                 if(kingCounter == 2 && service.getPieceService().getPieces().size() == 2) {
                     BooleanService.isStalemate = true;
                     service.getTimerService().stop();
-                    GameService.setState(GameState.STALEMATE);
+                    service.getGameService().setState(GameState.STALEMATE);
                     log.info("Stalemate. Both sides hold just the King");
                 }
             }
@@ -342,7 +340,7 @@ public class MovesManager {
         return service.getPieceService()
                 .getPieces()
                 .stream()
-                .filter(p -> p.getColor() == GameService.getCurrentTurn())
+                .filter(p -> p.getColor() ==  service.getGameService().getCurrentTurn())
                 .toList();
     }
 }

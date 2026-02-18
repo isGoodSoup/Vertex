@@ -5,7 +5,6 @@ import org.vertex.engine.enums.ControlsHUD;
 import org.vertex.engine.gui.Colors;
 import org.vertex.engine.service.BooleanService;
 import org.vertex.engine.service.GUIService;
-import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.ServiceFactory;
 
 import java.awt.*;
@@ -13,19 +12,19 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class ControlsRender {
-    private ServiceFactory serviceFactory;
+    private ServiceFactory service;
 
     private static final int LINE_HEIGHT = 15;
     private static final int PADDING = 10;
 
     public ControlsRender() {}
 
-    public ServiceFactory getServiceFactory() {
-        return serviceFactory;
+    public ServiceFactory getService() {
+        return service;
     }
 
-    public void setServiceFactory(ServiceFactory serviceFactory) {
-        this.serviceFactory = serviceFactory;
+    public void setService(ServiceFactory service) {
+        this.service = service;
     }
 
     public void drawControlsHUD(Graphics2D g2) {
@@ -35,7 +34,7 @@ public class ControlsRender {
         g2.setColor(Colorblindness.filter(Colors.getForeground()));
         g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
 
-        ControlCategory[] categories = switch(GameService.getState()) {
+        ControlCategory[] categories = switch(service.getGameService().getState()) {
             case BOARD -> new ControlCategory[]{ControlCategory.BOARD_KEYBOARD, ControlCategory.BOARD_MOUSE};
             case MENU -> new ControlCategory[]{ControlCategory.MENU};
             default -> new ControlCategory[]{};

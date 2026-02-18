@@ -24,7 +24,7 @@ public class BoardService {
     private static MovesManager movesManager;
     private static SaveManager saveManager;
 
-    private ServiceFactory serviceFactory;
+    private ServiceFactory service;
     private static final Logger log = LoggerFactory.getLogger(BoardService.class);
 
     private Games lastLoggedGame = null;
@@ -41,12 +41,12 @@ public class BoardService {
         this.columns = new HashMap<>();
     }
 
-    public ServiceFactory getServiceFactory() {
-        return serviceFactory;
+    public ServiceFactory getService() {
+        return service;
     }
 
-    public void setServiceFactory(ServiceFactory serviceFactory) {
-        this.serviceFactory = serviceFactory;
+    public void setService(ServiceFactory service) {
+        this.service = service;
     }
 
     public Board getBoard() {
@@ -70,7 +70,7 @@ public class BoardService {
     }
 
     public void prepBoard() {
-        Games game = GameService.getGame();
+        Games game = service.getGameService().getGame();
         if (game == null) {
             throw new IllegalStateException("Game must be selected before starting the board");
         }
@@ -140,15 +140,15 @@ public class BoardService {
             if(BooleanService.canStopwatch) {
                 TimerService.setTime(Time.STOPWATCH);
                 BooleanService.canTime = false;
-                getServiceFactory().getTimerService().reset();
-                getServiceFactory().getTimerService().start();
+                getService().getTimerService().reset();
+                getService().getTimerService().start();
             }
 
             if(BooleanService.canTime) {
                 TimerService.setTime(Time.TIMER);
                 BooleanService.canStopwatch = false;
-                getServiceFactory().getTimerService().reset();
-                getServiceFactory().getTimerService().start();
+                getService().getTimerService().reset();
+                getService().getTimerService().start();
             }
         }
     }
@@ -162,15 +162,15 @@ public class BoardService {
 
     public void resetBoard() {
         if(BooleanService.canResetTable) {
-            getServiceFactory().getGameService().startNewGame();
+            getService().getGameService().startNewGame();
         }
     }
 
     public void setPieces() {
-        Games game = GameService.getGame();
+        Games game = service.getGameService().getGame();
 
-        if(game != GameService.getGame()) {
-            log.debug("Current game: {}", GameService.getGame());
+        if(game != service.getGameService().getGame()) {
+            log.debug("Current game: {}", service.getGameService().getGame());
             lastLoggedGame = game;
         }
 
@@ -226,7 +226,7 @@ public class BoardService {
                     p.setY(p.getRow() * squareSize);
                 }
 
-                GameService.setCurrentTurn(Tint.LIGHT);
+                service.getGameService().setCurrentTurn(Tint.LIGHT);
                 PieceService.nullThisPiece();
             }
             case CHECKERS -> {
@@ -259,7 +259,7 @@ public class BoardService {
                     p.setX(p.getCol() * squareSize);
                     p.setY(p.getRow() * squareSize);
                 }
-                GameService.setCurrentTurn(Tint.LIGHT);
+                service.getGameService().setCurrentTurn(Tint.LIGHT);
                 PieceService.nullThisPiece();
             }
         }
@@ -270,7 +270,7 @@ public class BoardService {
             return;
         }
 
-        switch(GameService.getGame()) {
+        switch(service.getGameService().getGame()) {
             case CHESS -> {
                 List<Piece> pieces = pieceService.getPieces();
                 columns.clear();

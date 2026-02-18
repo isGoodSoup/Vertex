@@ -9,8 +9,8 @@ public enum Games {
                     "Outsmart your opponent and deliver checkmate to win") {
         @Override
         public void setup(GameService gameService) {
-            GameService.setGame(this);
-            GameService.setState(GameState.BOARD);
+            gameService.setGame(this);
+            gameService.setState(GameState.BOARD);
             if(!gameService.getSaveManager().autosaveExists()) {
                 gameService.startNewGame();
             } else {
@@ -19,8 +19,8 @@ public enum Games {
         }
 
         @Override
-        public int getBoardSize(Board board) {
-            return board.getGrids().get(GameService.getGame());
+        public int getBoardSize(Board board, GameService gameService) {
+            return board.getGrids().get(gameService.getGame());
         }
 
         @Override
@@ -33,8 +33,8 @@ public enum Games {
                     "all opponent pieces or block their moves to win") {
         @Override
         public void setup(GameService gameService) {
-            GameService.setGame(this);
-            GameService.setState(GameState.BOARD);
+            gameService.setGame(this);
+            gameService.setState(GameState.BOARD);
             if(!gameService.getSaveManager().autosaveExists()) {
                 gameService.startNewGame();
             } else {
@@ -43,8 +43,8 @@ public enum Games {
         }
 
         @Override
-        public int getBoardSize(Board board) {
-            return board.getGrids().get(GameService.getGame());
+        public int getBoardSize(Board board, GameService gameService) {
+            return board.getGrids().get(gameService.getGame());
         }
 
         @Override
@@ -56,8 +56,8 @@ public enum Games {
             "captured pieces can rejoin the game under your control."){
         @Override
         public void setup(GameService gameService) {
-            GameService.setGame(this);
-            GameService.setState(GameState.BOARD);
+            gameService.setGame(this);
+            gameService.setState(GameState.BOARD);
             if(!gameService.getSaveManager().autosaveExists()) {
                 gameService.startNewGame();
             } else {
@@ -66,8 +66,8 @@ public enum Games {
         }
 
         @Override
-        public int getBoardSize(Board board) {
-            return board.getGrids().get(GameService.getGame());
+        public int getBoardSize(Board board, GameService gameService) {
+            return board.getGrids().get(gameService.getGame());
         }
 
         @Override
@@ -100,7 +100,7 @@ public enum Games {
 
     public abstract boolean isEnabled();
 
-    public abstract int getBoardSize(Board board);
+    public abstract int getBoardSize(Board board, GameService gameService);
 
     public abstract void setup(GameService gameService);
 }

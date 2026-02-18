@@ -6,19 +6,19 @@ public enum GameMenu {
     PLAY("PLAY") {
         @Override
         public void run(GameService gameService) {
-            GameService.getGame().setup(gameService);
+            gameService.getGame().setup(gameService);
         }
     },
     SETTINGS("SETTINGS") {
         @Override
         public void run(GameService gameService) {
-            GameService.setState(GameState.RULES);
+            gameService.setState(GameState.RULES);
         }
     },
     ADVANCEMENTS("ACHIEVEMENTS") {
         @Override
         public void run(GameService gameService) {
-            GameService.setState(GameState.ACHIEVEMENTS);
+            gameService.setState(GameState.ACHIEVEMENTS);
         }
     },
     EXIT("EXIT") {

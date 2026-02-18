@@ -53,7 +53,7 @@ public class ModelService {
         if(rule == null) {
             throw new IllegalStateException("Invalid ruleset: not set or null");
         }
-        List<MoveScore> moves = rule.getAllLegalMoves(GameService.getCurrentTurn());
+        List<MoveScore> moves = rule.getAllLegalMoves(boardService.getService().getGameService().getCurrentTurn());
         if(moves.isEmpty()) { return null; }
         moves.sort(Comparator.comparingInt(MoveScore::score).reversed());
         return moves.getFirst().move();
@@ -64,7 +64,7 @@ public class ModelService {
         Piece p = move.piece();
         if(p.getColor() == Tint.DARK) {
             animationService.startMove(p, move.targetCol(), move.targetRow());
-            boardService.getServiceFactory().getSound().playFX(0);
+            boardService.getService().getSound().playFX(0);
         }
         BoardService.getMovesManager()
                 .attemptMove(move.piece(), move.targetCol(), move.targetRow());
@@ -72,7 +72,7 @@ public class ModelService {
 
     public void triggerAIMove() {
         if(!BooleanService.canAIPlay ||
-                GameService.getCurrentTurn() != Tint.DARK ||
+                boardService.getService().getGameService().getCurrentTurn() != Tint.DARK ||
                 BooleanService.isAIMoving) return;
         new Thread(() -> {
             Move AIMove = getAiTurn();

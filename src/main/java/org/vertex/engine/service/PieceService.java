@@ -230,8 +230,8 @@ public class PieceService {
     }
 
     public void switchTurns() {
-        GameService.setCurrentTurn(
-                GameService.getCurrentTurn() == Tint.LIGHT ? Tint.DARK : Tint.LIGHT
+        boardService.getService().getGameService().setCurrentTurn(
+                boardService.getService().getGameService().getCurrentTurn() == Tint.LIGHT ? Tint.DARK : Tint.LIGHT
         );
     }
 
@@ -294,7 +294,7 @@ public class PieceService {
     }
 
     public boolean isKingInCheck(Tint kingColor) {
-        if(GameService.getGame() != Games.CHESS) { return false; }
+        if(boardService.getService().getGameService().getGame() != Games.CHESS) { return false; }
         if(BooleanService.isSandboxEnabled) { return false; }
         Piece king = getKing(kingColor);
 
@@ -335,7 +335,7 @@ public class PieceService {
         simPiece.setCol(targetCol);
         simPiece.setRow(targetRow);
 
-        if(GameService.getGame() == Games.CHESS) {
+        if(boardService.getService().getGameService().getGame() == Games.CHESS) {
             if(!BooleanService.isSandboxEnabled && !BooleanService.canType) {
                 Piece king = simPieces.stream()
                         .filter(p -> p instanceof King

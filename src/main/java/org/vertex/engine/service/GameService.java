@@ -13,38 +13,38 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class GameService {
-    private static final Logger log = LoggerFactory.getLogger(GameService.class);
-    private static GameMenu gameMenu;
-    private static GameState state;
-    private static PlayState mode;
-    private static Games game;
-    private static Tint currentTurn;
-    private static RenderContext render;
-    private static BoardService boardService;
-    private static ServiceFactory service;
-    private static SaveManager saveManager;
+    private final Logger log = LoggerFactory.getLogger(GameService.class);
+    private GameMenu gameMenu;
+    private GameState state;
+    private PlayState mode;
+    private Games game;
+    private Tint currentTurn;
+    private RenderContext render;
+    private BoardService boardService;
+    private ServiceFactory service;
+    private SaveManager saveManager;
 
     public GameService(RenderContext render, BoardService boardService, SaveManager saveManager) {
-        GameService.render = render;
-        GameService.boardService = boardService;
-        GameService.saveManager = saveManager;
+        this.render = render;
+        this.boardService = boardService;
+        this.saveManager = saveManager;
         game = Games.CHESS;
     }
 
-    public static GameMenu getGameMenu() { return gameMenu; }
-    public static void setGameMenu(GameMenu menu) { gameMenu = menu; }
+    public GameMenu getGameMenu() { return gameMenu; }
+    public void setGameMenu(GameMenu menu) { gameMenu = menu; }
 
-    public static void setGame(Games g) { game = g; }
-    public static Games getGame() { return game; }
+    public void setGame(Games g) { game = g; }
+    public Games getGame() { return game; }
 
-    public static GameState getState() { return state; }
-    public static void setState(GameState s) { state = s; }
+    public GameState getState() { return state; }
+    public void setState(GameState s) { state = s; }
 
-    public static PlayState getMode() { return mode; }
-    public static Tint getCurrentTurn() { return currentTurn; }
-    public static void setCurrentTurn(Tint tint) { currentTurn = tint; }
+    public PlayState getMode() { return mode; }
+    public Tint getCurrentTurn() { return currentTurn; }
+    public void setCurrentTurn(Tint tint) { currentTurn = tint; }
 
-    public static ServiceFactory getServiceFactory() { return service; }
+    public ServiceFactory getServiceFactory() { return service; }
     public void setServiceFactory(ServiceFactory svc) { service = svc; }
 
     public SaveManager getSaveManager() { return saveManager; }
@@ -98,7 +98,7 @@ public class GameService {
         setState(GameState.BOARD);
     }
 
-    public static void autoSave() {
+    public void autoSave() {
         Save save = new Save(
                 getGame(),
                 LocalDate.now().toString(),
@@ -110,7 +110,7 @@ public class GameService {
         log.debug("Autosave triggered.");
     }
 
-    public static void nextGame() {
+    public void nextGame() {
         Games[] games = Games.values();
         int nextIndex = (game.ordinal() + 1) % games.length;
         setGame(games[nextIndex]);

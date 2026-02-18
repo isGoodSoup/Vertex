@@ -85,17 +85,6 @@ public class Keyboard implements KeyListener {
         return keyStates.getOrDefault(keyCode, false);
     }
 
-    public boolean isShiftDown() { return isKeyDown(KeyEvent.VK_SHIFT); }
-    public boolean isUpDown() { return isKeyDown(KeyEvent.VK_UP); }
-    public boolean isLeftDown() { return isKeyDown(KeyEvent.VK_LEFT); }
-    public boolean isDownDown() { return isKeyDown(KeyEvent.VK_DOWN); }
-    public boolean isRightDown() { return isKeyDown(KeyEvent.VK_RIGHT); }
-    public boolean isEnterDown() { return isKeyDown(KeyEvent.VK_ENTER); }
-    public boolean isSpaceDown() { return isKeyDown(KeyEvent.VK_SPACE); }
-    public boolean isZDown() { return isKeyDown(KeyEvent.VK_Z); }
-    public boolean isDDown() { return isKeyDown(KeyEvent.VK_D); }
-    public boolean isRDown() { return isKeyDown(KeyEvent.VK_R); }
-    public boolean isQDown() { return isKeyDown(KeyEvent.VK_Q); }
     public boolean isEscapeDown() { return isKeyDown(KeyEvent.VK_ESCAPE); }
 
     public boolean isComboPressed(int modifierKey, int triggerKey) {

@@ -2,13 +2,11 @@ package org.vertex.engine.entities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertex.engine.enums.Games;
 import org.vertex.engine.enums.Theme;
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.TypeID;
 import org.vertex.engine.gui.Colors;
 import org.vertex.engine.render.Colorblindness;
-import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.PieceService;
 
 import java.awt.image.BufferedImage;
@@ -46,8 +44,6 @@ public abstract class Piece {
 
 	public BufferedImage getSprite() {
 		String pieceName = getClass().getSimpleName().toLowerCase();
-		Games game = GameService.getGame();
-		String prefix = game.getSpritePrefix();
 		Theme theme = Colors.getTheme();
 		String color = theme.getColor(this.color);
 		String suffix = "";

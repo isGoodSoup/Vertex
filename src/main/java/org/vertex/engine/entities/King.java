@@ -3,7 +3,6 @@ package org.vertex.engine.entities;
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.TypeID;
 import org.vertex.engine.service.BooleanService;
-import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.PieceService;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class King extends Piece {
 
 	@Override
 	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
-		switch(GameService.getGame()) {
+		switch(pieceService.getBoardService().getService().getGameService().getGame()) {
 			case CHESS -> {
 				if(!isWithinBoard(targetCol, targetRow)) { return false; }
 				int colDiff = Math.abs(targetCol - getCol());

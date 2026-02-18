@@ -180,7 +180,7 @@ public class BoardRender {
         int size = (int) (square * piece.getScale());
         int offset = (square - size)/2;
 
-        if(piece instanceof King && GameService.getGame() == Games.CHECKERS) {
+        if(piece instanceof King && boardService.getService().getGameService().getGame() == Games.CHECKERS) {
             override = piece.getKingSprites();
         }
 

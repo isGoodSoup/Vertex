@@ -1,5 +1,6 @@
 package org.vertex.engine.service;
 
+import org.vertex.engine.gui.GameFrame;
 import org.vertex.engine.input.Mouse;
 import org.vertex.engine.input.MouseInput;
 import org.vertex.engine.sound.Sound;
@@ -30,11 +31,12 @@ public class ServiceFactory {
     private final AchievementService achievement;
     private final EventBus eventBus;
 
-    public ServiceFactory(RenderContext render) {
+    public ServiceFactory(RenderContext render, GameFrame gameFrame) {
         this.render = render;
         this.eventBus = new EventBus();
         this.keyboard = new Keyboard();
         this.key = new KeyboardInput();
+        this.key.setGameFrame(gameFrame);
         this.mouse = new Mouse();
         this.mouseInput = new MouseInput(mouse, this);
         this.sound = new Sound();
@@ -49,7 +51,7 @@ public class ServiceFactory {
         this.board = new BoardService(piece, promotion,
                 model, movesManager);
         this.piece.setBoardService(board);
-        this.board.setServiceFactory(this);
+        this.board.setService(this);
         this.model.setBoardService(board);
         this.saveManager = new SaveManager();
         this.gs = new GameService(render, board, saveManager);
@@ -76,7 +78,7 @@ public class ServiceFactory {
         this.render.getMovesRender().setBoardService(board);
         this.render.getMovesRender().setGuiService(gui);
         this.render.getMovesRender().setMovesManager(movesManager);
-        this.render.getControlsRender().setServiceFactory(this);
+        this.render.getControlsRender().setService(this);
         this.movesManager.init(this, eventBus);
         this.render.getMenuRender().init();
         this.mouseInput.init();

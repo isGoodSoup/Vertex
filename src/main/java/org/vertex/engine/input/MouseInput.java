@@ -3,7 +3,6 @@ package org.vertex.engine.input;
 import org.vertex.engine.entities.Board;
 import org.vertex.engine.entities.Piece;
 import org.vertex.engine.render.RenderContext;
-import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.ServiceFactory;
 
 public class MouseInput {
@@ -57,7 +56,7 @@ public class MouseInput {
                 int pieceX = p.getCol() * Board.getSquare();
                 int pieceY = p.getRow() * Board.getSquare();
 
-                if (p.getColor() == GameService.getCurrentTurn()
+                if (p.getColor() == service.getGameService().getCurrentTurn()
                         && mouseBoardX >= pieceX
                         && mouseBoardX < pieceX + Board.getSquare()
                         && mouseBoardY >= pieceY

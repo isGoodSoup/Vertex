@@ -447,7 +447,7 @@ public class MenuRender {
 
         g2.setFont(GUIService.getFont(GUIService.getMENU_FONT()));
         FontMetrics fm = g2.getFontMetrics();
-        Keyboard keyboard = boardService.getServiceFactory().getKeyboard();
+        Keyboard keyboard = boardService.getService().getKeyboard();
         String input = keyboard.getCurrentText();
         int textWidth = fm.stringWidth(input);
         int textHeight = fm.getAscent() + fm.getDescent();
@@ -474,14 +474,14 @@ public class MenuRender {
     }
 
     public void drawCheckmate(Graphics2D g2) {
-        if(GameService.getState() != GameState.CHECKMATE) { return; }
+        if(gameService.getState() != GameState.CHECKMATE) { return; }
         g2.setFont(GUIService.getFontBold(GUIService.getMENU_FONT()));
         FontMetrics fm = g2.getFontMetrics();
 
         int headerY = render.getOffsetY() + render.scale(200);
         int headerWidth = fm.stringWidth(CHECKMATE);
         g2.setColor(Colorblindness.filter(Colors.getForeground()));
-        String text = GameService.getState() == GameState.CHECKMATE ?
+        String text = gameService.getState() == GameState.CHECKMATE ?
                 CHECKMATE : STALEMATE;
         g2.drawString(text, getCenterX(getTotalWidth(), headerWidth),headerY);
     }
