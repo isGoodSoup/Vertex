@@ -20,6 +20,8 @@ public class Tokin extends Piece implements GoldGeneral {
 
     @Override
     public Piece copy() {
-        return null;
+        Tokin p = new Tokin(getColor(), getCol(), getRow());
+        p.setHasMoved(hasMoved());
+        return p;
     }
 }

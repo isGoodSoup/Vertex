@@ -128,7 +128,7 @@ public class PieceService {
 
     public BufferedImage getSprite(Piece piece) {
         Games game = GameService.getGames();
-        if(game == Games.SHOGI) {
+        if(game == Games.SHOGI || BooleanService.isSandboxEnabled) {
             return getShogiSprite(piece);
         }
 
