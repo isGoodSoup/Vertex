@@ -55,6 +55,7 @@ public class ServiceFactory {
         this.model.setBoardService(board);
         this.saveManager = new SaveManager();
         this.gs = new GameService(render, board, saveManager);
+        this.piece.setGameService(gs);
         this.gs.setServiceFactory(this);
         this.gs.setSaveManager(saveManager);
         this.timer = new TimerService();

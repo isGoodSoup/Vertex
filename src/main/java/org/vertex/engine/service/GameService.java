@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class GameService {
-    private final Logger log = LoggerFactory.getLogger(GameService.class);
     private GameMenu gameMenu;
     private GameState state;
     private PlayState mode;
@@ -23,6 +22,8 @@ public class GameService {
     private BoardService boardService;
     private ServiceFactory service;
     private SaveManager saveManager;
+    private final Logger log = LoggerFactory.getLogger(GameService.class);
+
 
     public GameService(RenderContext render, BoardService boardService, SaveManager saveManager) {
         this.render = render;
@@ -83,6 +84,10 @@ public class GameService {
             startNewGame();
             return;
         }
+        if(loaded.game() != getGame()) {
+            log.info("Switching game mode to match save: {}", loaded.game());
+        }
+        setGame(loaded.game());
         boardService.prepBoard();
         boardService.restoreSprites(loaded, service.getGuiService());
         service.getPieceService().getPieces().clear();
@@ -113,7 +118,11 @@ public class GameService {
     public void nextGame() {
         Games[] games = Games.values();
         int nextIndex = (game.ordinal() + 1) % games.length;
-        setGame(games[nextIndex]);
-        service.getAnimationService().add(new ToastAnimation(games[nextIndex].getLabel()));
+        Games newGame = games[nextIndex];
+        setGame(newGame);
+        log.info("Game rotated to {}. Overwriting autosave.", newGame);
+        startNewGame();
+        service.getAnimationService()
+                .add(new ToastAnimation(newGame.getLabel()));
     }
 }

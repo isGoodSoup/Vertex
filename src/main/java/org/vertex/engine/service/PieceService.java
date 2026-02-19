@@ -30,6 +30,7 @@ public class PieceService {
     private final EventBus eventBus;
     private static MovesManager movesManager;
     private static BoardService boardService;
+    private GameService gameService;
 
     private static final Logger log = LoggerFactory.getLogger(PieceService.class);
 
@@ -37,6 +38,14 @@ public class PieceService {
         this.eventBus = eventBus;
         this.pieces = new ArrayList<>();
         cache = new HashMap<>();
+    }
+
+    public GameService getGameService() {
+        return gameService;
+    }
+
+    public void setGameService(GameService gameService) {
+        this.gameService = gameService;
     }
 
     public BoardService getBoardService() {
@@ -156,6 +165,7 @@ public class PieceService {
     }
 
     public Piece getKing(Tint color) {
+        if(gameService.getGame() != Games.CHESS) { return null; }
         if(BooleanService.isSandboxEnabled) { return null; }
         for(Piece p : pieces) {
             if(p instanceof King && p.getColor() == color) {
@@ -230,8 +240,8 @@ public class PieceService {
     }
 
     public void switchTurns() {
-        boardService.getService().getGameService().setCurrentTurn(
-                boardService.getService().getGameService().getCurrentTurn() == Tint.LIGHT ? Tint.DARK : Tint.LIGHT
+        gameService.setCurrentTurn(
+                gameService.getCurrentTurn() == Tint.LIGHT ? Tint.DARK : Tint.LIGHT
         );
     }
 
@@ -294,7 +304,7 @@ public class PieceService {
     }
 
     public boolean isKingInCheck(Tint kingColor) {
-        if(boardService.getService().getGameService().getGame() != Games.CHESS) { return false; }
+        if(gameService.getGame() != Games.CHESS) { return false; }
         if(BooleanService.isSandboxEnabled) { return false; }
         Piece king = getKing(kingColor);
 
@@ -335,7 +345,7 @@ public class PieceService {
         simPiece.setCol(targetCol);
         simPiece.setRow(targetRow);
 
-        if(boardService.getService().getGameService().getGame() == Games.CHESS) {
+        if(gameService.getGame() == Games.CHESS) {
             if(!BooleanService.isSandboxEnabled && !BooleanService.canType) {
                 Piece king = simPieces.stream()
                         .filter(p -> p instanceof King

@@ -64,7 +64,6 @@ public class SaveManager {
 
         try {
             Files.move(temp, savePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            log.debug("Autosave written atomically.");
         } catch(IOException e) {
             log.error("Failed to rename temp autosave: {}", e.getMessage());
         }

@@ -8,5 +8,5 @@ import org.vertex.engine.enums.Tint;
 import java.io.Serializable;
 import java.util.List;
 
-public record Save(Games games, String name, Tint player, List<Piece> pieces,
+public record Save(Games game, String name, Tint player, List<Piece> pieces,
                    List<Achievement> achievements) implements Serializable {}
