@@ -543,14 +543,18 @@ public class MenuRender {
         if(p != null) {
             if(mouseCol == p.getCol() && mouseRow == p.getRow()) {
                 TypeID id = p.getTypeID();
+                TypeID shogiID = p.getShogiID();
+                if(shogiID != null && GameService.getGames() == Games.SHOGI) {
+                    id = shogiID;
+                }
                 g2.setFont(GUIService.getFont(24));
                 int textWidth = g2.getFontMetrics().stringWidth(id.name());
                 int textHeight = g2.getFontMetrics().getHeight();
                 GUIService.drawBox(g2, 4, mouse.getX(), mouse.getY(),
-                        textWidth + 15, textHeight + 5, ARC/4, ARC/4,
+                        textWidth + 20, textHeight + 15, ARC/4, ARC/4,
                         true, false, 180);
                 g2.setColor(Colorblindness.filter(Color.WHITE));
-                g2.drawString(id.name(), mouse.getX() + 5, mouse.getY() + 25);
+                g2.drawString(id.name(), mouse.getX() + 10, mouse.getY() + 30);
             }
         }
     }

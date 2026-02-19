@@ -50,6 +50,14 @@ public abstract class Piece {
 		this.typeID = type;
 	}
 
+	public TypeID getShogiID() {
+		return shogiID;
+	}
+
+	public void setShogiID(TypeID shogiID) {
+		this.shogiID = shogiID;
+	}
+
 	public int getPreCol() {
 		return preCol;
 	}

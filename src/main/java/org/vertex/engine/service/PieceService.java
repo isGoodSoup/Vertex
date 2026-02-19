@@ -128,11 +128,11 @@ public class PieceService {
 
     public BufferedImage getSprite(Piece piece) {
         Games game = GameService.getGames();
-        if (game == Games.SHOGI) {
+        if(game == Games.SHOGI) {
             return getShogiSprite(piece);
         }
 
-        if (game == Games.CHECKERS && piece.getTypeID() == TypeID.KING) {
+        if(game == Games.CHECKERS && piece.getTypeID() == TypeID.KING) {
             return getKingSprites(piece);
         }
         return getThemedSprite(piece);
@@ -150,7 +150,11 @@ public class PieceService {
 
     private BufferedImage getShogiSprite(Piece piece) {
         String pieceName = piece.getClass().getSimpleName().toLowerCase();
-        String path = "/pieces/shogi/shogi_" + pieceName;
+        String suffix = "";
+        if(piece instanceof King && piece.getColor() == Tint.DARK) {
+            suffix = "_jeweled";
+        }
+        String path = "/pieces/shogi/shogi_" + pieceName + suffix;
         return getImage(path);
     }
 
@@ -184,7 +188,7 @@ public class PieceService {
 
     public static Piece getPieceAt(int col, int row, List<Piece> board) {
         for (Piece p : board) {
-            if (p.getCol() == col && p.getRow() == row) {
+            if(p.getCol() == col && p.getRow() == row) {
                 return p;
             }
         }
@@ -249,13 +253,13 @@ public class PieceService {
         List<Piece> copy = new ArrayList<>();
         synchronized (pieces) {
             for (Piece p : pieces) {
-                if (p == null) {
+                if(p == null) {
                     throw new IllegalStateException(
                             "Null piece found inside pieces list"
                     );
                 }
                 Piece cloned = p.copy();
-                if (cloned == null) {
+                if(cloned == null) {
                     throw new IllegalStateException(
                             "copy() returned null for " + p.getClass().getSimpleName()
                     );
@@ -319,7 +323,7 @@ public class PieceService {
 
     public static Piece isColliding(int col, int row, List<Piece> board) {
         for (Piece p : board) {
-            if (p.getCol() == col && p.getRow() == row) {
+            if(p.getCol() == col && p.getRow() == row) {
                 return p;
             }
         }
@@ -331,7 +335,7 @@ public class PieceService {
         int colDiff = targetCol - piece.getCol();
         int rowDiff = targetRow - piece.getRow();
 
-        if (Math.abs(colDiff) != Math.abs(rowDiff)) {
+        if(Math.abs(colDiff) != Math.abs(rowDiff)) {
             return false;
         }
 
@@ -343,8 +347,8 @@ public class PieceService {
 
         while (c != targetCol && r != targetRow) {
             for (Piece p : board) {
-                if (p == getHeldPiece()) { continue; }
-                if (p.getCol() == c && p.getRow() == r) {
+                if(p == getHeldPiece()) { continue; }
+                if(p.getCol() == c && p.getRow() == r) {
                     return false;
                 }
             }
@@ -395,7 +399,7 @@ public class PieceService {
                 .findFirst()
                 .orElse(null);
 
-        if (simPiece == null) {
+        if(simPiece == null) {
             return true;
         }
 
@@ -416,7 +420,7 @@ public class PieceService {
                         .orElseThrow(() -> new IllegalStateException("King must exist after cloning"));
 
                 for (Piece enemy : simPieces) {
-                    if (enemy.getColor() != piece.getColor() &&
+                    if(enemy.getColor() != piece.getColor() &&
                             enemy.canMove(king.getCol(), king.getRow(), simPieces)) {
                         return true;
                     }
