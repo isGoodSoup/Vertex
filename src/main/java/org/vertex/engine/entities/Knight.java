@@ -30,12 +30,21 @@ public class Knight extends Piece implements GoldGeneral {
 					return isValidSquare(this, targetCol, targetRow, board);
 				}
             }
-            case SHOGI -> {
-
+			case SHOGI -> {
 				if(isPromoted()) {
 					return canMoveLikeGold(this, targetCol, targetRow, board);
 				}
-            }
+
+				int direction = getColor() == Tint.LIGHT ? 1 : -1;
+				int rowDiff = targetRow - getRow();
+				int colDiff = targetCol - getCol();
+
+				if(rowDiff == 2 * direction && Math.abs(colDiff) == 1) {
+					return isValidSquare(this, targetCol, targetRow, board);
+				}
+
+				return false;
+			}
         }
 		return false;
 	}

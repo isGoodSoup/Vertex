@@ -44,10 +44,34 @@ public class Bishop extends Piece {
 				return target == null || target.getColor() != getColor();
 			}
             case SHOGI -> {
-
 				if(isPromoted()) {
-					return true;
+					int colDiff = Math.abs(targetCol - getCol());
+					int rowDiff = Math.abs(targetRow - getRow());
+
+					if((colDiff + rowDiff == 1) || (colDiff * rowDiff == 1)) {
+						return isValidSquare(this, targetCol, targetRow, board);
+					}
 				}
+
+				int colDiff = targetCol - getCol();
+				int rowDiff = targetRow - getRow();
+
+				if(Math.abs(colDiff) != Math.abs(rowDiff)) {
+					return false;
+				}
+
+				if(!isPathClear(this, targetCol, targetRow, board)) {
+					return false;
+				}
+
+				Piece target = null;
+				for(Piece p : board) {
+					if(p.getCol() == targetCol && p.getRow() == targetRow) {
+						target = p;
+						break;
+					}
+				}
+				return target == null || target.getColor() != getColor();
             }
         }
         return false;

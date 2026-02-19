@@ -15,7 +15,7 @@ public class Gold extends Piece implements GoldGeneral {
 
     @Override
     public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
-        return false;
+        return canMoveLikeGold(this, targetCol, targetRow, board);
     }
 
     @Override

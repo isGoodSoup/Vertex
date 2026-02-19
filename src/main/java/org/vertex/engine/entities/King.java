@@ -27,9 +27,9 @@ public class King extends Piece {
 
 	@Override
 	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
+		if(!isWithinBoard(targetCol, targetRow)) { return false; }
 		switch(GameService.getGames()) {
 			case CHESS -> {
-				if(!isWithinBoard(targetCol, targetRow)) { return false; }
 				int colDiff = Math.abs(targetCol - getCol());
 				int rowDiff = Math.abs(targetRow - getRow());
 
@@ -59,8 +59,6 @@ public class King extends Piece {
 				}
 			}
 			case CHECKERS -> {
-				if(!isWithinBoard(targetCol, targetRow)) { return false; }
-
 				int colDiff = Math.abs(targetCol - getCol());
 				int rowDiff = Math.abs(targetRow - getRow());
 
@@ -77,7 +75,15 @@ public class King extends Piece {
 					}
 				}
 			}
-		}
+            case SHOGI -> {
+				int colDiff = Math.abs(targetCol - getCol());
+				int rowDiff = Math.abs(targetRow - getRow());
+
+				if((colDiff + rowDiff == 1) || (colDiff * rowDiff == 1)) {
+					return isValidSquare(this, targetCol, targetRow, board);
+				}
+            }
+        }
 		return false;
 	}
 

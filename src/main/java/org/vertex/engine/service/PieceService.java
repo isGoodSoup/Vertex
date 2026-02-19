@@ -220,14 +220,16 @@ public class PieceService {
     }
 
     public Piece getKing(Tint color) {
-        if(GameService.getGames() != Games.CHESS) { return null; }
         if(BooleanService.isSandboxEnabled) { return null; }
-        for(Piece p : pieces) {
-            if(p instanceof King && p.getColor() == color) {
-                return p;
+        if(GameService.getGames() == Games.CHESS || GameService.getGames() == Games.SHOGI) {
+            for(Piece p : pieces) {
+                if(p instanceof King && p.getColor() == color) {
+                    return p;
+                }
             }
+            throw new IllegalStateException("King not found for color: " + color);
         }
-        throw new IllegalStateException("King not found for color: " + color);
+        return null;
     }
 
     public void addPiece(Piece p) {
@@ -370,20 +372,21 @@ public class PieceService {
     }
 
     public boolean isKingInCheck(Tint kingColor) {
-        if(GameService.getGames() != Games.CHESS) { return false; }
         if(BooleanService.isSandboxEnabled) { return false; }
-        Piece king = getKing(kingColor);
+        if(GameService.getGames() == Games.CHESS || GameService.getGames() == Games.SHOGI) {
+            Piece king = getKing(kingColor);
 
-        for(Piece p : pieces) {
-            if(p.getColor() != kingColor) {
-                if(p.canMove(king.getCol(), king.getRow(), pieces)) {
-                    checkingPiece = p;
-                    eventBus.fire(new CheckEvent(p, king));
-                    return true;
+            for(Piece p : pieces) {
+                if(p.getColor() != kingColor) {
+                    if(p.canMove(king.getCol(), king.getRow(), pieces)) {
+                        checkingPiece = p;
+                        eventBus.fire(new CheckEvent(p, king));
+                        return true;
+                    }
                 }
             }
+            checkingPiece = null;
         }
-        checkingPiece = null;
         return false;
     }
 
@@ -411,7 +414,7 @@ public class PieceService {
         simPiece.setCol(targetCol);
         simPiece.setRow(targetRow);
 
-        if(GameService.getGames() == Games.CHESS) {
+        if(GameService.getGames() == Games.CHESS || GameService.getGames() == Games.SHOGI) {
             if(!BooleanService.isSandboxEnabled && !BooleanService.canType) {
                 Piece king = simPieces.stream()
                         .filter(p -> p instanceof King

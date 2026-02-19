@@ -27,10 +27,18 @@ public class Rook extends Piece {
 					}
 				}
                 case SHOGI -> {
-					// TODO rook movement
-
 					if(isPromoted()) {
-						return true;
+						int colDiff = Math.abs(targetCol - getCol());
+						int rowDiff = Math.abs(targetRow - getRow());
+
+						if((colDiff + rowDiff == 1) || (colDiff * rowDiff == 1)) {
+							return isValidSquare(this, targetCol, targetRow, board);
+						}
+					}
+
+					if(targetCol == getPreCol() || targetRow == getPreRow()) {
+						return isValidSquare(this, targetCol, targetRow, board)
+								&& isPathClear(this, targetCol, targetRow, board);
 					}
                 }
             }

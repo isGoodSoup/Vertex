@@ -15,12 +15,25 @@ public class Silver extends Piece implements GoldGeneral {
 
     @Override
     public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
-        // TODO movement logic for silver
-
-        if(isPromoted()) {
+        if (isPromoted()) {
             return canMoveLikeGold(this, targetCol, targetRow, board);
         }
-        return false;
+
+        int direction = getColor() == Tint.LIGHT ? 1 : -1;
+        int colDiff = targetCol - getCol();
+        int rowDiff = targetRow - getRow();
+
+        boolean validMove =
+                (rowDiff == direction && Math.abs(colDiff) <= 1) ||
+                        (rowDiff == -direction && Math.abs(colDiff) == 1);
+        if (!validMove) return false;
+
+        for (Piece p : board) {
+            if (p.getCol() == targetCol && p.getRow() == targetRow) {
+                return p.getColor() != getColor();
+            }
+        }
+        return true;
     }
 
     @Override

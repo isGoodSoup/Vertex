@@ -40,7 +40,6 @@ public class AchievementSprites {
 
     private void load(Achievements type, String path) {
         try {
-            log.info("Achievement sprite for: {}", type.getTitle());
             SPRITES.put(type, GUIService.getImage(path));
         } catch (IOException e) {
             log.error("Missing achievement sprite: {}", path);

@@ -15,11 +15,17 @@ public class Lance extends Piece implements GoldGeneral {
 
     @Override
     public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
-        // TODO lance movement
-
-
-        if(isPromoted()) {
+        if (isPromoted()) {
             return canMoveLikeGold(this, targetCol, targetRow, board);
+        }
+
+        int direction = getColor() == Tint.LIGHT ? 1 : -1;
+        int rowDiff = targetRow - getRow();
+        int colDiff = targetCol - getCol();
+
+        if (colDiff == 0 && rowDiff * direction > 0) {
+            return isPathClear(this, targetCol, targetRow, board)
+                    && isValidSquare(this, targetCol, targetRow, board);
         }
         return false;
     }
