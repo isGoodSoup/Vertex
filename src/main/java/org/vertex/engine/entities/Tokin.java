@@ -2,10 +2,11 @@ package org.vertex.engine.entities;
 
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.TypeID;
+import org.vertex.engine.interfaces.GoldGeneral;
 
 import java.util.List;
 
-public class Tokin extends Piece {
+public class Tokin extends Piece implements GoldGeneral {
 
     public Tokin(Tint color, int col, int row) {
         super(color, col, row);
@@ -14,7 +15,7 @@ public class Tokin extends Piece {
 
     @Override
     public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
-        return false;
+        return canMoveLikeGold(this, targetCol, targetRow, board);
     }
 
     @Override

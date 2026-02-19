@@ -271,6 +271,58 @@ public class BoardService {
                 service.getGameService().setCurrentTurn(Tint.LIGHT);
                 PieceService.nullThisPiece();
             }
+            case SHOGI -> {
+                List<Piece> pieces = pieceService.getPieces();
+                pieces.clear();
+                clearBoardState();
+
+                for(int col = 0; col < 9; col++) {
+                    Pawn lightPawn = new Pawn(Tint.LIGHT, col, 6);
+                    Pawn darkPawn  = new Pawn(Tint.DARK, col, 2);
+                    pieces.add(lightPawn);
+                    pieces.add(darkPawn);
+                }
+
+                pieces.addAll(List.of(
+                        new Lance(Tint.LIGHT, 0, 8),
+                        new Knight(Tint.LIGHT, 1, 8),
+                        new Silver(Tint.LIGHT, 2, 8),
+                        new Gold(Tint.LIGHT, 3, 8),
+                        new King(pieceService, Tint.LIGHT, 4, 8),
+                        new Gold(Tint.LIGHT, 5, 8),
+                        new Silver(Tint.LIGHT, 6, 8),
+                        new Knight(Tint.LIGHT, 7, 8),
+                        new Lance(Tint.LIGHT, 8, 8)
+                ));
+
+                pieces.add(new Bishop(Tint.LIGHT, 1, 7));
+                pieces.add(new Rook(Tint.LIGHT, 7, 7));
+
+                pieces.addAll(List.of(
+                        new Lance(Tint.DARK, 0, 0),
+                        new Knight(Tint.DARK, 1, 0),
+                        new Silver(Tint.DARK, 2, 0),
+                        new Gold(Tint.DARK, 3, 0),
+                        new King(pieceService, Tint.DARK, 4, 0),
+                        new Gold(Tint.DARK, 5, 0),
+                        new Silver(Tint.DARK, 6, 0),
+                        new Knight(Tint.DARK, 7, 0),
+                        new Lance(Tint.DARK, 8, 0)
+                ));
+
+                pieces.add(new Bishop(Tint.DARK, 7, 1));
+                pieces.add(new Rook(Tint.DARK, 1, 1));
+
+                for(Piece p : pieces) {
+                    boardState[p.getRow()][p.getCol()] = p;
+                    int squareSize = Board.getSquare();
+                    p.setX(p.getCol() * squareSize);
+                    p.setY(p.getRow() * squareSize);
+                }
+
+                service.getGameService().setCurrentTurn(Tint.LIGHT);
+                PieceService.nullThisPiece();
+            }
         }
     }
 
@@ -312,6 +364,7 @@ public class BoardService {
                 pieces.add(new King(pieceService, Tint.DARK, 4, 0));
             }
             case CHECKERS -> {}
+            case SHOGI -> {}
         }
     }
 }

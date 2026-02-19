@@ -2,6 +2,7 @@ package org.vertex.engine.entities;
 
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.TypeID;
+import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.PieceService;
 
 import java.util.List;
@@ -11,16 +12,28 @@ public class Rook extends Piece {
 	public Rook(Tint color, int col, int row) {
 		super(color, col, row);
 		this.typeID = TypeID.ROOK;
+		this.shogiID = TypeID.ROOK_SHOGI;
 	}
 
 	@Override
 	public boolean canMove(int targetCol, int targetRow, List<Piece> board) {
 		if(isWithinBoard(targetCol, targetRow) && !isSameSquare(this, targetCol,
 				targetRow)) {
-			if(targetCol == getPreCol() || targetRow == getPreRow()) {
-				return isValidSquare(this, targetCol, targetRow, board)
-						&& isPathClear(this, targetCol, targetRow, board);
-			}
+			switch(GameService.getGames()) {
+                case CHESS -> {
+					if(targetCol == getPreCol() || targetRow == getPreRow()) {
+						return isValidSquare(this, targetCol, targetRow, board)
+								&& isPathClear(this, targetCol, targetRow, board);
+					}
+				}
+                case SHOGI -> {
+					// TODO rook movement
+
+					if(isPromoted()) {
+						return true;
+					}
+                }
+            }
 		}
 		return false;
 	}
@@ -54,10 +67,8 @@ public class Rook extends Piece {
 		} else {
 			return false;
 		}
-
-		return true;  // Path is clear
+		return true;
 	}
-
 
 	@Override
 	public Piece copy() {

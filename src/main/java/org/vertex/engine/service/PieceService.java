@@ -117,49 +117,32 @@ public class PieceService {
         });
     }
 
-    public void loadSprites() {
-        for (String pieceName : List.of("pawn", "rook",
-                "bishop", "knight", "queen", "king", "checker",
-                "silver", "gold", "lance", "tokin")) {
-            for (Tint color : Tint.values()) {
-                String path = "/pieces/" + pieceName + "/" +
-                        pieceName + "_" + Colors.getTheme().getColor(color);
-                try {
-                    getImage(path);
-                } catch (IllegalStateException ignored) {}
-
-                if (pieceName.equals("king") || pieceName.equals("checker")) {
-                    String kingPath = "/pieces/checker/checker_king_" + Colors.getTheme().getColor(color);
-                    try { getImage(kingPath); } catch (IllegalStateException ignored) {}
-                }
-
-                assert gameService != null;
-                if(GameService.getGames() == Games.SHOGI) {
-                    String shogiPath = "/pieces/shogi/" + pieceName;
-                    try { getImage(shogiPath); } catch (IllegalStateException ignored) {}
-                }
-            }
+    public BufferedImage getSprite(Piece piece) {
+        Games game = GameService.getGames();
+        if (game == Games.SHOGI) {
+            return getShogiSprite(piece);
         }
+
+        if (game == Games.CHECKERS && piece.getTypeID() == TypeID.KING) {
+            return getKingSprites(piece);
+        }
+        return getThemedSprite(piece);
     }
 
-    public BufferedImage getSprite(Piece piece) {
+
+    private BufferedImage getThemedSprite(Piece piece) {
         String pieceName = piece.getClass().getSimpleName().toLowerCase();
         Theme theme = Colors.getTheme();
         String color = theme.getColor(piece.getColor());
-        String suffix = "";
-        String path ="/pieces/" + pieceName + "/" + pieceName + "_" + color;
+
+        String path = "/pieces/" + pieceName + "/" + pieceName + "_" + color;
         return getImage(path);
     }
 
-    public BufferedImage getShogiSprites(Piece piece) {
+    private BufferedImage getShogiSprite(Piece piece) {
         String pieceName = piece.getClass().getSimpleName().toLowerCase();
-        String path = "/pieces/shogi/" + pieceName;
-        try {
-            return getImage(path);
-        } catch (IllegalStateException e) {
-            log.warn("Missing Shogi sprite for piece: {}, skipping", pieceName);
-            return null;
-        }
+        String path = "/pieces/shogi/shogi_" + pieceName;
+        return getImage(path);
     }
 
     public BufferedImage getKingSprites(Piece piece) {
@@ -175,14 +158,17 @@ public class PieceService {
 
     public int getPieceValue(Piece p) {
         return switch(p.getTypeID()) {
+            case PAWN_SHOGI -> 1;
             case PAWN -> 10;
+            case LANCE, KNIGHT_SHOGI -> 4;
+            case SILVER -> 5;
+            case TOKIN -> 6;
+            case GOLD -> 6;
+            case BISHOP_SHOGI, ROOK_SHOGI -> 8;
             case CHECKER -> 20;
-            case TOKIN -> 30;
-            case KNIGHT, BISHOP, LANCE -> 30;
+            case KNIGHT, BISHOP -> 30;
             case ROOK -> 50;
             case QUEEN -> 90;
-            case SILVER -> 100;
-            case GOLD -> 100;
             case KING -> 900;
         };
     }
@@ -252,9 +238,20 @@ public class PieceService {
 
     public List<Piece> clonePieces() {
         List<Piece> copy = new ArrayList<>();
-        synchronized(pieces) {
+        synchronized (pieces) {
             for (Piece p : pieces) {
-                copy.add(p.copy());
+                if (p == null) {
+                    throw new IllegalStateException(
+                            "Null piece found inside pieces list"
+                    );
+                }
+                Piece cloned = p.copy();
+                if (cloned == null) {
+                    throw new IllegalStateException(
+                            "copy() returned null for " + p.getClass().getSimpleName()
+                    );
+                }
+                copy.add(cloned);
             }
         }
         return copy;
@@ -417,6 +414,10 @@ public class PieceService {
                 }
             }
         }
+        return false;
+    }
+
+    public static boolean isInPromotionZone(Tint color, int i) {
         return false;
     }
 }

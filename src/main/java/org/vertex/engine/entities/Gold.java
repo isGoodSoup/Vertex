@@ -2,10 +2,11 @@ package org.vertex.engine.entities;
 
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.TypeID;
+import org.vertex.engine.interfaces.GoldGeneral;
 
 import java.util.List;
 
-public class Gold extends Piece {
+public class Gold extends Piece implements GoldGeneral {
 
     public Gold(Tint color, int col, int row) {
         super(color, col, row);
@@ -19,6 +20,8 @@ public class Gold extends Piece {
 
     @Override
     public Piece copy() {
-        return null;
+        Gold p = new Gold(getColor(), getCol(), getRow());
+        p.setHasMoved(hasMoved());
+        return p;
     }
 }

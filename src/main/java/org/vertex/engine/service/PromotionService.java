@@ -3,6 +3,7 @@ package org.vertex.engine.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertex.engine.entities.*;
+import org.vertex.engine.enums.Games;
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.manager.EventBus;
 import org.vertex.engine.events.PromotionEvent;
@@ -15,6 +16,7 @@ public class PromotionService {
     private GameService gameService;
     private final EventBus event;
 
+    private boolean isPromoted;
     private static final Logger log = LoggerFactory.getLogger(PromotionService.class);
 
     public PromotionService(PieceService pieceService, EventBus event) {
@@ -68,16 +70,7 @@ public class PromotionService {
         if(!checkPromotion(piece)) { return piece; }
         log.info("Promotion: {}, {}", piece.getRow(), piece.getCol());
 
-        Piece promotedPiece = null;
-        if(piece instanceof Pawn) {
-            promotedPiece = new Queen(piece.getColor(), piece.getRow(),
-                    piece.getCol());
-        }
-        else {
-            promotedPiece = new King(pieceService, piece.getColor(),
-                    piece.getRow(), piece.getCol());
-        }
-
+        Piece promotedPiece = getPiece(piece);
         pieceService.getPieces().remove(piece);
         pieceService.getPieces().add(promotedPiece);
         promotedPiece.setX(promotedPiece.getRow() * Board.getSquare());
@@ -98,7 +91,41 @@ public class PromotionService {
         if(piece instanceof Checker checker) {
             event.fire(new PromotionEvent(checker));
         }
+
+        if(GameService.getGames() == Games.SHOGI) {
+            if(piece instanceof Pawn || piece instanceof Lance || piece instanceof Silver || piece instanceof Knight ||
+                    piece instanceof Bishop || piece instanceof Rook) {
+                event.fire(new PromotionEvent(piece));
+            }
+        }
         pieceService.switchTurns();
+        return promotedPiece;
+    }
+
+    private Piece getPiece(Piece piece) {
+        Piece promotedPiece = null;
+        if(piece instanceof Pawn) {
+            if(GameService.getGames() == Games.SHOGI) {
+                promotedPiece = new Tokin(piece.getColor(), piece.getRow(),
+                        piece.getCol());
+            } else {
+                promotedPiece = new Queen(piece.getColor(), piece.getRow(),
+                        piece.getCol());
+            }
+        }
+        if(piece instanceof Checker) {
+            promotedPiece = new King(pieceService, piece.getColor(),
+                    piece.getRow(), piece.getCol());
+        }
+        if(GameService.getGames() == Games.SHOGI) {
+            if(piece instanceof Lance || piece instanceof Silver || piece instanceof Knight ) {
+                promotedPiece = new Gold(piece.getColor(), piece.getRow(), piece.getCol());
+            }
+            if(piece instanceof Bishop || piece instanceof Rook) {
+                promotedPiece = piece;
+                piece.setPromoted(true);
+            }
+        }
         return promotedPiece;
     }
 }

@@ -37,8 +37,10 @@ public class SaveManager {
                         .registerSubtype(Bishop.class, "BISHOP")
                         .registerSubtype(Queen.class, "QUEEN")
                         .registerSubtype(King.class, "KING")
-                        .registerSubtype(Checker.class, "CHECKER");
-
+                        .registerSubtype(Checker.class, "CHECKER")
+                        .registerSubtype(Lance.class, "LANCE")
+                        .registerSubtype(Gold.class, "GOLD")
+                        .registerSubtype(Silver.class, "SILVER");
         this.gson = new GsonBuilder()
                 .registerTypeAdapterFactory(pieceAdapter)
                 .setPrettyPrinting()

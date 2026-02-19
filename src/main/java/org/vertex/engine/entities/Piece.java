@@ -12,6 +12,7 @@ public abstract class Piece {
 	protected final long id;
 	private static long NEXT_ID = 1;
 	protected TypeID typeID;
+	protected TypeID shogiID;
 	private int x, y;
 	private int col, row, preCol, preRow;
 	private static final double DEFAULT_SCALE = 1.0;
@@ -21,6 +22,7 @@ public abstract class Piece {
 	private Piece otherPiece;
 	private boolean hasMoved;
 	private boolean isTwoStepsAhead;
+	private boolean isPromoted;
 
 	private static final Logger log = LoggerFactory.getLogger(Piece.class);
 
@@ -167,6 +169,14 @@ public abstract class Piece {
 
 	public abstract Piece copy();
 
+	public boolean isPromoted() {
+		return isPromoted;
+	}
+
+	public void setPromoted(boolean promoted) {
+		isPromoted = promoted;
+	}
+
 	public boolean isWithinBoard(int targetCol, int targetRow) {
         return PieceService.isWithinBoard(targetCol, targetRow);
     }
@@ -187,5 +197,9 @@ public abstract class Piece {
 	public boolean isValidSquare(Piece piece, int targetCol, int targetRow,
 							   List<Piece> board) {
 		return PieceService.isValidSquare(piece, targetCol, targetRow, board);
+	}
+
+	public boolean isInPromotionZone(Tint color, int i) {
+		return PieceService.isInPromotionZone(color, i);
 	}
 }

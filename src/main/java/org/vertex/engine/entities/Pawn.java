@@ -2,6 +2,7 @@ package org.vertex.engine.entities;
 
 import org.vertex.engine.enums.Tint;
 import org.vertex.engine.enums.TypeID;
+import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.PieceService;
 
 import java.util.List;
@@ -11,6 +12,7 @@ public class Pawn extends Piece {
 	public Pawn(Tint color, int col, int row) {
 		super(color, col, row);
 		this.typeID = TypeID.PAWN;
+		this.shogiID = TypeID.PAWN_SHOGI;
 	}
 
 	@Override
@@ -19,24 +21,34 @@ public class Pawn extends Piece {
 			return false;
 
 		int direction = (getColor() == Tint.LIGHT) ? -1 : 1;
-
 		Piece pieceAtTarget = PieceService.getPieceAt(targetCol, targetRow, board);
 
-		if(targetCol == getCol() && targetRow == getRow() + direction) {
-			return pieceAtTarget == null;
-		}
-
-		if(targetCol == getCol() && targetRow == getRow() + 2 * direction
-				&& !hasMoved() && isPathClear(this, targetCol, targetRow, board)) {
-			return pieceAtTarget == null;
-		}
-
-		if(Math.abs(targetCol - getCol()) == 1 && targetRow == getRow() + direction) {
-			if(pieceAtTarget != null && pieceAtTarget.getColor() != this.getColor()) {
-				return true;
+		switch(GameService.getGames()) {
+			case CHESS, CHECKERS -> {
+				if(targetCol == getCol() && targetRow == getRow() + direction) {
+					return pieceAtTarget == null;
+				}
+				if(targetCol == getCol() && targetRow == getRow() + 2 * direction
+						&& !hasMoved() && isPathClear(this, targetCol, targetRow, board)) {
+					return pieceAtTarget == null;
+				}
+				if(Math.abs(targetCol - getCol()) == 1 && targetRow == getRow() + direction) {
+					if(pieceAtTarget != null && pieceAtTarget.getColor() != this.getColor()) {
+						return true;
+					}
+					return canEnPassant(targetCol, targetRow, board);
+				}
 			}
-			return canEnPassant(targetCol, targetRow, board);
-		}
+            case SHOGI -> {
+				if(targetCol == getCol() && targetRow == getRow() + direction) {
+					return pieceAtTarget == null;
+				}
+				if(targetCol == getCol() && targetRow == getRow()
+						&& !hasMoved() && isPathClear(this, targetCol, targetRow, board)) {
+					return pieceAtTarget == null;
+				}
+			}
+        }
 		return false;
 	}
 

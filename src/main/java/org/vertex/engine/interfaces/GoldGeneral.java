@@ -6,8 +6,8 @@ import org.vertex.engine.service.PieceService;
 
 import java.util.List;
 
-public interface GoldMovement {
-    default boolean canMoveGoldLike(Piece piece, int targetCol, int targetRow, List<Piece> board) {
+public interface GoldGeneral {
+    default boolean canMoveLikeGold(Piece piece, int targetCol, int targetRow, List<Piece> board) {
         int col = piece.getCol();
         int row = piece.getRow();
         int forward = (piece.getColor() == Tint.LIGHT) ? -1 : 1;
@@ -18,10 +18,10 @@ public interface GoldMovement {
                 {0, -forward}
         };
 
-        for (int[] d : directions) {
+        for(int[] d : directions) {
             int newCol = col + d[0];
             int newRow = row + d[1];
-            if (newCol == targetCol && newRow == targetRow) {
+            if(newCol == targetCol && newRow == targetRow) {
                 Piece targetPiece = PieceService.getPieceAt(targetCol, targetRow, board);
                 return targetPiece == null || targetPiece.getColor() != piece.getColor();
             }
