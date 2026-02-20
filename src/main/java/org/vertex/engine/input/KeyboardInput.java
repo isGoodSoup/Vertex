@@ -111,16 +111,16 @@ public class KeyboardInput {
 
     public void keyboardMove() {
         Piece selectedPiece = service.getMovesManager().getSelectedPiece();
+        updateKeyboardHover();
+
         if(selectedPiece == null) {
             Piece piece = PieceService.getPieceAt(moveX, moveY,
                     service.getPieceService().getPieces());
 
-            if(piece != null && (BooleanService.isSandboxEnabled
-                    || piece.getColor() == service.getGameService().getCurrentTurn())) {
+            if(piece != null && piece.getColor() == service.getGameService().getCurrentTurn()) {
                 service.getMovesManager().setSelectedPiece(piece);
             }
         } else {
-            updateKeyboardHover();
             if(BooleanService.isLegal) {
                 service.getAnimationService().startMove(selectedPiece, moveX, moveY);
                 service.getMovesManager().attemptMove(selectedPiece, moveX, moveY);
@@ -132,25 +132,15 @@ public class KeyboardInput {
     public void updateKeyboardHover() {
         Piece selectedPiece = service.getMovesManager().getSelectedPiece();
         service.getPieceService().setHoveredSquare(moveX, moveY);
-        if (selectedPiece == null) {
-            Piece hoveredPiece = PieceService.getPieceAt(moveX, moveY,
-                    service.getPieceService().getPieces());
-            if (hoveredPiece != null &&
-                    (BooleanService.isSandboxEnabled ||
-                            hoveredPiece.getColor() == service.getGameService().getCurrentTurn())) {
-                service.getPieceService().setHoveredPieceKeyboard(hoveredPiece);
-            } else {
-                service.getPieceService().setHoveredPieceKeyboard(null);
-            }
-            BooleanService.isLegal = false;
+
+        if (selectedPiece != null) {
+            BooleanService.isLegal = selectedPiece.canMove(moveX, moveY, service.getPieceService().getPieces())
+                    && !service.getPieceService().wouldLeaveKingInCheck(selectedPiece, moveX, moveY);
         } else {
-            if(BooleanService.isSandboxEnabled) {
-                BooleanService.isLegal = true;
-            } else {
-                BooleanService.isLegal = selectedPiece.canMove(moveX, moveY,
-                        service.getPieceService().getPieces())
-                        && !service.getPieceService().wouldLeaveKingInCheck(selectedPiece, moveX, moveY);
-            }
+            BooleanService.isLegal = false;
+            service.getPieceService().setHoveredPieceKeyboard(
+                    PieceService.getPieceAt(moveX, moveY, service.getPieceService().getPieces())
+            );
         }
     }
 
@@ -283,8 +273,8 @@ public class KeyboardInput {
             activate(GameState.MENU);
             service.getSound().playFX(3);
         }
-        repeatKeyCheck(keyboard.wasUpPressed(), () -> moveUp(Arrays.asList(MenuRender.MENU)), now, () -> lastUpTime = now);
-        repeatKeyCheck(keyboard.wasDownPressed(), () -> moveDown(Arrays.asList(MenuRender.MENU)), now, () -> lastDownTime = now);
+        repeatKeyCheck(keyboard.wasUpPressed(), () -> moveUp(Arrays.asList(MenuRender.MENU)), now, lastUpTime, () -> lastUpTime = now);
+        repeatKeyCheck(keyboard.wasDownPressed(), () -> moveDown(Arrays.asList(MenuRender.MENU)), now, lastDownTime, () -> lastDownTime = now);
 
         if(keyboard.isComboPressed(KeyEvent.VK_CONTROL, KeyEvent.VK_G)) {
             service.getGameService().nextGame();
@@ -296,8 +286,8 @@ public class KeyboardInput {
     private void rulesInput(Keyboard keyboard, long now) {
         if(keyboard.wasSelectPressed()) { activate(GameState.RULES); service.getSound().playFX(0); }
 
-        repeatKeyCheck(keyboard.wasUpPressed(), () -> moveUp(Arrays.asList(MenuRender.SETTINGS_MENU)), now, () -> lastUpTime = now);
-        repeatKeyCheck(keyboard.wasDownPressed(), () -> moveDown(Arrays.asList(MenuRender.SETTINGS_MENU)), now, () -> lastDownTime = now);
+        repeatKeyCheck(keyboard.wasUpPressed(), () -> moveUp(Arrays.asList(MenuRender.SETTINGS_MENU)), now, lastUpTime, () -> lastUpTime = now);
+        repeatKeyCheck(keyboard.wasDownPressed(), () -> moveDown(Arrays.asList(MenuRender.SETTINGS_MENU)), now, lastDownTime,  () -> lastDownTime = now);
 
         if(keyboard.wasLeftPressed()) { previousPage(); service.getSound().playFX(2); lastLeftTime = now; }
         if(keyboard.wasRightPressed()) { nextPage(MenuRender.SETTINGS_MENU); service.getSound().playFX(2); lastRightTime = now; }
@@ -307,8 +297,8 @@ public class KeyboardInput {
         if(keyboard.wasSelectPressed()) { activate(GameState.ACHIEVEMENTS); service.getSound().playFX(3); }
 
         List<?> achievements = service.getAchievementService().getAchievementList();
-        repeatKeyCheck(keyboard.wasUpPressed(), () -> moveUp(achievements), now, () -> lastUpTime = now);
-        repeatKeyCheck(keyboard.wasDownPressed(), () -> moveDown(achievements), now, () -> lastDownTime = now);
+        repeatKeyCheck(keyboard.wasUpPressed(), () -> moveUp(achievements), now, lastUpTime, () -> lastUpTime = now);
+        repeatKeyCheck(keyboard.wasDownPressed(), () -> moveDown(achievements), now, lastDownTime, () -> lastDownTime = now);
 
         if(keyboard.wasLeftPressed()) { previousPage(); selectedIndexY = 0; service.getSound().playFX(2); lastLeftTime = now; }
         if(keyboard.wasRightPressed()) { nextPage(achievements.size()); selectedIndexY = 0; service.getSound().playFX(2); lastRightTime = now; }
@@ -326,12 +316,10 @@ public class KeyboardInput {
         if(keyboard.wasCancelPressed()) { move.cancelMove(); service.getSound().playFX(1); }
         if(keyboard.wasSelectPressed()) { activate(GameState.BOARD); service.getSound().playFX(0); }
 
-        repeatKeyCheck(keyboard.wasUpPressed(), () -> move(Direction.UP), now, () -> lastUpTime = now);
-        repeatKeyCheck(keyboard.wasDownPressed(), () -> move(Direction.DOWN), now, () -> lastDownTime = now);
-        repeatKeyCheck(keyboard.wasLeftPressed(), () -> move(Direction.LEFT), now, () -> lastLeftTime = now);
-        repeatKeyCheck(keyboard.wasRightPressed(), () -> move(Direction.RIGHT), now, () -> lastRightTime = now);
-
-        keyboardMove();
+        repeatKeyCheck(keyboard.wasUpPressed(), () -> move(Direction.UP), now, lastUpTime, () -> lastUpTime = now);
+        repeatKeyCheck(keyboard.wasDownPressed(), () -> move(Direction.DOWN), now, lastDownTime, () -> lastDownTime = now);
+        repeatKeyCheck(keyboard.wasLeftPressed(), () -> move(Direction.LEFT), now, lastLeftTime, () -> lastLeftTime = now);
+        repeatKeyCheck(keyboard.wasRightPressed(), () -> move(Direction.RIGHT), now, lastRightTime, () -> lastRightTime = now);
 
         if(keyboard.isComboPressed(KeyEvent.VK_CONTROL, KeyEvent.VK_Z) && BooleanService.canUndoMoves) {
             move.undoLastMove(move.getSelectedPiece());
@@ -347,7 +335,7 @@ public class KeyboardInput {
         if(keyboard.isComboPressed(KeyEvent.VK_CONTROL, KeyEvent.VK_H)) { service.getRender().getMovesRender().toggleMoves(); service.getSound().playFX(3); }
     }
 
-    private void repeatKeyCheck(boolean condition, Runnable action, long now, Runnable updateTime) {
-        if(condition && now - repeatDelay >= 0) { action.run(); updateTime.run(); service.getSound().playFX(1); }
+    private void repeatKeyCheck(boolean condition, Runnable action, long now, long lastKeyTime, Runnable updateTime) {
+        if(condition && now - lastKeyTime >= repeatDelay) { action.run(); updateTime.run(); service.getSound().playFX(1); }
     }
 }

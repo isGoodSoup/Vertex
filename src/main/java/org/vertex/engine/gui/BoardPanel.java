@@ -2,6 +2,7 @@ package org.vertex.engine.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertex.engine.entities.Piece;
 import org.vertex.engine.enums.GameState;
 import org.vertex.engine.enums.PlayState;
 import org.vertex.engine.enums.Theme;
@@ -89,7 +90,10 @@ public class BoardPanel extends JPanel implements Runnable {
                 if(!BooleanService.canDoSandbox) {
                     if(service.getTimerService().isActive()) {
                         service.getGuiService().drawTimer(g2);
-                        service.getGuiService().drawTick(g2, BooleanService.isLegal);
+                        Piece selected = service.getMovesManager().getSelectedPiece();
+                        if(selected != null) {
+                            service.getGuiService().drawTick(g2, BooleanService.isLegal);
+                        }
                     }
                 }
                 if(BooleanService.canDoSandbox) {
