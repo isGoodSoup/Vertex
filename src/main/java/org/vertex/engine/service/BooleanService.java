@@ -22,6 +22,7 @@ public class BooleanService {
     public static boolean canType;
     public static boolean canPlayFX;
     public static boolean canZoomIn;
+    public static boolean canSwitchTurns;
 
     public static boolean canDoMoves;
     public static boolean canUndoMoves;
@@ -42,6 +43,7 @@ public class BooleanService {
     private static final Random random = new Random();
 
     public static void defaultToggles() {
+        canSwitchTurns = true;
         canPlayFX = true;
         canDoMoves = true;
         canAIPlay = true;

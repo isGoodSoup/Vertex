@@ -349,9 +349,11 @@ public class PieceService {
     }
 
     public void switchTurns() {
-        gameService.setCurrentTurn(
-                gameService.getCurrentTurn() == Tint.LIGHT ? Tint.DARK : Tint.LIGHT
-        );
+        if(!(GameService.getGame() == Games.SANDBOX) && BooleanService.canSwitchTurns) {
+            gameService.setCurrentTurn(
+                    gameService.getCurrentTurn() == Tint.LIGHT ? Tint.DARK : Tint.LIGHT
+            );
+        }
     }
 
     public static boolean isWithinBoard(int targetCol, int targetRow) {
@@ -461,12 +463,15 @@ public class PieceService {
         }
 
         if(GameService.getGame() == Games.CHESS || GameService.getGame() == Games.SHOGI) {
-            Piece king = simPieces.stream()
-                    .filter(p -> p instanceof King
-                            && p.getColor() == piece.getColor())
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("King must exist after cloning"));
+            Optional<Piece> kingList = simPieces.stream()
+                    .filter(p -> p instanceof King && p.getColor() == piece.getColor())
+                    .findFirst();
 
+            if(kingList.isEmpty()) {
+                return false;
+            }
+
+            Piece king = kingList.get();
             for (Piece enemy : simPieces) {
                 if(enemy.getColor() != piece.getColor() &&
                         enemy.canMove(king.getCol(), king.getRow(), simPieces)) {

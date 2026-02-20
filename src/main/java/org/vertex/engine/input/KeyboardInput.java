@@ -14,6 +14,7 @@ import org.vertex.engine.service.*;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class KeyboardInput {
     private static final Logger log = LoggerFactory.getLogger(KeyboardInput.class);
@@ -143,9 +144,14 @@ public class KeyboardInput {
             Piece piece = PieceService.getPieceAt(moveX, moveY,
                     service.getPieceService().getPieces());
 
-            if(piece != null && piece.getColor() == service.getGameService().getCurrentTurn()) {
+            boolean isSandbox = GameService.getGame() == Games.SANDBOX;
+            boolean canSelect = isSandbox || !BooleanService.canSwitchTurns
+                    || Objects.requireNonNull(piece).getColor() == service.getGameService().getCurrentTurn();
+
+            if(canSelect) {
                 service.getMovesManager().setSelectedPiece(piece);
-                selectedPiece = piece;
+            } else {
+                service.getSound().playFX(3);
             }
         } else {
             boolean isSandbox = GameService.getGame() == Games.SANDBOX;
@@ -283,7 +289,6 @@ public class KeyboardInput {
 
     private void exitTypingMode() {
         BooleanService.canType = false;
-        BooleanService.isLegal = true;
     }
 
     private void menuInput(Keyboard keyboard, long now) {

@@ -87,12 +87,12 @@ public class MovesManager {
             }
         }
 
-        BooleanService.isLegal = piece.canMove(targetCol, targetRow,
+        boolean isLegalLocal = piece.canMove(targetCol, targetRow,
                 service.getPieceService().getPieces())
                 && !service.getPieceService().wouldLeaveKingInCheck(
                 piece, targetCol, targetRow);
 
-        if(!BooleanService.isLegal) {
+        if(!isLegalLocal) {
             PieceService.updatePos(piece);
             return;
         }

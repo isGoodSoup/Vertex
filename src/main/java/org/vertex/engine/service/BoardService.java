@@ -382,6 +382,9 @@ public class BoardService {
             finalizeSandbox();
             gameService.setGame(Games.CHESS);
             gameService.setState(GameState.BOARD);
+            service.getMovesManager().setSelectedPiece(null);
+            service.getPieceService().setHoveredPieceKeyboard(null);
+            service.getGameService().setCurrentTurn(Tint.LIGHT);
         }
     }
 

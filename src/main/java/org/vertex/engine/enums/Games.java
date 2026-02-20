@@ -81,6 +81,7 @@ public enum Games {
         @Override
         public void setup(GameService gameService) {
             BooleanService.canAIPlay = false;
+            BooleanService.canSwitchTurns = false;
 
             gameService.setGame(this);
             gameService.setState(GameState.BOARD);

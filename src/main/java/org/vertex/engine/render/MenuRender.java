@@ -233,6 +233,7 @@ public class MenuRender {
 
         for(int i = 0; i < options.length; i++) {
             String text = options[i].getLabel();
+            if(text.equals(GameMenu.PLAY.getLabel())) { text += GameService.getGame().getLabel(); }
             boolean isSelected = i == keyUI.getSelectedIndexY();
             g2.setFont(isSelected ? selectedFont : baseFont);
             FontMetrics metrics = g2.getFontMetrics();
@@ -242,7 +243,7 @@ public class MenuRender {
             }
         }
 
-        int startX = centerX - totalWidth/2 - 20;
+        int startX = centerX - totalWidth/2;
         int currentX = startX;
 
         GameMenu hoveredOption = null;
@@ -252,6 +253,7 @@ public class MenuRender {
         for(int i = 0; i < options.length; i++) {
             GameMenu op = options[i];
             String option = op.getLabel();
+            if(op == GameMenu.PLAY) { option += GameService.getGame().getLabel(); }
             boolean isSelected = i == keyUI.getSelectedIndexY();
             g2.setFont(isSelected ? selectedFont : baseFont);
             FontMetrics metrics = g2.getFontMetrics();

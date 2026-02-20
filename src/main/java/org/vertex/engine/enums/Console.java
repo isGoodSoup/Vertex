@@ -121,12 +121,6 @@ public enum Console {
             }
         }
     },
-    SPRITE("SPRITE") {
-        @Override
-        public void run(ServiceFactory service, String[] args) {
-
-        }
-    },
     THEME("THEME") {
         @Override
         public void run(ServiceFactory service, String[] args) {
