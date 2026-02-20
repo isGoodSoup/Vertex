@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
 
 public class BoardRender {
     private RenderContext render;
-    private UIService UIService;
+    private UIService uiService;
     private PieceService pieceService;
     private BoardService boardService;
     private PromotionService promotionService;
@@ -25,12 +25,12 @@ public class BoardRender {
         this.render = render;
     }
 
-    public UIService getGuiService() {
-        return UIService;
+    public UIService getUIService() {
+        return uiService;
     }
 
-    public void setGuiService(UIService UIService) {
-        this.UIService = UIService;
+    public void setUIService(UIService UIService) {
+        this.uiService = UIService;
     }
 
     public PieceService getPieceService() {

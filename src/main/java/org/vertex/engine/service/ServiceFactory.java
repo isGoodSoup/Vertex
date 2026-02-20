@@ -71,7 +71,7 @@ public class ServiceFactory {
         this.achievement.setSaveManager(saveManager);
         this.render.getBoardRender().setBoardService(board);
         this.render.getBoardRender().setPieceService(piece);
-        this.render.getBoardRender().setGuiService(gui);
+        this.render.getBoardRender().setUIService(gui);
         this.render.getBoardRender().setPromotionService(promotion);
         this.render.getMenuRender().setBoardService(board);
         this.render.getMenuRender().setUIService(gui);

@@ -14,7 +14,7 @@ import java.util.List;
 public class MovesRender {
     private RenderContext render;
     private BoardService boardService;
-    private UIService UIService;
+    private UIService uiService;
     private MovesManager movesManager;
 
     public MovesRender(RenderContext render, MovesManager movesManager) {
@@ -39,11 +39,11 @@ public class MovesRender {
     }
 
     public UIService getGuiService() {
-        return UIService;
+        return uiService;
     }
 
     public void setGuiService(UIService UIService) {
-        this.UIService = UIService;
+        this.uiService = UIService;
     }
 
     public RenderContext getRender() {
