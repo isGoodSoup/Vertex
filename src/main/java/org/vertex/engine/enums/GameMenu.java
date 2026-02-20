@@ -3,7 +3,7 @@ package org.vertex.engine.enums;
 import org.vertex.engine.service.GameService;
 
 public enum GameMenu {
-    PLAY("PLAY ", "Start a match of ", "Continue match of ") {
+    PLAY("", "Start a match of ", "Continue match of ") {
         @Override
         public void run(GameService gameService) {
             GameService.getGame().setup(gameService);

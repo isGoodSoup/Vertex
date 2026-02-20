@@ -265,7 +265,7 @@ public class MenuRender {
             int buttonWidth = textWidth + paddingX;
             int buttonHeight = textHeight + paddingY;
             Color textColor = isSelected ?
-                    Colorblindness.filter(Colors.getEdge())
+                    Colorblindness.filter(Colors.getHighlight())
                     : Colorblindness.filter(Colors.getBackground());
 
             Rectangle hitbox = new Rectangle(currentX - 2, centerY,

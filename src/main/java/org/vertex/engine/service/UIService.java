@@ -245,7 +245,7 @@ public class UIService {
     public void drawButton(Graphics2D g2, int x, int y,
                            int width, int height, int arc, boolean isHighlighted) {
         g2.setColor(Colorblindness.filter(isHighlighted ?
-                Colors.getHighlight() : Colors.getEdge()));
+                Colors.getEdge() : Colors.getForeground()));
         g2.fillRoundRect(x, y, width, height, arc, arc);
     }
 
