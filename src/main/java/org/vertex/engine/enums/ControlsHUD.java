@@ -7,11 +7,11 @@ public enum ControlsHUD {
     CHANGE_THEME(ControlCategory.GLOBAL, "Switch Theme", new String[]{"ctrl", "t"}),
     TOGGLE_FULLSCREEN(ControlCategory.GLOBAL, "Fullscreen", new String[]{"f11"}),
 
-    CHANGE_GAME(ControlCategory.MENU, "Change Game", new String[]{"ctrl", "g"}),
     NAVIGATE_UP(ControlCategory.MENU, "Up", new String[]{"arrow_up"}),
     NAVIGATE_DOWN(ControlCategory.MENU, "Down", new String[]{"arrow_down"}),
     NAVIGATE_LEFT(ControlCategory.MENU, "Left", new String[]{"arrow_left"}),
     NAVIGATE_RIGHT(ControlCategory.MENU, "Right", new String[]{"arrow_right"}),
+    CHANGE_GAME(ControlCategory.MENU, "Switch Game", new String[]{"ctrl", "g"}),
     SELECT(ControlCategory.MENU, "Select", new String[]{"enter"}),
     CANCEL(ControlCategory.MENU, "Back", new String[]{"escape"}),
 

@@ -104,7 +104,7 @@ public class BoardPanel extends JPanel implements Runnable {
                 service.getRender().getMenuRender().drawPromotions(g2);
                 renderTooltip(g2);
             }
-            case RULES -> service.getRender().getMenuRender()
+            case SETTINGS -> service.getRender().getMenuRender()
                     .drawOptionsMenu(g2, MenuRender.SETTINGS_MENU);
             case ACHIEVEMENTS -> service.getRender().getMenuRender().drawAchievementsMenu(g2);
             case CHECKMATE -> service.getRender().getMenuRender().drawCheckmate(g2);

@@ -124,7 +124,7 @@ public class KeyboardInput {
 
         switch(service.getGameService().getState()) {
             case MENU -> menuInput(keyboard, now);
-            case RULES -> rulesInput(keyboard, now);
+            case SETTINGS -> rulesInput(keyboard, now);
             case ACHIEVEMENTS -> achievementsInput(keyboard, now);
             case BOARD -> boardInput(keyboard, now, move);
         }
@@ -233,7 +233,7 @@ public class KeyboardInput {
     public void activate(GameState state) {
         switch (state) {
             case MENU -> activateMenu();
-            case RULES -> activateRules();
+            case SETTINGS -> activateRules();
             case ACHIEVEMENTS -> BooleanService.canZoomIn ^= true;
             case BOARD -> keyboardMove();
         }
@@ -242,7 +242,9 @@ public class KeyboardInput {
     private void activateMenu() {
         if(selectedIndexY >= 0 && selectedIndexY < MenuRender.MENU.length) {
             GameMenu selected = MenuRender.MENU[selectedIndexY];
-            if(selected.isEnabled(service.getGameService())) selected.run(service.getGameService());
+            if(selected.isEnabled(service.getGameService())) {
+                selected.run(service.getGameService());
+            }
         }
     }
 
@@ -307,7 +309,7 @@ public class KeyboardInput {
     }
 
     private void rulesInput(Keyboard keyboard, long now) {
-        if(keyboard.wasSelectPressed()) { activate(GameState.RULES); service.getSound().playFX(0); }
+        if(keyboard.wasSelectPressed()) { activate(GameState.SETTINGS); service.getSound().playFX(0); }
 
         repeatKeyCheck(keyboard.wasUpPressed(), () -> moveUp(Arrays.asList(MenuRender.SETTINGS_MENU)), now, lastUpTime, () -> lastUpTime = now);
         repeatKeyCheck(keyboard.wasDownPressed(), () -> moveDown(Arrays.asList(MenuRender.SETTINGS_MENU)), now, lastDownTime,  () -> lastDownTime = now);

@@ -8,21 +8,26 @@ import org.vertex.engine.gui.Colors;
 import org.vertex.engine.input.Keyboard;
 import org.vertex.engine.input.KeyboardInput;
 import org.vertex.engine.input.Mouse;
+import org.vertex.engine.input.MouseInput;
+import org.vertex.engine.interfaces.Clickable;
 import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.service.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MenuRender {
     public static final GameMenu[] MENU = GameMenu.values();
     public static final Games[] GAMES = Games.values();
     public static final GameSettings[] SETTINGS_MENU = GameSettings.values();
+    public static String ENABLE = "Enable ";
     private static final String SETTINGS = "SETTINGS";
     private static final String ACHIEVEMENTS = "ACHIEVEMENTS";
-    public static String ENABLE = "Enable ";
+    private final Map<Clickable, Rectangle> buttons;
     private static final String CHECKMATE = "Checkmate!";
     private static final String STALEMATE = "Stalemate";
     private static final int OPTION_X = 100;
@@ -52,10 +57,12 @@ public class MenuRender {
     private PieceService pieceService;
     private PromotionService promotionService;
     private Mouse mouse;
+    private MouseInput mouseInput;
     private AchievementSprites sprites;
 
     public MenuRender(RenderContext render) {
         MenuRender.render = render;
+        this.buttons = new HashMap<>();
         cb = ColorblindType.PROTANOPIA;
     }
 
@@ -181,6 +188,14 @@ public class MenuRender {
         this.mouse = mouse;
     }
 
+    public MouseInput getMouseInput() {
+        return mouseInput;
+    }
+
+    public void setMouseInput(MouseInput mouseInput) {
+        this.mouseInput = mouseInput;
+    }
+
     public PieceService getPieceService() {
         return pieceService;
     }
@@ -191,6 +206,10 @@ public class MenuRender {
 
     public static int getARC() {
         return ARC;
+    }
+
+    public Map<Clickable, Rectangle> getButtons() {
+        return buttons;
     }
 
     private static void drawLogo(Graphics2D g2, int containerWidth) {
@@ -210,6 +229,7 @@ public class MenuRender {
     }
 
     public void drawGraphics(Graphics2D g2, GameMenu[] options) {
+        buttons.clear();
         g2.setColor(Colorblindness.filter(Colors.getBackground()));
         g2.fillRect(0, 0, totalWidth, render.scale(RenderContext.BASE_HEIGHT));
 
@@ -228,10 +248,10 @@ public class MenuRender {
         int[] buttonWidths = new int[options.length];
         FontMetrics[] metricsArray = new FontMetrics[options.length];
 
-        for (int i = 0; i < options.length; i++) {
+        for(int i = 0; i < options.length; i++) {
             GameMenu op = options[i];
             String option = op.getLabel();
-            if (op == GameMenu.PLAY) {
+            if(op == GameMenu.PLAY) {
                 option += GameService.getGame().getLabel();
             }
 
@@ -243,7 +263,7 @@ public class MenuRender {
             int buttonWidth = metrics.stringWidth(option) + paddingX;
             buttonWidths[i] = buttonWidth;
             totalWidth += buttonWidth;
-            if (i < options.length - 1) totalWidth += spacing;
+            if(i < options.length - 1) totalWidth += spacing;
         }
 
         int startX = centerX - totalWidth/2;
@@ -253,10 +273,10 @@ public class MenuRender {
         Rectangle hoveredHitbox = null;
         String tooltip = "";
 
-        for (int i = 0; i < options.length; i++) {
+        for(int i = 0; i < options.length; i++) {
             GameMenu op = options[i];
             String option = op.getLabel();
-            if (op == GameMenu.PLAY) option += GameService.getGame().getLabel();
+            if(op == GameMenu.PLAY) option += GameService.getGame().getLabel();
             boolean isSelected = i == keyUI.getSelectedIndexY();
             Font font = isSelected ? selectedFont : baseFont;
             g2.setFont(font);
@@ -272,26 +292,29 @@ public class MenuRender {
                     ? Colorblindness.filter(Colors.getHighlight())
                     : Colorblindness.filter(Colors.getBackground());
 
-            Rectangle hitbox = new Rectangle(currentX - 2,
-                    centerY, buttonWidth, buttonHeight);
-
-            uiService.drawButton(g2, currentX - 2, centerY,
-                    buttonWidth, buttonHeight, ARC, isSelected);
-
             int textX = currentX + (buttonWidth - textWidth)/2;
             int textY = centerY + (buttonHeight - textHeight)/2 + ascent;
+
+            buttons.put(op, new Rectangle(currentX - 2,
+                    centerY, buttonWidth, buttonHeight));
+
+            if(buttons.get(op).contains(mouse.getX(), mouse.getY())) {
+                uiService.drawButton(g2, currentX - 2, centerY,
+                        buttonWidth, buttonHeight, ARC, isSelected);
+
+                hoveredOption = op;
+                hoveredHitbox = buttons.get(op);
+            } else {
+                uiService.drawButton(g2, currentX - 2, centerY,
+                        buttonWidth, buttonHeight, ARC, !isSelected);
+            }
             g2.setColor(textColor);
             g2.drawString(option, textX, textY);
-
-            if (hitbox.contains(mouse.getX(), mouse.getY())) {
-                hoveredOption = op;
-                hoveredHitbox = hitbox;
-            }
             currentX += buttonWidth + spacing;
         }
 
-        if (hoveredOption != null) {
-            if (hoveredOption == GameMenu.PLAY) {
+        if(hoveredOption != null) {
+            if(hoveredOption == GameMenu.PLAY) {
                 tooltip = gameService.getTooltip(GameService.getGame(),
                         gameService.getSaveManager().autosaveExists());
             } else {
@@ -356,24 +379,28 @@ public class MenuRender {
             int toggleX = blockX + maxRowWidth - toggleWidth;
             int toggleY = startY - toggleHeight;
 
-            boolean isEnabled = option.get();
-
             g2.drawString(enabledOption, textX,
                     render.getOffsetY() + startY);
 
+            buttons.put(option, new Rectangle(render.getOffsetX() + toggleX,
+                    render.getOffsetY() + toggleY, toggleWidth, toggleHeight));
+
+            boolean isEnabled = option.get();
+            boolean isHovered = buttons.get(option).contains(mouse.getX(), mouse.getY())
+                    && !mouseInput.isClickingOption(option);
+
             BufferedImage toggleImage;
-            if(options[i] == GameSettings.HARD_MODE) {
-                toggleImage = isEnabled
-                        ? (isSelected ? HARD_MODE_ON_HIGHLIGHTED : HARD_MODE_ON)
-                        : (isSelected ? TOGGLE_OFF_HIGHLIGHTED : TOGGLE_OFF);
+
+            if(option == GameSettings.HARD_MODE) {
+                if(isEnabled) toggleImage = isSelected ? HARD_MODE_ON_HIGHLIGHTED : HARD_MODE_ON;
+                else toggleImage = isHovered ? TOGGLE_OFF_HIGHLIGHTED : TOGGLE_OFF;
             } else {
-                toggleImage = isEnabled
-                        ? (isSelected ? TOGGLE_ON_HIGHLIGHTED : TOGGLE_ON)
-                        : (isSelected ? TOGGLE_OFF_HIGHLIGHTED : TOGGLE_OFF);
+                if(isEnabled) toggleImage = isSelected || isHovered ? TOGGLE_ON_HIGHLIGHTED : TOGGLE_ON;
+                else toggleImage = isSelected || isHovered ? TOGGLE_OFF_HIGHLIGHTED : TOGGLE_OFF;
             }
+
             uiService.drawToggle(g2, toggleImage, render.getOffsetX() + toggleX,
                     render.getOffsetY() + toggleY, toggleWidth, toggleHeight);
-
             startY += lineHeight;
         }
     }
@@ -425,7 +452,11 @@ public class MenuRender {
                     ? Color.WHITE : Colors.getForeground()));
             g2.setFont(UIService.getFont(UIService.getMENU_FONT()));
 
-            if(isSelected) {
+            buttons.put(a, new Rectangle(x, startY, width, height));
+            boolean isHovered = buttons.get(a).contains(mouse.getX(), mouse.getY())
+                    && !mouseInput.isClickingOption(a);
+
+            if(isSelected || isHovered) {
                 UIService.drawBox(g2, STROKE, x, startY,
                         width, height, ARC, hasBackground,
                         true, 255);
@@ -477,7 +508,6 @@ public class MenuRender {
 
                 if(zoomImg != null) {
                     int padding = render.scale(40);
-
                     int imgSize = Math.min(
                             zoomWidth - padding * 2,
                             zoomHeight - padding * 2
@@ -485,7 +515,6 @@ public class MenuRender {
 
                     int imgX = zoomX + (zoomWidth - imgSize)/2;
                     int imgY = zoomY + (zoomHeight - imgSize)/2;
-
                     g2.drawImage(zoomImg, imgX, imgY, imgSize, imgSize, null);
                 }
             }

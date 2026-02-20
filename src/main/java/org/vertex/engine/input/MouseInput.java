@@ -3,10 +3,14 @@ package org.vertex.engine.input;
 import org.vertex.engine.entities.Board;
 import org.vertex.engine.entities.Piece;
 import org.vertex.engine.enums.Games;
+import org.vertex.engine.interfaces.Clickable;
 import org.vertex.engine.render.RenderContext;
 import org.vertex.engine.service.GameService;
 import org.vertex.engine.service.PieceService;
 import org.vertex.engine.service.ServiceFactory;
+
+import java.awt.*;
+import java.util.Map;
 
 public class MouseInput {
     private final Mouse mouse;
@@ -14,6 +18,9 @@ public class MouseInput {
     private Piece piece;
     private int offsetX;
     private int offsetY;
+
+    public boolean isClicking = false;
+    private Clickable click = null;
 
     public MouseInput(Mouse mouse, ServiceFactory service) {
         this.mouse = mouse;
@@ -36,10 +43,52 @@ public class MouseInput {
         this.piece = piece;
     }
 
+    public boolean isClickingOption(Clickable option) {
+        return isClicking && click == option;
+    }
+
+    public Clickable getClick() {
+        return click;
+    }
+
+    public void setClick(Clickable click) {
+        this.click = click;
+    }
+
     public void update() {
+        Map<Clickable, Rectangle> buttons = service.getRender().getMenuRender().getButtons();
+        switch(service.getGameService().getState()) {
+            case MENU, SETTINGS -> updateMenus(buttons);
+            case BOARD -> updateBoard();
+        }
+    }
+
+    private void updateBoard() {
         checkPiece();
         pickUpPiece();
         dropPiece();
+    }
+
+    private void updateMenus(Map<Clickable, Rectangle> buttons) {
+        for(Map.Entry<Clickable, Rectangle> entry : buttons.entrySet()) {
+            if(entry.getValue().contains(mouse.getX(), mouse.getY())
+                    && mouse.wasPressed() && !isClickingOption(entry.getKey())) {
+                activate(entry.getKey());
+                break;
+            }
+        }
+
+        if(!mouse.wasPressed()) {
+            isClicking = false;
+            click = null;
+        }
+    }
+
+    public void activate(Clickable c) {
+        service.getSound().playFX(0);
+        c.onClick(service.getGameService());
+        isClicking = true;
+        click = c;
     }
 
     private void checkPiece() {

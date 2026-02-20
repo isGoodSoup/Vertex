@@ -1,8 +1,9 @@
 package org.vertex.engine.enums;
 
+import org.vertex.engine.interfaces.Clickable;
 import org.vertex.engine.service.GameService;
 
-public enum GameMenu {
+public enum GameMenu implements Clickable {
     PLAY("", "Start a match of ", "Continue match of ") {
         @Override
         public void run(GameService gameService) {
@@ -12,7 +13,7 @@ public enum GameMenu {
     SETTINGS("SETTINGS", "Settings, themes, toggles", "") {
         @Override
         public void run(GameService gameService) {
-            gameService.setState(GameState.RULES);
+            gameService.setState(GameState.SETTINGS);
         }
     },
     ADVANCEMENTS("ACHIEVEMENTS", "Track your progress", "") {
@@ -55,4 +56,9 @@ public enum GameMenu {
     }
 
     public abstract void run(GameService gameService);
+
+    @Override
+    public void onClick(GameService gameService) {
+        run(gameService);
+    }
 }

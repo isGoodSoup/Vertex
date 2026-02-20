@@ -42,7 +42,8 @@ public class ControlsRender {
         };
 
         for(ControlCategory category : categories) {
-            if(category == ControlCategory.SANDBOX && !(GameService.getGame() == Games.SANDBOX)) continue;
+            if(category == ControlCategory.SANDBOX
+                    && !(GameService.getGame() == Games.SANDBOX)) { continue; }
 
             for(ControlsHUD control : ControlsHUD.values()) {
                 if(control.getCategory() != category) { continue; }
