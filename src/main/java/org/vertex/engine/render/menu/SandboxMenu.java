@@ -1,7 +1,6 @@
 package org.vertex.engine.render.menu;
 
 import org.vertex.engine.entities.Board;
-import org.vertex.engine.enums.GameState;
 import org.vertex.engine.enums.Games;
 import org.vertex.engine.gui.Colors;
 import org.vertex.engine.input.Keyboard;
