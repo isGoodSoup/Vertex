@@ -29,7 +29,8 @@ public class ChessRuleset implements Ruleset {
                 for(int row = 0; row < 8; row++) {
                     if(!isLegalMove(p, col, row)) { continue; }
                     Move move = new Move(p, p.getCol(), p.getRow(), col, row,
-                            p.getColor(), null);
+                            p.getColor(), null, p.isPromoted(), p.getColor(), p.hasMoved(), p.getPreCol(),
+                            p.getPreRow(), p.isTwoStepsAhead());
                     moves.add(new MoveScore(move, evaluateMove(move)));
                 }
             }

@@ -5,6 +5,7 @@ import org.lud.engine.input.Keyboard;
 import org.lud.engine.input.KeyboardInput;
 import org.lud.engine.input.Mouse;
 import org.lud.engine.input.MouseInput;
+import org.lud.engine.interfaces.UI;
 import org.lud.engine.manager.EventBus;
 import org.lud.engine.manager.MovesManager;
 import org.lud.engine.manager.SaveManager;
@@ -12,6 +13,8 @@ import org.lud.engine.render.MenuRender;
 import org.lud.engine.render.RenderContext;
 import org.lud.engine.render.menu.*;
 import org.lud.engine.sound.Sound;
+
+import java.util.List;
 
 public class ServiceFactory {
     private final RenderContext render;
@@ -76,13 +79,15 @@ public class ServiceFactory {
 
         this.render.getMenuRender().setGameService(gs);
         this.render.getMenuRender().init();
-        this.render.getMenuRender().getMenus().add(new MainMenu(render, gs, ui, key, mouse));
-        this.render.getMenuRender().getMenus().add(new OptionsMenu(render, ui, key, mouse, mouseInput, MenuRender.OPTION_IMAGES));
-        this.render.getMenuRender().getMenus().add(new AchievementsMenu(render, ui, key, achievement));
-        this.render.getMenuRender().getMenus().add(new Checkmate(ui, gs, render, RenderContext.BASE_WIDTH));
-        this.render.getMenuRender().getMenus().add(new PromotionMenu(render, piece, promotion, ui));
-        this.render.getMenuRender().getMenus().add(new SandboxMenu(render, board, ui));
-        this.render.getMenuRender().getMenus().add(new TooltipMenu(render, piece, board, ui, mouse));
+
+        List<UI> menus = render.getMenuRender().getMenus();
+        menus.add(new MainMenu(render, gs, ui, key, mouse));
+        menus.add(new OptionsMenu(render, ui, gs, key, mouse, mouseInput, MenuRender.OPTION_IMAGES));
+        menus.add(new AchievementsMenu(render, ui, key, achievement));
+        menus.add(new Checkmate(ui, gs, render, RenderContext.BASE_WIDTH));
+        menus.add(new PromotionMenu(render, piece, promotion, ui));
+        menus.add(new SandboxMenu(render, board, ui));
+        menus.add(new TooltipMenu(render, piece, board, ui, mouse));
 
         this.render.getBoardRender().setBoardService(board);
         this.render.getBoardRender().setPieceService(piece);

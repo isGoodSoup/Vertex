@@ -14,6 +14,7 @@ import org.lud.engine.interfaces.UI;
 import org.lud.engine.render.Colorblindness;
 import org.lud.engine.render.MenuRender;
 import org.lud.engine.render.RenderContext;
+import org.lud.engine.service.GameService;
 import org.lud.engine.service.UIService;
 
 import java.awt.*;
@@ -30,6 +31,7 @@ public class OptionsMenu implements UI {
 
     private final RenderContext render;
     private final UIService uiService;
+    private final GameService gameService;
     private final KeyboardInput keyUI;
     private final Mouse mouse;
     private final MouseInput mouseInput;
@@ -49,13 +51,15 @@ public class OptionsMenu implements UI {
 
     private Button nextButton;
     private Button prevButton;
+    private Button backButton;
 
-    public OptionsMenu(RenderContext render, UIService uiService,
+    public OptionsMenu(RenderContext render, UIService uiService, GameService gs,
                        KeyboardInput keyUI, Mouse mouse, MouseInput mouseInput,
                        BufferedImage... images) {
 
         this.render = render;
         this.uiService = uiService;
+        this.gameService = gs;
         this.keyUI = keyUI;
         this.mouse = mouse;
         this.mouseInput = mouseInput;
@@ -103,10 +107,6 @@ public class OptionsMenu implements UI {
                 render.scale(RenderContext.BASE_HEIGHT));
         int x = 32;
         int y = 32;
-        UIService.drawBox(g2, STROKE, x, y,
-                render.scale(RenderContext.BASE_WIDTH - x * 2),
-                render.scale(RenderContext.BASE_HEIGHT - y * 2),
-                ARC, true, false, 255);
 
         g2.setFont(UIService.getFont(UIService.getMENU_FONT()));
 
@@ -188,7 +188,7 @@ public class OptionsMenu implements UI {
         }
 
         initButtons(options, totalWidth);
-        drawPagination(g2);
+        drawButtons(g2);
     }
 
     private BufferedImage drawToggle(GameSettings option, boolean isEnabled,
@@ -217,12 +217,10 @@ public class OptionsMenu implements UI {
     }
 
     private void initButtons(GameSettings[] options, int totalWidth) {
-        int baseY = render.scale(600);
+        int baseY = render.scale(RenderContext.BASE_HEIGHT - 115);
         if(nextButton == null) {
             int x = totalWidth/2;
-            int y = baseY + (UIService.getFont(
-                    UIService.getMENU_FONT()).getSize() + 10)
-                    * KeyboardInput.getITEMS_PER_PAGE();
+            int y = baseY;
 
             nextButton = new Button(x, y, nextPage.getWidth(),
                     nextPage.getHeight(), () -> {
@@ -241,9 +239,7 @@ public class OptionsMenu implements UI {
 
         if(prevButton == null) {
             int x = totalWidth/2 - render.scale(80);
-            int y = baseY + (UIService.getFont(
-                    UIService.getMENU_FONT()).getSize() + 10)
-                    * KeyboardInput.getITEMS_PER_PAGE();
+            int y = baseY;
 
             prevButton = new Button(x, y, previousPage.getWidth(),
                     previousPage.getHeight(), () -> {
@@ -254,15 +250,26 @@ public class OptionsMenu implements UI {
                     });
         }
 
+        if(backButton == null) {
+            int x = 50;
+            int y = baseY;
+
+            backButton = new Button(x, y, previousPage.getWidth(),
+                    previousPage.getHeight(), () -> gameService.setState(GameState.MENU));
+        }
+
         buttons.put(nextButton, new Rectangle(nextButton.getX(), nextButton.getY(),
                         nextButton.getWidth(), nextButton.getHeight()));
 
         buttons.put(prevButton, new Rectangle(prevButton.getX(), prevButton.getY(),
                         prevButton.getWidth(), prevButton.getHeight()));
+
+        buttons.put(backButton, new Rectangle(backButton.getX(), backButton.getY(),
+                        backButton.getWidth(), backButton.getHeight()));
         render.getMenuRender().getButtons().putAll(buttons);
     }
 
-    private void drawPagination(Graphics2D g2) {
+    private void drawButtons(Graphics2D g2) {
         BufferedImage nextImg = render.isHovered(nextButton)
                         ? Colorblindness.filter(nextPageOn)
                         : Colorblindness.filter(nextPage);
@@ -271,7 +278,12 @@ public class OptionsMenu implements UI {
                         ? Colorblindness.filter(previousPageOn)
                         : Colorblindness.filter(previousPage);
 
+        BufferedImage backImg = render.isHovered(backButton)
+                ? Colorblindness.filter(previousPageOn)
+                : Colorblindness.filter(previousPage);
+
         g2.drawImage(nextImg, nextButton.getX(), nextButton.getY(), null);
         g2.drawImage(prevImg, prevButton.getX(), prevButton.getY(), null);
+        g2.drawImage(backImg, backButton.getX(), backButton.getY(), null);
     }
 }

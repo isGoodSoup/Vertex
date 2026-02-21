@@ -60,8 +60,8 @@ public class TooltipMenu implements UI {
         int boardY = (RenderContext.BASE_HEIGHT - boardSize)/2;
         int mouseBoardX = render.unscaleX(mouse.getX()) - boardX;
         int mouseBoardY = render.unscaleY(mouse.getY()) - boardY;
-        int mouseCol = mouseBoardX / Board.getSquare();
-        int mouseRow = mouseBoardY / Board.getSquare();
+        int mouseCol = mouseBoardX/Board.getSquare();
+        int mouseRow = mouseBoardY/Board.getSquare();
 
         Piece hovered = PieceService.getPieceAt(mouseCol, mouseRow, pieceService.getPieces());
         pieceService.setHoveredPiece(hovered);

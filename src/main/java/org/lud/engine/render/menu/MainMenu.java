@@ -136,8 +136,8 @@ public class MainMenu implements UI {
                     buttonHeight
             );
             buttons.put(op, hitbox);
-            boolean hovered = hitbox.contains(mouse.getX(), mouse.getY());
             render.getMenuRender().getButtons().putAll(buttons);
+            boolean isHovered = render.isHovered(op);
 
             uiService.drawButton(
                     g2,
@@ -146,7 +146,7 @@ public class MainMenu implements UI {
                     buttonWidth,
                     buttonHeight,
                     ARC,
-                    hovered || isSelected
+                    isHovered || isSelected
             );
 
             Color textColor = isSelected
@@ -155,7 +155,7 @@ public class MainMenu implements UI {
             g2.setColor(textColor);
             g2.drawString(label, textX, textY);
 
-            if(hovered) {
+            if(isHovered) {
                 hoveredOption = op;
             }
             currentX += buttonWidth + spacing;

@@ -68,9 +68,12 @@ public class CheckersRuleset implements Ruleset {
                 if (isLegalMove(p, newCol, newRow)) {
                     MoveScore ms = new MoveScore(new Move
                             (p, p.getCol(), p.getRow(), newCol, newRow, p.getColor(),
-                                    p.getOtherPiece()), evaluateMove(new Move(p,
+                                    p.getOtherPiece(), p.isPromoted(), p.getColor(), p.hasMoved(),
+                                    p.getPreCol(), p.getPreRow(), p.isTwoStepsAhead()),
+                            evaluateMove(new Move(p,
                             p.getCol(), p.getRow(), newCol, newRow, p.getColor(),
-                            p.getOtherPiece())));
+                            p.getOtherPiece(), p.isPromoted(), p.getColor(), p.hasMoved(),
+                                    p.getPreCol(), p.getPreRow(), p.isTwoStepsAhead())));
                     if (Math.abs(offset[0]) == 2) captureMoves.add(ms);
                     else allMoves.add(ms);
                 }

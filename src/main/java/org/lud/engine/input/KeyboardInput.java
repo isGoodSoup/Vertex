@@ -348,7 +348,7 @@ public class KeyboardInput {
 
         if(keyboard.isComboPressed(KeyEvent.VK_CONTROL, KeyEvent.VK_Z) && BooleanService.canUndoMoves) {
             move.undoLastMove();
-            service.getSound().playFX(3);
+            service.getSound().playFX(0);
             lastRightTime = now;
         }
     }

@@ -320,7 +320,7 @@ public class PieceService {
         BoardService.getBoardState()[p.getRow()][p.getCol()] = null;
         p.setCol(newCol);
         p.setRow(newRow);
-        updatePos(p);
+        updatePos(p, false);
 
         log.debug("{} {}: {} -> {}", p.getColor().toString(),
                 p.getTypeID().toString(), oldPos, newPos);
@@ -328,24 +328,31 @@ public class PieceService {
     }
 
     public static void updatePos(Piece piece) {
+        updatePos(piece, true);
+    }
+
+    public static void updatePos(Piece piece, boolean isOldPos) {
         if(piece.getTypeID() == TypeID.PAWN) {
             if(Math.abs(piece.getRow() - piece.getPreRow()) == 2) {
                 piece.setTwoStepsAhead(true);
             }
         }
+
         int square = Board.getSquare();
         piece.setX(piece.getCol() * square);
         piece.setY(piece.getRow() * square);
         piece.setHasMoved(true);
 
-        piece.setPreCol(piece.getCol());
-        piece.setPreRow(piece.getRow());
+        if(isOldPos) {
+            piece.setPreCol(piece.getCol());
+            piece.setPreRow(piece.getRow());
+        }
     }
 
     public void resetPos(Piece piece) {
         piece.setCol(piece.getPreCol());
         piece.setRow(piece.getPreRow());
-        updatePos(piece);
+        updatePos(piece, false);
     }
 
     public void switchTurns() {

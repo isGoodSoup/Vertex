@@ -2,16 +2,13 @@ package org.lud.engine.manager;
 
 import org.lud.engine.entities.*;
 import org.lud.engine.events.*;
+import org.lud.engine.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lud.engine.enums.GameState;
 import org.lud.engine.enums.Games;
 import org.lud.engine.enums.Tint;
 import org.lud.engine.records.Move;
-import org.lud.engine.service.BooleanService;
-import org.lud.engine.service.GameService;
-import org.lud.engine.service.PieceService;
-import org.lud.engine.service.ServiceFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,12 +70,12 @@ public class MovesManager {
             }
         }
 
-        if (piece instanceof King) {
+        if(piece instanceof King) {
             int colDiff = targetCol - piece.getCol();
-            if (Math.abs(colDiff) > 1) {
+            if(Math.abs(colDiff) > 1) {
                 int step = (colDiff > 0) ? 1 : -1;
                 for (int c = piece.getCol(); c != targetCol + step; c += step) {
-                    if (service.getPieceService()
+                    if(service.getPieceService()
                             .wouldLeaveKingInCheck(piece, c, piece.getRow())) {
                         PieceService.updatePos(piece);
                         return;
@@ -114,9 +111,9 @@ public class MovesManager {
         }
 
         if(piece instanceof Checker && captured != null) {
-            boolean areMoreJumpsAvailable = true;
-            while(areMoreJumpsAvailable) {
-                areMoreJumpsAvailable = false;
+            boolean canJumpMore = true;
+            while(canJumpMore) {
+                canJumpMore = false;
                 for(int dr = -2; dr <= 2; dr += 4) {
                     for(int dc = -2; dc <= 2; dc += 4) {
                         int newRow = piece.getRow() + dr;
@@ -137,9 +134,13 @@ public class MovesManager {
                                         newCol, newRow,
                                         piece.getColor(),
                                         nextCaptured,
-                                        piece.isPromoted()));
-
-                                areMoreJumpsAvailable = true;
+                                        piece.isPromoted(),
+                                        piece.getColor(),
+                                        piece.hasMoved(),
+                                        piece.getPreCol(),
+                                        piece.getPreRow(),
+                                        piece.isTwoStepsAhead()));
+                                canJumpMore = true;
                             }
                         }
                     }
@@ -151,7 +152,7 @@ public class MovesManager {
             executeCastling(piece, targetCol);
         }
 
-        if (piece instanceof Pawn && isEnPassantMove(piece, targetCol,
+        if(piece instanceof Pawn && isEnPassantMove(piece, targetCol,
                 targetRow, service.getPieceService().getPieces())) {
             executeEnPassant(piece, captured, targetCol, targetRow);
         } else {
@@ -162,7 +163,12 @@ public class MovesManager {
                     targetCol, targetRow,
                     piece.getColor(),
                     captured,
-                    piece.isPromoted()));
+                    piece.isPromoted(),
+                    piece.getColor(),
+                    piece.hasMoved(),
+                    piece.getPreCol(),
+                    piece.getPreRow(),
+                    piece.isTwoStepsAhead()));
         }
 
         PieceService.movePiece(piece, targetCol, targetRow);
@@ -176,7 +182,7 @@ public class MovesManager {
             log.info("Promoted piece");
             service.getKeyboardInput().setMoveX(promoted.getCol());
             service.getKeyboardInput().setMoveY(promoted.getRow());
-            if (!(GameService.getGame() == Games.SANDBOX)) {
+            if(!(GameService.getGame() == Games.SANDBOX)) {
                 selectedPiece = null;
             }
             service.getPieceService().setHoveredPieceKeyboard(promoted);
@@ -331,14 +337,11 @@ public class MovesManager {
     private Move getMoveEvent() {
         Move lastMove = moves.getLast();
         Move newMove = new Move(
-                lastMove.piece(),
-                lastMove.fromRow(),
-                lastMove.fromCol(),
-                lastMove.targetCol(),
-                lastMove.targetRow(),
-                lastMove.color(),
-                lastMove.captured(),
-                lastMove.wasPromoted()
+                lastMove.piece(), lastMove.fromRow(), lastMove.fromCol(),
+                lastMove.targetCol(), lastMove.targetRow(), lastMove.color(),
+                lastMove.captured(), lastMove.wasPromoted(), lastMove.currentTurn(),
+                lastMove.hasMoved(), lastMove.preCol(), lastMove.preRow(),
+                lastMove.isTwoStepsAhead()
         );
         return newMove;
     }
@@ -362,7 +365,7 @@ public class MovesManager {
     }
 
     public void cancelMove() {
-        if (selectedPiece != null) {
+        if(selectedPiece != null) {
             selectedPiece.setCol(selectedPiece.getPreCol());
             selectedPiece.setRow(selectedPiece.getPreRow());
             PieceService.updatePos(selectedPiece);
@@ -374,22 +377,35 @@ public class MovesManager {
     }
 
     public void undoLastMove() {
-        if(!BooleanService.canUndoMoves || moves.isEmpty()) { return; }
+        if(moves.isEmpty()) { return; }
 
-        Move lastMove = moves.removeLast();
-        Piece movedPiece = lastMove.piece();
-        movedPiece.setRow(lastMove.fromRow());
-        movedPiece.setCol(lastMove.fromCol());
-        movedPiece.setHasMoved(false);
-        if (lastMove.wasPromoted()) {
-            movedPiece.setPromoted(false);
-        }
-        PieceService.updatePos(movedPiece);
-        Piece captured = lastMove.captured();
-        if (captured != null && !service.getPieceService().getPieces().contains(captured)) {
-            service.getPieceService().getPieces().add(captured);
-            PieceService.updatePos(captured);
+        Tint turn = moves.getLast().currentTurn();
+        while (!moves.isEmpty() && moves.getLast().currentTurn() == turn) {
+            undo();
         }
         service.getPieceService().switchTurns();
+    }
+
+    private void undo() {
+        if(!BooleanService.canUndoMoves || moves.isEmpty()) { return; }
+
+        Piece[][] boardState = BoardService.getBoardState();
+        Move lastMove = moves.getLast();
+        Piece p = lastMove.piece();
+        Piece captured = lastMove.captured();
+
+        p.setCol(lastMove.fromCol());
+        p.setRow(lastMove.fromRow());
+        boardState[lastMove.targetRow()][lastMove.targetCol()] = p;
+        
+        log.info("Move undone: {} <- from {} [{}{}]",
+                service.getBoardService().getSquareNameAt(lastMove.targetCol(), lastMove.targetRow()),
+                service.getBoardService().getSquareNameAt(lastMove.fromCol(), lastMove.fromRow()),
+                p.getTypeID(), captured != null ? " capturing " + captured.getTypeID() : "");
+        moves.removeLast();
+    }
+
+    private boolean isAIturn() {
+        return service.getGameService().getCurrentTurn() == Tint.DARK;
     }
 }

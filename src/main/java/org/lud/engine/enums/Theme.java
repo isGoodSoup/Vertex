@@ -39,7 +39,7 @@ public enum Theme {
             new Color(150,240,180)
     ),
     LOGO(
-            "logo", "logo2",
+            "logo", "black",
             new Color(111,175,77),
             new Color(71,135,37),
             new Color(51,115,17),
