@@ -11,7 +11,7 @@ public enum Theme {
             new Color(255,200,0)
     ),
     BLACK(
-            "white", "black",
+            "creme", "brown",
             new Color(0,0,0),
             new Color(255,255,255),
             new Color(20,20,40),
