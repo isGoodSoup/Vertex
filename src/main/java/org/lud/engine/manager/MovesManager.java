@@ -391,13 +391,17 @@ public class MovesManager {
             PieceService.updatePos(p, false);
             boardState[lastMove.fromRow()][lastMove.fromCol()] = p;
 
+            if(captured != null) {
+                captured.setCol(captured.getPreCol());
+                captured.setRow(captured.getPreRow());
+                service.getPieceService().addPiece(captured);
+                PieceService.updatePos(p, false);
+            }
+
             log.info("Move undone: {} <- from {} [{}{}]",
                     service.getBoardService().getSquareNameAt(lastMove.targetCol(), lastMove.targetRow()),
                     service.getBoardService().getSquareNameAt(lastMove.fromCol(), lastMove.fromRow()),
                     p.getTypeID(), captured != null ? " capturing " + captured.getTypeID() : "");
-            if(captured != null) {
-
-            }
             moves.removeLast();
         }
         service.getPieceService().switchTurns();
