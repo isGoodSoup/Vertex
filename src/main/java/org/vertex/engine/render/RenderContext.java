@@ -3,11 +3,16 @@ package org.vertex.engine.render;
 import org.vertex.engine.input.Mouse;
 import org.vertex.engine.input.MouseInput;
 import org.vertex.engine.interfaces.Clickable;
+import org.vertex.engine.interfaces.UI;
 import org.vertex.engine.manager.MovesManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RenderContext {
     public static final int BASE_WIDTH = 1920;
     public static final int BASE_HEIGHT = 1080;
+    private final List<UI> menus;
     private double scale = 1.0;
     private int offsetX = 0;
     private int offsetY = 0;
@@ -23,6 +28,7 @@ public class RenderContext {
 
     public RenderContext() {
         this.boardRender = new BoardRender(this);
+        this.menus = new ArrayList<>();
         this.menuRender = new MenuRender(this);
         this.movesRender = new MovesRender(this, movesManager);
         this.controlsRender = new ControlsRender();

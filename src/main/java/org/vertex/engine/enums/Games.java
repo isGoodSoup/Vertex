@@ -1,10 +1,11 @@
 package org.vertex.engine.enums;
 
 import org.vertex.engine.entities.Board;
+import org.vertex.engine.interfaces.State;
 import org.vertex.engine.service.BooleanService;
 import org.vertex.engine.service.GameService;
 
-public enum Games {
+public enum Games implements State {
     CHESS("CHESS", "",
             "A classic strategy duel where every piece moves differently. " +
                     "Outsmart your opponent and deliver checkmate to win") {

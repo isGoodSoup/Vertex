@@ -8,7 +8,6 @@ import org.vertex.engine.enums.Games;
 import org.vertex.engine.enums.PlayState;
 import org.vertex.engine.enums.Theme;
 import org.vertex.engine.render.Colorblindness;
-import org.vertex.engine.render.MenuRender;
 import org.vertex.engine.render.RenderContext;
 import org.vertex.engine.service.BooleanService;
 import org.vertex.engine.service.GameService;
@@ -83,45 +82,32 @@ public class BoardPanel extends JPanel implements Runnable {
     }
 
     public void drawGame(Graphics2D g2) throws InterruptedException, IOException {
-        switch(service.getGameService().getState()) {
-            case MENU -> service.getRender().getMenuRender().drawGraphics(g2,
-                    MenuRender.MENU);
+        switch (service.getGameService().getState()) {
+            case MENU -> service.getRender().getMenuRender().draw(g2);
             case BOARD -> {
                 service.getRender().getBoardRender().drawBoard(g2);
                 service.getRender().getMovesRender().drawMoves(g2);
-                if(!(GameService.getGame() == Games.SANDBOX)) {
-                    if(service.getTimerService().isActive()) {
-                        service.getGuiService().drawTimer(g2);
-                        Piece selected = service.getMovesManager().getSelectedPiece();
-                        if(selected != null) {
-                            service.getGuiService().drawTick(g2, BooleanService.isLegal);
-                        }
+                if (GameService.getGame() != Games.SANDBOX && service.getTimerService().isActive()) {
+                    service.getGuiService().drawTimer(g2);
+                    Piece selected = service.getMovesManager().getSelectedPiece();
+                    if (selected != null) {
+                        service.getGuiService().drawTick(g2, BooleanService.isLegal);
                     }
                 }
-                if(GameService.getGame() == Games.SANDBOX) {
-                    service.getRender().getMenuRender().drawSandboxMenu(g2);
-                }
-                service.getRender().getMenuRender().drawPromotions(g2);
-                renderTooltip(g2);
+                service.getRender().getMenuRender().draw(g2);
             }
-            case SETTINGS -> service.getRender().getMenuRender()
-                    .drawOptionsMenu(g2, MenuRender.SETTINGS_MENU);
-            case ACHIEVEMENTS -> service.getRender().getMenuRender().drawAchievementsMenu(g2);
-            case CHECKMATE -> service.getRender().getMenuRender().drawCheckmate(g2);
-            case STALEMATE -> service.getRender().getMenuRender().drawCheckmate(g2);
+            case SETTINGS, ACHIEVEMENTS, CHECKMATE, STALEMATE ->
+                    service.getRender().getMenuRender().draw(g2);
         }
+
         renderAnimations(g2);
-        if(BooleanService.canToggleHelp) {
+        if (BooleanService.canToggleHelp) {
             renderControls(g2);
         }
     }
 
     private void renderAnimations(Graphics2D g2) {
         service.getAnimationService().render(g2);
-    }
-
-    private void renderTooltip(Graphics2D g2) {
-        service.getRender().getMenuRender().showTooltip(g2);
     }
 
     private void renderControls(Graphics2D g2) {

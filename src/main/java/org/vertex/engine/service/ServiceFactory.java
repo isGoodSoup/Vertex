@@ -1,15 +1,17 @@
 package org.vertex.engine.service;
 
 import org.vertex.engine.gui.GameFrame;
-import org.vertex.engine.input.Mouse;
-import org.vertex.engine.input.MouseInput;
-import org.vertex.engine.sound.Sound;
 import org.vertex.engine.input.Keyboard;
 import org.vertex.engine.input.KeyboardInput;
+import org.vertex.engine.input.Mouse;
+import org.vertex.engine.input.MouseInput;
 import org.vertex.engine.manager.EventBus;
 import org.vertex.engine.manager.MovesManager;
 import org.vertex.engine.manager.SaveManager;
+import org.vertex.engine.render.MenuRender;
 import org.vertex.engine.render.RenderContext;
+import org.vertex.engine.render.menu.*;
+import org.vertex.engine.sound.Sound;
 
 public class ServiceFactory {
     private final RenderContext render;
@@ -20,7 +22,7 @@ public class ServiceFactory {
     private final Mouse mouse;
     private final MouseInput mouseInput;
     private final Sound sound;
-    private final UIService gui;
+    private final UIService ui;
     private final GameService gs;
     private final PromotionService promotion;
     private final MovesManager movesManager;
@@ -65,40 +67,36 @@ public class ServiceFactory {
         this.gs.setServiceFactory(this);
         this.gs.setSaveManager(saveManager);
         this.timer = new TimerService();
-        this.gui = new UIService(render, piece, board, gs, promotion,
+        this.ui = new UIService(render, piece, board, gs, promotion,
                 model, movesManager, timer, mouse);
         this.achievement = new AchievementService(eventBus);
         this.achievement.setService(this);
         this.achievement.setAnimationService(animation);
         this.achievement.setSaveManager(saveManager);
 
+        this.render.getMenuRender().setGameService(gs);
+        this.render.getMenuRender().init();
+        this.render.getMenuRender().getMenus().add(new MainMenu(render, gs, ui, key, mouse));
+        this.render.getMenuRender().getMenus().add(new OptionsMenu(render, ui, key, mouse, mouseInput, MenuRender.OPTION_IMAGES));
+        this.render.getMenuRender().getMenus().add(new AchievementsMenu(render, ui, key, achievement));
+        this.render.getMenuRender().getMenus().add(new Checkmate(ui, gs, render, RenderContext.BASE_WIDTH));
+        this.render.getMenuRender().getMenus().add(new PromotionMenu(render, piece, promotion, ui));
+        this.render.getMenuRender().getMenus().add(new SandboxMenu(render, board, ui));
+        this.render.getMenuRender().getMenus().add(new TooltipMenu(render, piece, board, ui, mouse));
+
         this.render.getBoardRender().setBoardService(board);
         this.render.getBoardRender().setPieceService(piece);
-        this.render.getBoardRender().setUIService(gui);
+        this.render.getBoardRender().setUIService(ui);
         this.render.getBoardRender().setPromotionService(promotion);
         this.render.getBoardRender().setGameService(gs);
         this.render.getBoardRender().setMouse(mouse);
         this.render.getBoardRender().setMouseInput(mouseInput);
 
-        this.render.getMenuRender().setBoardService(board);
-        this.render.getMenuRender().setUIService(gui);
-        this.render.getMenuRender().setGameService(gs);
-        this.render.getMenuRender().setMoveManager(movesManager);
-        this.render.getMenuRender().setKeyUI(key);
-        this.render.getMenuRender().setAnimationService(animation);
-        this.render.getMenuRender().setAchievementService(achievement);
-        this.render.getMenuRender().setPieceService(piece);
-        this.render.getMenuRender().setPromotionService(promotion);
-        this.render.getMenuRender().setMouse(mouse);
-        this.render.getMenuRender().setMouseInput(mouseInput);
-        this.render.getMenuRender().setSound(sound);
-
         this.render.getMovesRender().setBoardService(board);
-        this.render.getMovesRender().setGuiService(gui);
+        this.render.getMovesRender().setUIService(ui);
         this.render.getMovesRender().setMovesManager(movesManager);
         this.render.getControlsRender().setService(this);
         this.movesManager.init(this, eventBus);
-        this.render.getMenuRender().init();
         this.mouseInput.init();
         this.achievement.init();
     }
@@ -132,7 +130,7 @@ public class ServiceFactory {
     }
 
     public UIService getGuiService() {
-        return gui;
+        return ui;
     }
 
     public Sound getSound() {

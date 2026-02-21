@@ -38,11 +38,11 @@ public class MovesRender {
         this.boardService = boardService;
     }
 
-    public UIService getGuiService() {
+    public UIService getUIService() {
         return uiService;
     }
 
-    public void setGuiService(UIService UIService) {
+    public void setUIService(UIService UIService) {
         this.uiService = UIService;
     }
 
