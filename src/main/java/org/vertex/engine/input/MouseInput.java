@@ -59,7 +59,10 @@ public class MouseInput {
         Map<Clickable, Rectangle> buttons = service.getRender().getMenuRender().getButtons();
         switch(service.getGameService().getState()) {
             case MENU, SETTINGS -> updateMenus(buttons);
-            case BOARD -> updateBoard();
+            case BOARD -> {
+                updateBoard();
+                updateMenus(buttons);
+            }
         }
     }
 

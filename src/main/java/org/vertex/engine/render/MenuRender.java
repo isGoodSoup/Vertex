@@ -93,16 +93,20 @@ public class MenuRender {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        TOGGLE_ON = Colorblindness.filter(TOGGLE_ON);
-        TOGGLE_OFF = Colorblindness.filter(TOGGLE_OFF);
-        TOGGLE_ON_HIGHLIGHTED = Colorblindness.filter(TOGGLE_ON_HIGHLIGHTED);
-        TOGGLE_OFF_HIGHLIGHTED = Colorblindness.filter(TOGGLE_OFF_HIGHLIGHTED);
-        HARD_MODE_ON = Colorblindness.filter(HARD_MODE_ON);
-        HARD_MODE_ON_HIGHLIGHTED = Colorblindness.filter(HARD_MODE_ON_HIGHLIGHTED);
-        NEXT_PAGE = Colorblindness.filter(NEXT_PAGE);
-        NEXT_PAGE_ON = Colorblindness.filter(NEXT_PAGE_ON);
-        PREVIOUS_PAGE = Colorblindness.filter(PREVIOUS_PAGE);
-        PREVIOUS_PAGE_ON = Colorblindness.filter(PREVIOUS_PAGE_ON);
+    }
+
+    public BufferedImage getColorblindSprite(BufferedImage img) {
+        if(img == TOGGLE_ON) { return Colorblindness.filter(TOGGLE_ON); }
+        if(img == TOGGLE_OFF) { return Colorblindness.filter(TOGGLE_OFF); }
+        if(img == TOGGLE_ON_HIGHLIGHTED) { return Colorblindness.filter(TOGGLE_ON_HIGHLIGHTED); }
+        if(img == TOGGLE_OFF_HIGHLIGHTED) { return Colorblindness.filter(TOGGLE_OFF_HIGHLIGHTED); }
+        if(img == HARD_MODE_ON) { return Colorblindness.filter(HARD_MODE_ON); }
+        if(img == HARD_MODE_ON_HIGHLIGHTED) { return Colorblindness.filter(HARD_MODE_ON_HIGHLIGHTED); }
+        if(img == NEXT_PAGE) { return Colorblindness.filter(NEXT_PAGE); }
+        if(img == NEXT_PAGE_ON) { return Colorblindness.filter(NEXT_PAGE_ON); }
+        if(img == PREVIOUS_PAGE) { return Colorblindness.filter(PREVIOUS_PAGE); }
+        if(img == PREVIOUS_PAGE_ON) { return Colorblindness.filter(PREVIOUS_PAGE_ON); }
+        return img;
     }
 
     public KeyboardInput getKeyUI() {
@@ -238,6 +242,14 @@ public class MenuRender {
         this.sound = sound;
     }
 
+    public BufferedImage getPREVIOUS_PAGE() {
+        return PREVIOUS_PAGE;
+    }
+
+    public BufferedImage getPREVIOUS_PAGE_ON() {
+        return PREVIOUS_PAGE_ON;
+    }
+
     private void drawLogo(Graphics2D g2, int containerWidth) {
         if(UIService.getLogo() == null) { return; }
         BufferedImage img = UIService.getLogo();
@@ -253,7 +265,6 @@ public class MenuRender {
     }
 
     public void drawGraphics(Graphics2D g2, GameMenu[] options) {
-        buttons.clear();
         g2.setColor(Colorblindness.filter(Colors.getBackground()));
         g2.fillRect(0, 0, totalWidth, render.scale(RenderContext.BASE_HEIGHT));
 
@@ -319,7 +330,8 @@ public class MenuRender {
             int textX = currentX + (buttonWidth - textWidth)/2;
             int textY = centerY + (buttonHeight - textHeight)/2 + ascent;
 
-            buttons.put(op, new Rectangle(currentX - 2,
+            int finalCurrentX = currentX;
+            buttons.computeIfAbsent(op, k -> new Rectangle(finalCurrentX - 2,
                     centerY, buttonWidth, buttonHeight));
 
             if(buttons.get(op).contains(mouse.getX(), mouse.getY())) {
@@ -410,17 +422,19 @@ public class MenuRender {
                     render.getOffsetY() + toggleY, toggleWidth, toggleHeight));
 
             boolean isEnabled = option.get();
-            boolean isHovered = buttons.get(option).contains(mouse.getX(), mouse.getY())
-                    && !mouseInput.isClickingOption(option);
 
             BufferedImage toggleImage;
 
             if(option == GameSettings.HARD_MODE) {
-                if(isEnabled) toggleImage = isSelected ? HARD_MODE_ON_HIGHLIGHTED : HARD_MODE_ON;
-                else toggleImage = isHovered ? TOGGLE_OFF_HIGHLIGHTED : TOGGLE_OFF;
+                if(isEnabled) toggleImage = isSelected ? getColorblindSprite(HARD_MODE_ON_HIGHLIGHTED)
+                        : getColorblindSprite(HARD_MODE_ON);
+                else toggleImage = render.isHovered(option) ? getColorblindSprite(TOGGLE_OFF_HIGHLIGHTED)
+                        : getColorblindSprite(TOGGLE_OFF);
             } else {
-                if(isEnabled) toggleImage = isSelected || isHovered ? TOGGLE_ON_HIGHLIGHTED : TOGGLE_ON;
-                else toggleImage = isSelected || isHovered ? TOGGLE_OFF_HIGHLIGHTED : TOGGLE_OFF;
+                if(isEnabled) toggleImage = isSelected || render.isHovered(option)
+                        ? getColorblindSprite(TOGGLE_ON_HIGHLIGHTED) : getColorblindSprite(TOGGLE_ON);
+                else toggleImage = isSelected || render.isHovered(option)
+                        ? getColorblindSprite(TOGGLE_OFF_HIGHLIGHTED) : getColorblindSprite(TOGGLE_OFF);
             }
 
             uiService.drawToggle(g2, toggleImage, render.getOffsetX() + toggleX,
@@ -431,11 +445,11 @@ public class MenuRender {
         initButtons(options);
         boolean nextHovered = buttons.get(nextButton).contains(mouse.getX(), mouse.getY())
                 && !mouseInput.isClickingOption(nextButton);
-        BufferedImage nextImg = nextHovered ? NEXT_PAGE_ON : NEXT_PAGE;
+        BufferedImage nextImg = nextHovered ? getColorblindSprite(NEXT_PAGE_ON) : getColorblindSprite(NEXT_PAGE);
 
         boolean prevHovered = buttons.get(prevButton).contains(mouse.getX(), mouse.getY())
                 && !mouseInput.isClickingOption(prevButton);
-        BufferedImage prevImg = prevHovered ? PREVIOUS_PAGE_ON : PREVIOUS_PAGE;
+        BufferedImage prevImg = prevHovered ? getColorblindSprite(PREVIOUS_PAGE_ON) : getColorblindSprite(PREVIOUS_PAGE);
 
         g2.drawImage(nextImg, nextButton.getX(), nextButton.getY(), null);
         g2.drawImage(prevImg, prevButton.getX(), prevButton.getY(), null);
@@ -528,10 +542,8 @@ public class MenuRender {
             g2.setFont(UIService.getFont(UIService.getMENU_FONT()));
 
             buttons.put(a, new Rectangle(x, startY, width, height));
-            boolean isHovered = buttons.get(a).contains(mouse.getX(), mouse.getY())
-                    && !mouseInput.isClickingOption(a);
 
-            if(isSelected || isHovered) {
+            if(isSelected || render.isHovered(a)) {
                 UIService.drawBox(g2, STROKE, x, startY,
                         width, height, ARC, hasBackground,
                         true, 255);

@@ -39,6 +39,8 @@ public class ServiceFactory {
         this.key.setGameFrame(gameFrame);
         this.mouse = new Mouse();
         this.mouseInput = new MouseInput(mouse, this);
+        this.render.setMouse(mouse);
+        this.render.setMouseInput(mouseInput);
         this.sound = new Sound();
         this.key.setService(this);
         this.animation = new AnimationService();
@@ -74,6 +76,9 @@ public class ServiceFactory {
         this.render.getBoardRender().setPieceService(piece);
         this.render.getBoardRender().setUIService(gui);
         this.render.getBoardRender().setPromotionService(promotion);
+        this.render.getBoardRender().setGameService(gs);
+        this.render.getBoardRender().setMouse(mouse);
+        this.render.getBoardRender().setMouseInput(mouseInput);
 
         this.render.getMenuRender().setBoardService(board);
         this.render.getMenuRender().setUIService(gui);
